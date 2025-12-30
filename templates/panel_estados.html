@@ -1,0 +1,527 @@
+{% extends "base.html" %}
+{% block title %}Gestión de Estados - CABELAB{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="text-white mb-0"><i class="fas fa-tasks me-2"></i> Gestión de Estados</h2>
+            <p class="text-muted mb-0">Panel de Control: {{ current_role|title }}</p>
+        </div>
+
+        <div class="d-flex gap-2">
+            {% if current_role != 'visualizador' %}
+            <div class="input-group">
+                <span class="input-group-text bg-dark border-secondary text-secondary">
+                    <i class="fas fa-search"></i>
+                </span>
+                <input type="text" id="searchInput" class="form-control bg-dark text-light border-secondary"
+                    placeholder="Buscar equipo...">
+            </div>
+            {% endif %}
+            <button class="btn btn-outline-light" onclick="location.reload()" title="Refrescar Datos">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+    </div>
+
+    {% if current_role == 'visualizador' %}
+    <!-- KPI SUMMARY CARDS -->
+    <div class="row g-4 mb-4">
+        <!-- 1. En Diagnóstico -->
+        <div class="col-xl-3 col-sm-6">
+            <div class="card bg-dark-card border-secondary shadow-sm h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="icon icon-shape bg-info shadow text-center border-radius-md">
+                            <i class="fas fa-stethoscope text-white opacity-10"></i>
+                        </div>
+                        <div class="ms-3">
+                            <p class="text-xs font-weight-bold mb-0 text-info text-uppercase">En Diagnóstico</p>
+                            <h4 class="font-weight-bolder text-white mb-0" id="kpiDiag">0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 2. Aprobados -->
+        <div class="col-xl-3 col-sm-6">
+            <div class="card bg-dark-card border-secondary shadow-sm h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="icon icon-shape bg-success shadow text-center border-radius-md">
+                            <i class="fas fa-check-circle text-white opacity-10"></i>
+                        </div>
+                        <div class="ms-3">
+                            <p class="text-xs font-weight-bold mb-0 text-success text-uppercase">Aprobados</p>
+                            <h4 class="font-weight-bolder text-white mb-0" id="kpiApro">0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 3. Pendientes de Aprobación -->
+        <div class="col-xl-3 col-sm-6">
+            <div class="card bg-dark-card border-secondary shadow-sm h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="icon icon-shape bg-warning shadow text-center border-radius-md">
+                            <i class="fas fa-clock text-white opacity-10"></i>
+                        </div>
+                        <div class="ms-3">
+                            <p class="text-xs font-weight-bold mb-0 text-warning text-uppercase">Pendientes de
+                                Aprobación</p>
+                            <h4 class="font-weight-bolder text-white mb-0" id="kpiPend">0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 4. Total Equipos -->
+        <div class="col-xl-3 col-sm-6">
+            <div class="card bg-dark-card border-secondary shadow-sm h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="icon icon-shape bg-primary shadow text-center border-radius-md">
+                            <i class="fas fa-cubes text-white opacity-10"></i>
+                        </div>
+                        <div class="ms-3">
+                            <p class="text-xs font-weight-bold mb-0 text-secondary text-uppercase">Total Equipos</p>
+                            <h4 class="font-weight-bolder text-white mb-0" id="kpiTotal">0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VISTA VISUALIZADOR (3 TABLAS + FILTROS INDEPENDIENTES) -->
+    <!-- ORDER: 1. Diagnostico, 2. Pendiente, 3. Revision -->
+    <div class="row g-4">
+
+        <!-- 1. DIAGNOSTICO -->
+        <div class="col-12">
+            <div class="card bg-dark-card border-secondary shadow-sm">
+                <div
+                    class="card-header border-secondary d-flex justify-content-between align-items-center bg-info bg-opacity-10">
+                    <h5 class="mb-0 text-info"><i class="fas fa-stethoscope me-2"></i> Diagnóstico</h5>
+                    <div class="input-group input-group-sm w-25">
+                        <input type="text" id="searchDiagnostico"
+                            class="form-control bg-dark text-light border-secondary" placeholder="Filtrar...">
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead>
+                                <tr class="text-secondary text-uppercase text-xs">
+                                    <th class="ps-4">FR</th>
+                                    <th>Marca/Modelo</th>
+                                    <th>Estado</th>
+                                    <th>Encargado</th>
+                                    <th>Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableDiagnostico"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. APROBADOS (Visible now, excluding Entregados) -->
+        <div class="col-12">
+            <div class="card bg-dark-card border-secondary shadow-sm">
+                <div
+                    class="card-header border-secondary d-flex justify-content-between align-items-center bg-success bg-opacity-10">
+                    <h5 class="mb-0 text-success"><i class="fas fa-check-circle me-2"></i> Aprobados / En Servicio</h5>
+                    <div class="input-group input-group-sm w-25">
+                        <input type="text" id="searchAprobado" class="form-control bg-dark text-light border-secondary"
+                            placeholder="Filtrar...">
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead>
+                                <tr class="text-secondary text-uppercase text-xs">
+                                    <th class="ps-4">FR</th>
+                                    <th>Marca/Modelo</th>
+                                    <th>Estado</th>
+                                    <th>Encargado</th>
+                                    <th>Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableAprobado"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. REEVALUACIONES O REVISION -->
+        <div class="col-12">
+            <div class="card bg-dark-card border-secondary shadow-sm">
+                <div
+                    class="card-header border-secondary d-flex justify-content-between align-items-center bg-primary bg-opacity-10">
+                    <h5 class="mb-0 text-primary"><i class="fas fa-sync-alt me-2"></i> Reevaluaciones o Revisión</h5>
+                    <div class="input-group input-group-sm w-25">
+                        <input type="text" id="searchRevision" class="form-control bg-dark text-light border-secondary"
+                            placeholder="Filtrar...">
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead>
+                                <tr class="text-secondary text-uppercase text-xs">
+                                    <th class="ps-4">FR</th>
+                                    <th>Marca/Modelo</th>
+                                    <th>Estado</th>
+                                    <th>Encargado</th>
+                                    <th>Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableRevision"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. PENDIENTE APROBACION (PAGINATED) -->
+        <div class="col-12">
+            <div class="card bg-dark-card border-secondary shadow-sm">
+                <div
+                    class="card-header border-secondary d-flex justify-content-between align-items-center bg-warning bg-opacity-10">
+                    <h5 class="mb-0 text-warning"><i class="fas fa-clock me-2"></i> Pendiente Aprobación</h5>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="input-group input-group-sm" style="width: 200px;">
+                            <input type="text" id="searchPendiente"
+                                class="form-control bg-dark text-light border-secondary" placeholder="Filtrar...">
+                        </div>
+                        <!-- Pagination Controls -->
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-secondary" id="btnPrevPendiente" disabled><i
+                                    class="fas fa-chevron-left"></i></button>
+                            <span class="btn btn-outline-secondary disabled text-light border-secondary"
+                                id="pageInfoPendiente">1/1</span>
+                            <button class="btn btn-outline-secondary" id="btnNextPendiente" disabled><i
+                                    class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead>
+                                <tr class="text-secondary text-uppercase text-xs">
+                                    <th class="ps-4">FR</th>
+                                    <th>Marca/Modelo</th>
+                                    <th>Estado</th>
+                                    <!-- RENAMED COLUMN PER USER REQUEST -->
+                                    <th>ENCARGADO DEL DIAGNOSTICO</th>
+                                    <th>Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablePendiente"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {% else %}
+    <!-- VISTA OPERATIVA (TABLA UNIFICADA) -->
+    <div class="card bg-dark-card border-secondary shadow-lg">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-dark table-hover mb-0 align-middle" id="equipmentTable">
+                    <thead
+                        class="bg-secondary bg-opacity-10 text-uppercase text-secondary text-xs font-weight-bolder opacity-7">
+                        <tr>
+                            <th class="ps-4">Equipo / FR</th>
+                            <th>Estado Actual</th>
+                            <th>Encargado</th>
+                            <th>Fecha Ingreso</th>
+                            <th>Días</th>
+                            <th class="text-end pe-4">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"> <!-- Unified Body --> </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- DATA -->
+<div id="equipmentsData" data-equipments='{{ equipments_json|safe }}' data-user-role='{{ current_role|tojson }}'
+    style="display:none;"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const dataEl = document.getElementById('equipmentsData');
+        if (!dataEl) return;
+
+        let equipments = JSON.parse(dataEl.dataset.equipments);
+        let userRole = JSON.parse(dataEl.dataset.userRole);
+        if (userRole) userRole = userRole.toLowerCase();
+
+        // Helper functions
+        function getStatusBadge(status) {
+            let badgeClass = 'bg-secondary';
+            let icon = 'fa-circle';
+
+            let s = status.toLowerCase(); // Case insensitive match
+
+            // Updated Filter Logic: Include REVISION and STANDBY
+            if (s.includes('diagnostico') || s.includes('revision') || s.includes('standby')) { badgeClass = 'bg-info text-dark'; icon = 'fa-stethoscope'; }
+            else if (s.includes('aprobado')) { badgeClass = 'bg-success'; icon = 'fa-check-circle'; }
+            else if (s.includes('espera') || s.includes('pendiente')) { badgeClass = 'bg-warning text-dark'; icon = 'fa-clock'; }
+            else if (s.includes('servicio') || s.includes('reparacion')) { badgeClass = 'bg-primary'; icon = 'fa-tools'; }
+            else if (s.includes('culminado') || s.includes('entregado')) { badgeClass = 'bg-success'; icon = 'fa-flag-checkered'; }
+
+            return `<span class="badge ${badgeClass}"><i class="fas ${icon} me-1"></i> ${status}</span>`;
+        }
+
+        function createRow(item, isVisualizador = false) {
+            const today = new Date();
+            const ingreso = new Date(item.fecha_ingreso);
+            const diffDays = Math.ceil(Math.abs(today - ingreso) / (1000 * 60 * 60 * 24));
+
+            let actionsHtml = '';
+            if (!isVisualizador) {
+                actionsHtml = `<div class="btn-group">`;
+                // Simplified logic (copy from previous impl) - Valid buttons logic remains same
+                // ... (keeping simplified for brevity as user didn't request logic change here)
+                // Reusing existing logic for unified view
+                if (item.estado === 'Espera de Diagnostico') actionsHtml += `<button class="btn btn-sm btn-info" onclick="updateStatus(${item.id}, 'En Diagnostico')">Iniciar</button>`;
+                else if (item.estado.includes('En Diagnostico') || item.estado.includes('en Diagnostico')) { // Case fix
+                    actionsHtml += `<button class="btn btn-sm btn-success" onclick="updateStatus(${item.id}, 'Pendiente Aprobacion')">Diagnosticar</button>`;
+                    actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'Espera Repuesto')">Repuestos</button>`;
+                }
+                // Fix: 'Pendiente de aprobacion' vs 'Pendiente Aprobacion'
+                else if (item.estado.toLowerCase().includes('pendiente de aprobacion') || item.estado === 'Pendiente Aprobacion') {
+                    actionsHtml += `<button class="btn btn-sm btn-success" onclick="updateStatus(${item.id}, 'Aprobado')">Aprobar</button>`;
+                    actionsHtml += `<button class="btn btn-sm btn-danger" onclick="updateStatus(${item.id}, 'Rechazado')">Rechazar</button>`;
+                }
+                else if (item.estado === 'Aprobado') actionsHtml += `<button class="btn btn-sm btn-primary" onclick="updateStatus(${item.id}, 'En Servicio')">Servicio</button>`;
+                else if (item.estado === 'En Servicio') {
+                    actionsHtml += `<button class="btn btn-sm btn-success" onclick="updateStatus(${item.id}, 'Servicio Culminado')">Culminar</button>`;
+                    actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'Espera Repuesto')">Falta</button>`;
+                }
+                else if (item.estado === 'Servicio Culminado') actionsHtml += `<button class="btn btn-sm btn-info" onclick="updateStatus(${item.id}, 'Entregado')">Entregar</button>`;
+                else if (item.estado.includes('Espera Repuesto')) actionsHtml += `<button class="btn btn-sm btn-success" onclick="updateStatus(${item.id}, 'Repuesto Entregado')">Llegó</button>`;
+                else if (item.estado === 'Repuesto Entregado') actionsHtml += `<button class="btn btn-sm btn-primary" onclick="updateStatus(${item.id}, 'En Servicio')">Retomar</button>`;
+
+                actionsHtml += `</div>`;
+            }
+
+            const frDisplay = item.fr || 'Sin FR';
+
+            if (isVisualizador) {
+                return `
+                <tr>
+                    <td class="ps-4 fw-bold text-info">${frDisplay}</td>
+                    <td>${item.marca} ${item.modelo}</td>
+                    <td>${getStatusBadge(item.estado)}</td>
+                    <td class="text-light">${item.encargado}</td>
+                    <td class="text-muted">${item.fecha_ingreso || 'N/A'}</td>
+                </tr>
+            `;
+            } else {
+                return `
+                <tr>
+                    <td class="ps-4">
+                        <div class="d-flex flex-column">
+                            <span class="fw-bold text-white">${item.marca} ${item.modelo}</span>
+                            <span class="text-xs text-info">${frDisplay}</span>
+                        </div>
+                    </td>
+                    <td>${getStatusBadge(item.estado)}</td>
+                    <td class="text-sm text-light"><i class="fas fa-user-circle me-1 text-muted"></i> ${item.encargado}</td>
+                    <td class="text-sm text-muted">${item.fecha_ingreso || 'N/A'}</td>
+                    <td><span class="badge ${diffDays > 5 ? 'bg-danger' : 'bg-success'} badge-pill">${diffDays} días</span></td>
+                    <td class="text-end pe-4">${actionsHtml}</td>
+                </tr>
+            `;
+            }
+        }
+
+        // MAIN LOGIC
+        if (userRole === 'visualizador') {
+            // SORT BY FR DESCENDING
+            equipments.sort((a, b) => {
+                const frA = parseInt(a.fr) || 0;
+                const frB = parseInt(b.fr) || 0;
+                if (frA !== frB) return frB - frA;
+                return (b.fr || '').localeCompare(a.fr || '');
+            });
+
+            // ------------------ KPI CALCULATION ------------------
+            let countDiag = 0, countPend = 0, countApro = 0, countRev = 0;
+
+            equipments.forEach(item => {
+                const s = (item.estado || '').toLowerCase();
+                if (s.includes('revision') || s.includes('reevaluacion')) countRev++;
+                else if (s.includes('diagnostico')) countDiag++;
+                else if (s.includes('pendiente') || s.includes('espera de aprobacion')) countPend++;
+                else if (s.includes('aprobado') || s.includes('servicio') || s.includes('repuesto')) countApro++;
+                // Entregado/Culminado are NOT counted in 'Aprobado' card per user request.
+                // They are only in TOTAL.
+            });
+
+            document.getElementById('kpiTotal').innerText = equipments.length;
+            document.getElementById('kpiDiag').innerText = countDiag;
+            document.getElementById('kpiPend').innerText = countPend;
+            document.getElementById('kpiApro').innerText = countApro;
+            // Note: No KPI card for Revision requested, but internal count is tracked.
+            // -----------------------------------------------------
+
+            const tDiag = document.getElementById('tableDiagnostico');
+            const tPend = document.getElementById('tablePendiente'); // PAGINATED
+            const tApro = document.getElementById('tableAprobado');
+
+            // Pagination State
+            const ITEMS_PER_PAGE = 15;
+            let pendientePage = 1;
+
+            function renderPaginationControls(totalItems) {
+                const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
+                document.getElementById('pageInfoPendiente').innerText = `${pendientePage}/${totalPages}`;
+                document.getElementById('btnPrevPendiente').disabled = (pendientePage === 1);
+                document.getElementById('btnNextPendiente').disabled = (pendientePage === totalPages);
+            }
+
+            function renderSection(table, filterFn, searchId, isPaginated = false) {
+                let data = equipments.filter(item => {
+                    const s = (item.estado || '').toLowerCase();
+                    return filterFn(s);
+                });
+
+                const searchInput = document.getElementById(searchId);
+                let currentSearchTerm = '';
+
+                function doRender() {
+                    // 1. Filter by Search
+                    let filteredData = data.filter(item =>
+                        (item.fr && item.fr.toString().toLowerCase().includes(currentSearchTerm)) ||
+                        (item.marca && item.marca.toLowerCase().includes(currentSearchTerm)) ||
+                        (item.modelo && item.modelo.toLowerCase().includes(currentSearchTerm))
+                    );
+
+                    // 2. Pagination (if enabled)
+                    if (isPaginated) {
+                        renderPaginationControls(filteredData.length);
+                        const start = (pendientePage - 1) * ITEMS_PER_PAGE;
+                        const end = start + ITEMS_PER_PAGE;
+                        filteredData = filteredData.slice(start, end);
+                    }
+
+                    table.innerHTML = filteredData.length ? filteredData.map(i => createRow(i, true)).join('')
+                        : `<tr><td colspan="5" class="text-center text-muted py-3">Sin equipos</td></tr>`;
+                }
+
+                doRender();
+                searchInput.addEventListener('input', (e) => {
+                    currentSearchTerm = e.target.value.toLowerCase();
+                    if (isPaginated) pendientePage = 1;
+                    doRender();
+                });
+
+                return doRender;
+            }
+
+            // 1. Diagnostico (Loose match + REVISION/STANDBY)
+            // 1. Diagnostico (Loose match, NO REVISION, NO STANDBY)
+            renderSection(tDiag, s => s.includes('diagnostico') && !s.includes('revision'), 'searchDiagnostico');
+
+            // 2. Revision (New Section)
+            const tRev = document.getElementById('tableRevision');
+            if (tRev) {
+                renderSection(tRev, s => s.includes('revision') || s.includes('reevaluacion'), 'searchRevision');
+            }
+
+            // 3. Pendiente (Paginated)
+            const renderPendiente = renderSection(tPend, s => s.includes('pendiente') || s.includes('espera de aprobacion'), 'searchPendiente', true);
+
+            // 4. Aprobado (Hidden but rendered to avoid JS errors if elements exist, or just ignored)
+            // User asked to hide it. We kept elements as d-none so logic runs but user sees nothing.
+            if (tApro) {
+                // FIXED: Show 'Aprobado' list, but EXCLUDE 'Entregado'/'Culminado'.
+                // They are only calculated in the TOP KPI stats.
+                renderSection(tApro, s => (s.includes('aprobado') || s.includes('servicio') || s.includes('repuesto')) &&
+                    !s.includes('entregado') && !s.includes('culminado'), 'searchAprobado');
+            }
+
+            // Pagination Listeners
+            document.getElementById('btnPrevPendiente').addEventListener('click', () => {
+                if (pendientePage > 1) { pendientePage--; renderPendiente(); }
+            });
+            document.getElementById('btnNextPendiente').addEventListener('click', () => {
+                pendientePage++; renderPendiente();
+            });
+
+        } else {
+            // UNIFIED VIEW LOGIC
+            const tableBody = document.getElementById('tableBody');
+            const searchInput = document.getElementById('searchInput');
+
+            function renderUnified(data) {
+                tableBody.innerHTML = data.length ? data.map(i => createRow(i, false)).join('')
+                    : `<tr><td colspan="6" class="text-center py-5 text-muted">No se encontraron equipos</td></tr>`;
+            }
+            renderUnified(equipments);
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                const filtered = equipments.filter(eq =>
+                    (eq.marca && eq.marca.toLowerCase().includes(term)) ||
+                    (eq.modelo && eq.modelo.toLowerCase().includes(term)) ||
+                    (eq.fr && eq.fr.toLowerCase().includes(term)) ||
+                    (eq.estado && eq.estado.toLowerCase().includes(term))
+                );
+                renderUnified(filtered);
+            });
+        }
+
+        // Global Action
+        window.updateStatus = function (id, newStatus) {
+            if (!confirm(`¿Cambiar estado a: ${newStatus}?`)) return;
+            const formData = new FormData();
+            formData.append('status', newStatus);
+            fetch(`/api/equipment/${id}/update_status`, { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) location.reload();
+                    else alert('Error: ' + data.error);
+                })
+                .catch(err => alert('Error de red: ' + err));
+        };
+    });
+</script>
+
+<style>
+    .bg-dark-card {
+        background-color: #1e1e2f;
+    }
+
+    .card-header {
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .icon-shape {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.75rem;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Registro - CABELAB{% endblock %}
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="col-md-4">
+        <div class="card shadow-lg border-0 rounded-3">
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Cabelab Logo"
+                        style="max-height: 80px; width: auto;" class="mb-3">
+                    <p class="text-info small text-uppercase fw-bold">Registro de Usuarios</p>
+                    <p class="text-muted mt-2">Crea una cuenta nueva</p>
+                </div>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Usuario</label>
+                        <input type="text" name="username" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Contraseña</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-success btn-lg">Crear Cuenta</button>
+                    </div>
+                </form>
+                <div class="text-center mt-3">
+                    <small>¿Ya tienes cuenta? <a href="{{ url_for('auth.login') }}">Ingresar</a></small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

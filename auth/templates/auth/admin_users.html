@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Administración de Usuarios - CABELAB{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="fas fa-users-cog text-primary"></i> Gestión de Usuarios</h2>
+        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">Volver al Dashboard</a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Estado</th>
+                            <th>Expiración</th>
+                            <th>Acciones de Acceso</th>
+                            <th>Rol</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td class="fw-bold text-primary">{{ user.username }}</td>
+                            <td>
+                                {% if not user.is_approved %}
+                                <span class="badge bg-secondary">Sin Acceso</span>
+                                {% elif user.expires_at and user.expires_at < now %} <span class="badge bg-danger">
+                                    Expirado</span>
+                                    {% else %}
+                                    <span class="badge bg-success">Activo</span>
+                                    {% endif %}
+                            </td>
+                            <td>
+                                {% if not user.is_approved %}
+                                <span class="badge bg-danger">Revocado</span>
+                                {% elif user.expires_at %}
+                                {{ user.expires_at.strftime('%d/%m/%Y %H:%M') }}
+                                {% if user.expires_at < now %} <i class="fas fa-exclamation-circle text-danger"></i>
+                                    {% endif %}
+                                    {% else %}
+                                    <span class="text-muted">Permanente</span>
+                                    {% endif %}
+                            </td>
+                            <td>
+                                <form action="{{ url_for('auth.set_access', user_id=user.id) }}" method="POST"
+                                    class="d-flex gap-2">
+                                    <select name="meses" class="form-select form-select-sm" style="width: 140px;">
+                                        <option value="" selected disabled>Otorgar Acceso...</option>
+                                        <option value="1h">1 Hora (Pruebas)</option>
+                                        <option value="24h">24 Horas</option>
+                                        <option value="1">1 Mes</option>
+                                        <option value="3">3 Meses</option>
+                                        <option value="6">6 Meses</option>
+                                        <option value="12">1 Año</option>
+                                        <option value="PERMANENT">Permanente</option>
+                                        <option value="BLOCK" class="text-danger">Bloquear/Revocar</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-outline-primary">Ok</button>
+                                </form>
+                            </td>
+                            <td>
+                                {% if user.username|lower != 'venllas' %}
+                                <form action="{{ url_for('auth.set_role', user_id=user.id) }}" method="POST"
+                                    class="d-flex gap-2">
+                                    <select name="role" class="form-select form-select-sm" style="width: 140px;"
+                                        onchange="this.form.submit()">
+                                        <option value="recepcion" {% if user.role=='recepcion' %}selected{% endif %}>
+                                            Recepción</option>
+                                        <option value="operaciones" {% if user.role=='operaciones' %}selected{% endif
+                                            %}>Operaciones</option>
+                                        <option value="almacen" {% if user.role=='almacen' %}selected{% endif %}>Almacén
+                                        </option>
+                                        <option value="visualizador" {% if user.role=='visualizador' %}selected{% endif
+                                            %}>Visualizador</option>
+                                        <option value="admin" {% if user.role=='admin' %}selected{% endif %}>
+                                            Administrador</option>
+                                    </select>
+                                </form>
+                                {% else %}
+                                <span class="badge bg-dark">Super Admin</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if user.username|lower != 'venllas' %}
+                                <form action="{{ url_for('auth.delete_user', user_id=user.id) }}" method="POST"
+                                    onsubmit="return confirm('¿Estás seguro de eliminar al usuario {{ user.username }}? Esta acción no se puede deshacer.');"
+                                    style="display: inline;">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i> Eliminar
+                                    </button>
+                                </form>
+                                {% else %}
+                                <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
