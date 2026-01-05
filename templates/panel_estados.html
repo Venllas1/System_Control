@@ -303,24 +303,54 @@
                 // Simplified logic (copy from previous impl) - Valid buttons logic remains same
                 // ... (keeping simplified for brevity as user didn't request logic change here)
                 // Reusing existing logic for unified view
-                if (item.estado === 'Espera de Diagnostico') actionsHtml += `<button class="btn btn-sm btn-info" onclick="updateStatus(${item.id}, 'En Diagnostico')">Iniciar</button>`;
-                else if (item.estado.includes('En Diagnostico') || item.estado.includes('en Diagnostico')) { // Case fix
+                // 1. DIAGNOSTICO
+                if (item.estado === 'Espera de Diagnostico') {
+                    actionsHtml += `<button class="btn btn-sm btn-info" onclick="updateStatus(${item.id}, 'En Diagnostico')">Iniciar</button>`;
+                }
+                else if (item.estado.includes('En Diagnostico') || item.estado.includes('en Diagnostico')) {
                     actionsHtml += `<button class="btn btn-sm btn-success" onclick="updateStatus(${item.id}, 'Pendiente Aprobacion')">Diagnosticar</button>`;
                     actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'Espera Repuesto')">Repuestos</button>`;
                 }
-                // Fix: 'Pendiente de aprobacion' vs 'Pendiente Aprobacion'
+
+                // 2. REPUESTOS (Almacen)
+                else if (item.estado.includes('Espera Repuesto')) {
+                    // Solo Almacen deberia ver esto? O todos? Lo dejamos visible.
+                    actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'Repuesto Entregado')">Llegó Repuesto</button>`;
+                }
+                else if (item.estado === 'Repuesto Entregado') {
+                    // Backend Rule: REPUESTO_ENTREGADO -> PENDIENTE_APROBACION (Operaciones termina diagnostico/cotizacion)
+                    actionsHtml += `<button class="btn btn-sm btn-primary" onclick="updateStatus(${item.id}, 'Pendiente Aprobacion')">Retomar Diag</button>`;
+                }
+
+                // 3. APROBACION (Recepcion/Admin)
                 else if (item.estado.toLowerCase().includes('pendiente de aprobacion') || item.estado === 'Pendiente Aprobacion') {
                     actionsHtml += `<button class="btn btn-sm btn-success" onclick="updateStatus(${item.id}, 'Aprobado')">Aprobar</button>`;
                     actionsHtml += `<button class="btn btn-sm btn-danger" onclick="updateStatus(${item.id}, 'Rechazado')">Rechazar</button>`;
                 }
-                else if (item.estado === 'Aprobado') actionsHtml += `<button class="btn btn-sm btn-primary" onclick="updateStatus(${item.id}, 'En Servicio')">Servicio</button>`;
-                else if (item.estado === 'En Servicio') {
-                    actionsHtml += `<button class="btn btn-sm btn-success" onclick="updateStatus(${item.id}, 'Servicio Culminado')">Culminar</button>`;
-                    actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'Espera Repuesto')">Falta</button>`;
+
+                // 4. SERVICIO (Operaciones)
+                else if (item.estado === 'Aprobado') {
+                    actionsHtml += `<button class="btn btn-sm btn-primary" onclick="updateStatus(${item.id}, 'Inicio de Servicio')">Iniciar Servicio</button>`;
                 }
-                else if (item.estado === 'Servicio Culminado') actionsHtml += `<button class="btn btn-sm btn-info" onclick="updateStatus(${item.id}, 'Entregado')">Entregar</button>`;
-                else if (item.estado.includes('Espera Repuesto')) actionsHtml += `<button class="btn btn-sm btn-success" onclick="updateStatus(${item.id}, 'Repuesto Entregado')">Llegó</button>`;
-                else if (item.estado === 'Repuesto Entregado') actionsHtml += `<button class="btn btn-sm btn-primary" onclick="updateStatus(${item.id}, 'En Servicio')">Retomar</button>`;
+                else if (item.estado === 'Inicio de Servicio' || item.estado === 'En Servicio') {
+                    actionsHtml += `<button class="btn btn-sm btn-success" onclick="updateStatus(${item.id}, 'Servicio Culminado')">Culminar</button>`;
+                    actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'Espera Repuestos')">Falta (Serv)</button>`;
+                }
+                else if (item.estado === 'Espera Repuestos') {
+                    // Almacen entrega repuesto de servicio -> Vuelve a En Servicio
+                    actionsHtml += `<button class="btn btn-sm btn-primary" onclick="updateStatus(${item.id}, 'En Servicio')">Llegó (Serv)</button>`;
+                }
+
+                // 5. ENTREGA (Recepcion)
+                else if (item.estado === 'Servicio Culminado') {
+                    actionsHtml += `<button class="btn btn-sm btn-info" onclick="updateStatus(${item.id}, 'Entregado')">Entregar Cliente</button>`;
+                }
+
+                // 6. DELETE BUTTON (Admin/Venllas Only)
+                // userRole is defined in scope above.
+                if (userRole === 'admin' || userRole === 'venllas') {
+                    actionsHtml += `<button class="btn btn-sm btn-outline-danger ms-2" onclick="deleteEquipment(${item.id})" title="Eliminar"><i class="fas fa-trash"></i></button>`;
+                }
 
                 actionsHtml += `</div>`;
             }
@@ -502,6 +532,21 @@
                 .then(data => {
                     if (data.success) location.reload();
                     else alert('Error: ' + data.error);
+                })
+                .catch(err => alert('Error de red: ' + err));
+        };
+
+        window.deleteEquipment = function (id) {
+            if (!confirm('¿ESTÁ SEGURO DE ELIMINAR ESTE EQUIPO?\nEsta acción no se puede deshacer.')) return;
+            fetch(`/api/equipment/${id}/delete`, { method: 'POST' })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Equipo eliminado.');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
                 })
                 .catch(err => alert('Error de red: ' + err));
         };

@@ -406,10 +406,6 @@ def create_app(config_class=Config):
             old_obs = equipment.observaciones or ''
             equipment.observaciones = f"{old_obs}\n[{timestamp} {current_user.username}]: {observaciones}".strip()
             
-        # Actualizar encargado si cambia de área? 
-        # Por ahora mantenemos el creador o actualizamos al que hizo la acción?
-        # Mejor loguear quien lo movió en observaciones o un campo 'last_modified_by' si existiera.
-        
         db.session.commit()
         
         return jsonify({
@@ -417,6 +413,22 @@ def create_app(config_class=Config):
             'message': f'Estado actualizado a {new_status}',
             'new_status': new_status
         })
+
+    @app.route('/api/equipment/<int:eq_id>/delete', methods=['POST'])
+    @login_required
+    def delete_equipment(eq_id):
+        # SOLO ADMIN o VENLLAS
+        if not current_user.is_admin and current_user.username != 'Venllas':
+            return jsonify({'success': False, 'error': 'No autorizado'}), 403
+            
+        try:
+            equipment = Equipment.query.get_or_404(eq_id)
+            db.session.delete(equipment)
+            db.session.commit()
+            return jsonify({'success': True, 'message': 'Equipo eliminado correctamente'})
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'success': False, 'error': str(e)}), 500
     def not_found_error(error):
         return render_template('error.html', mensaje="Página no encontrada"), 404
 
@@ -516,12 +528,14 @@ def initialize_on_first_request():
             if not inspector.has_table("global_settings"):
                  db.create_all()
             
-            try:
-                from models import Equipment
-                Equipment.__table__.drop(db.engine, checkfirst=True)
-                print("Vercel/Startup: Dropped Equipment table to update schema.")
-            except Exception as e:
-                print(f"Schema Update Error: {e}")
+            # --- CRITICAL FIX: STOP DROPPING TABLE ---
+            # The schema migration is done. Removing this to ensure persistence.
+            # try:
+            #     from models import Equipment
+            #     Equipment.__table__.drop(db.engine, checkfirst=True)
+            #     print("Vercel/Startup: Dropped Equipment table to update schema.")
+            # except Exception as e:
+            #     print(f"Schema Update Error: {e}")
 
             if not inspector.has_table("user"):
                 print("Vercel/Startup: Initializing Database...")

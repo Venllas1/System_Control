@@ -1,28 +1,24 @@
-# Guía de Migración: Base de Datos Nativa
+# Arreglo Final: Persistencia y Flujos
 
-¡Decisión correcta! Al usar la base de datos nativa (Postgres):
-1.  **Cero duplicados.**
-2.  **Cero "desapariciones" de datos.**
-3.  **Velocidad máxima.**
-4.  **Almacenamiento:** Tienes espacio para **décadas** de trabajo (0.5GB es inmenso para texto).
+Problema detectado: La "actualización de estructura" se quedó activada y borraba la tabla cada vez que el servidor se reiniciaba (o sea, muy seguido).
+**¡Lo he desactivado!** Ahora tus datos son sagrados y no se tocarán.
 
-## Paso 1: Aplicar el Cambio
-Sube este código para desconectar el Excel fallido:
+## Mejoras Incluidas:
+1.  **Botón Eliminar:** El usuario `Venllas` (y Admins) verán un tacho de basura rojo para borrar equipos.
+2.  **Flujo Corregido:** He alineado los botones de Repuestos y Servicio para que coincidan con las reglas del sistema (Almacén entrega -> Operaciones retoma).
+
+## Instrucciones
+Sube este cambio crítico:
 
 ```powershell
 git add .
-git commit -m "Migrar a Base de Datos Nativa"
+git commit -m "Reparar persistencia y agregar eliminar"
 git push origin main
 ```
 
-## Paso 2: Importación Inicial (Solo una vez)
-Si al entrar ves la lista vacía, usa esta herramienta secreta una última vez para "chupar" los datos del Excel y guardarlos en Postgres:
+**Importante:**
+Como estábamos borrando la tabla, es probable que ahora mismo esté vacía o vieja.
+Una vez que subas esto, **carga tus datos una última vez** con la herramienta secreta:
+`.../debug_sync`
 
-1.  Entra a `https://TITULO-DE-TU-APP.vercel.app/debug_sync`
-2.  Espera a que termine.
-3.  Vuelve al inicio. ¡Tus datos ya están ahí seguros!
-
-## Paso 3: Nueva Forma de Trabajo
-*   **¿Nuevo equipo?** -> Botón "Agregar Equipo" en la web.
-*   **¿Reporte?** -> Botón "Exportar" (baja un Excel limpio).
-*   **¿Excel antiguo?** -> Ya no se usa. Solo es un respaldo histórico.
+¡Y listo! A partir de ese momento, **nunca más** se borrará nada. Podrás cerrar sesión, volver mañana, y ahí estarán.
