@@ -17,14 +17,17 @@ try:
         exit(1)
 
     # 2. Test Pandas Read (simulating excel_sync.py)
-    # Note: excel_sync.py uses header=1.
-    print("Attempting pd.read_excel...")
-    df = pd.read_excel(URL, header=1, engine='openpyxl')
+    print("Attempting to read ALL sheets...")
+    # sheet_name=None reads all sheets into a dict
+    xls = pd.read_excel(URL, sheet_name=None, engine='openpyxl')
     
-    print("SUCCESS: DataFrame loaded.")
-    print(f"Shape: {df.shape}")
-    print("Columns found:", df.columns.tolist())
-    print("First row:", df.iloc[0].to_dict())
+    print("SUCCESS: Workbook loaded.")
+    print("Sheet Names found:", list(xls.keys()))
+    
+    for sheet_name, df in xls.items():
+        print(f"\n--- Sheet: {sheet_name} ---")
+        print(f"Shape: {df.shape}")
+        print("Columns:", df.columns.tolist())
 
 except Exception as e:
     print(f"CRITICAL ERROR: {e}")

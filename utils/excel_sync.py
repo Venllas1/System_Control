@@ -110,3 +110,85 @@ def sync_excel_to_db(app, local_filename=None):
     except Exception as e:
         print(f"Excel Sync Logic Error: {e}")
         return False
+
+def sync_users_from_excel(app):
+    """
+    Reads users from the same Google Sheet if a 'USUARIOS' tab exists.
+    Expected Columns: USUARIO, PASSWORD, ROL
+    """
+    from models import User, UserRoles
+    
+    try:
+        print(f"User Sync: Checking for USUARIOS tab in {GOOGLE_SHEET_URL}...")
+        # Read specifically the 'USUARIOS' sheet (or try to find it)
+        # using header=0 because presumably user will put headers on row 1
+        xls = pd.read_excel(GOOGLE_SHEET_URL, sheet_name=None, engine='openpyxl')
+        
+        # Find sheet case-insensitive
+        user_sheet_name = next((s for s in xls.keys() if s.upper().strip() == 'USUARIOS'), None)
+        
+        if not user_sheet_name:
+            print("User Sync: 'USUARIOS' tab not found in Excel. Skipping user sync.")
+            return False
+            
+        df = xls[user_sheet_name]
+        # Normalize columns
+        df.columns = [str(c).upper().strip() for c in df.columns]
+        
+        print(f"User Sync: Found tab '{user_sheet_name}'. Columns: {df.columns.tolist()}")
+        
+        # Expected cols: USUARIO, PASSWORD, ROL
+        if 'USUARIO' not in df.columns or 'PASSWORD' not in df.columns:
+            print("User Sync: Missing required columns (USUARIO, PASSWORD).")
+            return False
+
+        count = 0
+        with app.app_context():
+            # Strategy: Upsert users. 
+            # Note: In Vercel, DB is empty anyway, so we just insert.
+            # But we must respect the hardcoded 'Venllas'/'admin' if we want to keep them as backups?
+            # Actually, Excel should be the source of truth if it exists.
+            
+            for index, row in df.iterrows():
+                username = row['USUARIO']
+                password = row['PASSWORD']
+                role_raw = str(row['ROL']).upper() if 'ROL' in df.columns and pd.notna(row['ROL']) else 'VISUALIZADOR'
+                
+                if pd.isna(username) or pd.isna(password): continue
+                username = str(username).strip()
+                password = str(password).strip()
+                
+                # Map Roles
+                role = UserRoles.VISUALIZADOR
+                is_admin_flag = False
+                
+                if 'ADMIN' in role_raw or 'GEREN' in role_raw:
+                    role = UserRoles.ADMIN
+                    is_admin_flag = True
+                elif 'RECEPCION' in role_raw:
+                    role = UserRoles.RECEPCION
+                elif 'OPERACION' in role_raw:
+                    role = UserRoles.OPERACIONES
+                elif 'ALMACEN' in role_raw:
+                    role = UserRoles.ALMACEN
+                
+                # Check exist
+                existing = User.query.filter_by(username=username).first()
+                if not existing:
+                    u = User(username=username, role=role, is_admin=is_admin_flag, is_approved=True)
+                    u.set_password(password)
+                    db.session.add(u)
+                    count += 1
+                else:
+                    # Optional: Update password/role if changed in Excel?
+                    existing.role = role
+                    existing.is_admin = is_admin_flag
+                    existing.set_password(password) # Reset password to match Excel
+            
+            db.session.commit()
+            print(f"User Sync: Synced {count} users from Excel.")
+            return True
+
+    except Exception as e:
+        print(f"User Sync Error: {e}")
+        return False

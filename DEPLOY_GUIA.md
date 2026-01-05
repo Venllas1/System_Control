@@ -1,23 +1,25 @@
-# Guía de Despliegue Final (Sync Robusto)
+# Guía Final: Base de Datos Real (Postgres)
 
-He reforzado el código de sincronización para asegurar que pueda leer el Excel correctamente en el servidor de Vercel.
+Para solucionar el problema de los usuarios que se borran, vamos a conectar el proyecto a una base de datos real en Vercel.
 
-**Datos de Acceso Confirmados:**
-*   **Usuario**: `Venllas`
-*   **Contraseña**: `Venllas2025`
-    *(Asegúrate de escribir la V mayúscula)*.
+## Paso 1: Crear la Base de Datos (Web de Vercel)
+1.  En la pantalla que me mostraste, selecciona **Neon (Serverless Postgres)**.
+2.  Dale a **Create**.
+3.  Te pedirá confirmar una región (acepta la que salga por defecto, ej: Washington DC).
+4.  Dale a **Connect** (asegúrate de que esté seleccionada tu app "pizarra-virtual").
+5.  Vercel añadirá automáticamente las "Environment Variables" (`POSTGRES_URL`, etc.). **No necesitas copiar nada**, se configuran solas.
 
-## Instrucciones para actualizar:
-Ejecuta esto en tu terminal por última vez:
+## Paso 2: Actualizar el Código
+He preparado el programa para que detecte automáticamente esta nueva base de datos. Solo sube los cambios:
 
 ```powershell
 git add .
-git commit -m "Mejorar lecturas de excel"
+git commit -m "Activar soporte PostgreSQL"
 git push origin main
 ```
 
-Una vez desplegado:
-1.  Espera 1-2 minutos a que Vercel termine.
-2.  Entra a la web.
-3.  Inicia sesión (puede tardar 5-10 segundos en entrar la primera vez mientras descarga los datos).
-4.  Si ves "No hay equipos", **recarga la página** o usa el botón de "Refrescar".
+## Paso 3: Disfrutar
+1.  Vercel volverá a desplegar (tarda 1-2 mins).
+2.  Entra a tu aplicación.
+3.  Crea un usuario nuevo.
+4.  Esta vez, **el usuario NUNCA se borrará**, porque ya está guardado en una base de datos profesional.
