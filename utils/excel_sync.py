@@ -16,13 +16,14 @@ def sync_excel_to_db(app, local_filename=None):
     df = None
 
     # 1. Try Google Sheet URL
+    # 1. Try Google Sheet URL
     try:
         print(f"Excel Sync: Attempting to read from {GOOGLE_SHEET_URL}...")
-        # Header is on Row 2 (Index 1) per previous debug
-        df = pd.read_excel(GOOGLE_SHEET_URL, header=1)
-        print("Excel Sync: Successfully downloaded from Google Drive.")
+        # Header is on Row 2 (Index 1). Explicitly use openpyxl engine.
+        df = pd.read_excel(GOOGLE_SHEET_URL, header=1, engine='openpyxl')
+        print(f"Excel Sync: Download success. Shape: {df.shape}")
     except Exception as e:
-        print(f"Excel Sync: Failed to read from Google Drive ({e}).")
+        print(f"Excel Sync: Failed to read from Google Drive. Error: {str(e)}")
         
         # 2. Key Fallback: Local File
         if local_filename:

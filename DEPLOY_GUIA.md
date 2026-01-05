@@ -1,20 +1,23 @@
-# Guía de Despliegue Final (Fix Usuarios)
+# Guía de Despliegue Final (Sync Robusto)
 
-He actualizado el código para que cree automáticamente los usuarios **"Venllas"** y **"visualizador"** cuando arranque en Vercel, ya que la base de datos se crea desde cero.
+He reforzado el código de sincronización para asegurar que pueda leer el Excel correctamente en el servidor de Vercel.
 
-**Contraseñas por defecto (Cámbialas al entrar si es posible):**
-*   **Venllas**: `Venllas2025`
-*   **visualizador**: `visualizador123`
-*   **admin**: `admin123`
+**Datos de Acceso Confirmados:**
+*   **Usuario**: `Venllas`
+*   **Contraseña**: `Venllas2025`
+    *(Asegúrate de escribir la V mayúscula)*.
 
 ## Instrucciones para actualizar:
-Ejecuta esto en tu terminal:
+Ejecuta esto en tu terminal por última vez:
 
 ```powershell
 git add .
-git commit -m "Add Venllas and Visualizador users"
+git commit -m "Mejorar lecturas de excel"
 git push origin main
 ```
 
-**Nota sobre los Equipos:**
-Si no aparecen los equipos, espera unos 10-20 segundos después de iniciar sesión la primera vez, ya que el sistema los está descargando de Google Drive en segundo plano. Si siguen sin aparecer, verifica que el link de Google Sheet en `utils/excel_sync.py` siga siendo público y accesible.
+Una vez desplegado:
+1.  Espera 1-2 minutos a que Vercel termine.
+2.  Entra a la web.
+3.  Inicia sesión (puede tardar 5-10 segundos en entrar la primera vez mientras descarga los datos).
+4.  Si ves "No hay equipos", **recarga la página** o usa el botón de "Refrescar".
