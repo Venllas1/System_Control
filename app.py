@@ -530,10 +530,15 @@ def initialize_on_first_request():
                 # If User exists but we dropped Equipment, we need to create Equipment again
                 db.create_all() # safe, checks existence
                 
-                print("Vercel/Startup: Syncing from Google Drive...")
-                from utils.excel_sync import sync_excel_to_db
-                sync_excel_to_db(app)
+                # Vercel/Native Mode: Users are persistent in Postgres.
+                # Excel Sync is DISABLED to prevent data loss/overwrites.
+                # db.create_all() checks are sufficient.
                 
+                # print("Vercel/Startup: Syncing from Google Drive...")
+                # from utils.excel_sync import sync_excel_to_db
+                # with app.app_context():
+                #     sync_excel_to_db(app) # Initial Sync
+                pass
                 # Check for admin again
                 if not User.query.filter_by(username='admin').first():
                     print("Vercel/Startup: Creating admin...")

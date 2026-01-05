@@ -1,20 +1,28 @@
-# Guía Final: Correción de Cache
+# Guía de Migración: Base de Datos Nativa
 
-El problema persiste porque Google (o un intermediario) guarda una copia "Vieja" del archivo para ahorrar energía, aunque tú lo hayas cambiado.
+¡Decisión correcta! Al usar la base de datos nativa (Postgres):
+1.  **Cero duplicados.**
+2.  **Cero "desapariciones" de datos.**
+3.  **Velocidad máxima.**
+4.  **Almacenamiento:** Tienes espacio para **décadas** de trabajo (0.5GB es inmenso para texto).
 
-He añadido un **truco de programador**: Cada vez que actualices, el sistema inventa un número único y se lo pega al enlace de Google. Esto confunde a Google y le obliga a **entregarte el archivo nuevo fresco** cada vez.
-
-## Poner en Producción
-Sube este cambio final:
+## Paso 1: Aplicar el Cambio
+Sube este código para desconectar el Excel fallido:
 
 ```powershell
 git add .
-git commit -m "Forzar cache de Google Drive"
+git commit -m "Migrar a Base de Datos Nativa"
 git push origin main
 ```
 
-**Prueba definitiva:**
-1.  Espera 1 minuto.
-2.  Entra a la web.
-3.  Dale al botón de **Actualizar**.
-4.  Debería actualizarse (ahora sí, sin excusas).
+## Paso 2: Importación Inicial (Solo una vez)
+Si al entrar ves la lista vacía, usa esta herramienta secreta una última vez para "chupar" los datos del Excel y guardarlos en Postgres:
+
+1.  Entra a `https://TITULO-DE-TU-APP.vercel.app/debug_sync`
+2.  Espera a que termine.
+3.  Vuelve al inicio. ¡Tus datos ya están ahí seguros!
+
+## Paso 3: Nueva Forma de Trabajo
+*   **¿Nuevo equipo?** -> Botón "Agregar Equipo" en la web.
+*   **¿Reporte?** -> Botón "Exportar" (baja un Excel limpio).
+*   **¿Excel antiguo?** -> Ya no se usa. Solo es un respaldo histórico.
