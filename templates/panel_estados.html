@@ -280,7 +280,8 @@
             let badgeClass = 'bg-secondary';
             let icon = 'fa-circle';
 
-            let s = status.toLowerCase(); // Case insensitive match
+            // Normalize for logic but display Original uppercased
+            let s = status.toLowerCase();
 
             // Updated Filter Logic: Include REVISION and STANDBY
             if (s.includes('diagnostico') || s.includes('revision') || s.includes('standby')) { badgeClass = 'bg-info text-dark'; icon = 'fa-stethoscope'; }
@@ -289,7 +290,7 @@
             else if (s.includes('servicio') || s.includes('reparacion')) { badgeClass = 'bg-primary'; icon = 'fa-tools'; }
             else if (s.includes('culminado') || s.includes('entregado')) { badgeClass = 'bg-success'; icon = 'fa-flag-checkered'; }
 
-            return `<span class="badge ${badgeClass}"><i class="fas ${icon} me-1"></i> ${status}</span>`;
+            return `<span class="badge ${badgeClass} text-uppercase"><i class="fas ${icon} me-1"></i> ${status}</span>`;
         }
 
         function createRow(item, isVisualizador = false) {

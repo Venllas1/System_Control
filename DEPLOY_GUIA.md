@@ -1,23 +1,20 @@
-# Arreglo Final: Flujo y Roles
+# Guía de Reparación Final: Etiquetas y Repuestos
 
-He reescrito el cerebro de los botones para que sea **infalible**.
+He corregido el conflicto de nombres que causaba el error en Almacén.
 
-**Mejoras:**
-1.  **Botones Inteligentes:** Ahora solo aparecen si tu usuario tiene permiso (ej. Recepción ya no ve botones de Diagnóstico).
-2.  **Corrección "Botón Desaparecido":** Arreglé un error de mayúsculas/minúsculas que hacía que el botón "Terminar Diagnóstico" se escondiera. Ahora aparecerá siempre.
-3.  **Flujo Completo:**
-    *   **Ops:** Diag -> (Repuestos) -> Terminar Diag -> Pendiente Aprobación.
-    *   **Rec:** Aprobar -> (Se devuelve a Ops).
-    *   **Ops:** Iniciar Mantenimiento -> Terminar -> Servicio Culminado.
-    *   **Rec:** Entregar Cliente.
+**El error técnico:**
+El sistema confundía "Espera de **Repuesto**" (Diagnóstico) con "Espera de **Repuestos**" (Mantenimiento). Al ser palabras casi idénticas, activaba el botón incorrecto y bloqueaba el flujo.
 
-## Última Subida
-Aplica estos cambios para tener el sistema perfecto:
+**La Solución:**
+1.  **Separación de Lógica:** Ahora el sistema distingue perfectamente entre repuestos de diagnóstico y de mantenimiento.
+2.  **Etiquetas Mayúsculas:** Todas las etiquetas de estado ahora se muestran en **MAYÚSCULAS** automáticamente, para mayor orden y legibilidad.
+3.  **Equipos Antiguos:** La nueva lógica es "flexible" (no importa si escribieron con mayúsculas/minúsculas antes), así que tus equipos antiguos volverán a tener botones activos.
 
+## Aplicar Cambios
 ```powershell
 git add .
-git commit -m "Corregir flujo y roles V1"
+git commit -m "Fix repuestos y mayusculas"
 git push origin main
 ```
 
-¡Listo! Prueba entrar como Operaciones y verás que ahora sí puedes terminar tus diagnósticos.
+Ahora sí, el flujo es robusto de principio a fin.
