@@ -1,17 +1,16 @@
-# Arreglo Definitivo: Conflicto Reparado
+# Arreglo: Ciclo de Repuestos (Devoluciones)
 
-El problema era que el sistema leía "Repuestos" y se detenía en la primera coincidencia ("Repuesto"), activando el botón equivocado.
+He habilitado el "bucle de repuestos".
+Antes, una vez que iniciabas el servicio, el sistema asumía que ya tenías todo.
+Ahora, si el repuesto es incorrecto o falta otro, puedes volver a pedirlo.
 
-**Corrección Aplicada:**
-He vuelto el código "inteligente":
-*   Ahora sabe que **"Repuesto" (sin S)** es de Diagnóstico.
-*   Y que **"Repuestos" (con S)** es de Mantenimiento.
-
-El botón de Almacén funcionará correctamente en ambos casos sin mezclarse.
+**Logica Nueva:**
+*   `En Servicio` -> Permite volver a `Espera de Repuestos`.
+*   Almacén entrega -> Vuelves a `En Servicio`.
 
 **Sube este cambio:**
 ```powershell
 git add .
-git commit -m "Reparar logica string repuestos"
+git commit -m "Permitir rebote de repuestos"
 git push origin main
 ```

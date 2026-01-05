@@ -57,7 +57,7 @@ def validate_transition(current_status, new_status, user_role):
             norm(STATUS.APROBADO): [norm(STATUS.INICIO_SERVICIO)],
             norm(STATUS.INICIO_SERVICIO): [norm(STATUS.SERVICIO_CULMINADO), norm(STATUS.ESPERA_REPUESTOS)],
             norm(STATUS.ESPERA_REPUESTOS): [norm(STATUS.EN_SERVICIO)],
-            norm(STATUS.EN_SERVICIO): [norm(STATUS.SERVICIO_CULMINADO)]
+            norm(STATUS.EN_SERVICIO): [norm(STATUS.SERVICIO_CULMINADO), norm(STATUS.ESPERA_REPUESTOS)]
         }
 
         allowed = valid_transitions.get(curr_norm, [])
