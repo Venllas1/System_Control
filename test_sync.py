@@ -18,24 +18,35 @@ try:
         print("ERROR: Failed to download file.")
         exit(1)
     
-    # 2. Read ONLY the specific sheet
-    print(f"\nAttempting to read sheet: {SHEET_NAME}...")
-    df = pd.read_excel(URL, sheet_name=SHEET_NAME, engine='openpyxl')
+    # 2. Test Pandas Read (simulating excel_sync.py)
+    print("Attempting to read ALL sheets (header=None)...")
+    xls = pd.read_excel(URL, sheet_name=None, header=None, engine='openpyxl')
     
-    print("SUCCESS: Sheet loaded.")
-    print(f"Shape: {df.shape}")
-    print(f"Columns: {list(df.columns)}")
+    print("SUCCESS: Workbook loaded.")
+    print("Sheet Names found:", list(xls.keys()))
     
-    # Show first few rows
-    print("\nFirst 5 rows:")
-    print(df.head())
+    winner = None
     
-    # Verify MARCA column exists
-    if 'MARCA' in df.columns or any('MARCA' in str(col).upper() for col in df.columns):
-        print("\n✅ MARCA column found!")
+    for sheet_name, df in xls.items():
+        print(f"\n--- Scanning Sheet: {sheet_name} (Rows: {len(df)}) ---")
+        
+        # Scan first 20 rows for header keywords
+        for i in range(min(20, len(df))):
+            row_values = [str(x).upper().strip() for x in df.iloc[i].tolist()]
+            
+            # Check for signature columns
+            if 'MARCA' in row_values and 'MODELO' in row_values:
+                print(f">>> FOUND HEADERS at Row {i} (Index {i}) in '{sheet_name}'")
+                print(f"    Values: {row_values}")
+                winner = (sheet_name, i)
+                break
+        
+        if winner: break
+
+    if winner:
+        print(f"\nCONCLUSION: The data is in sheet '{winner[0]}' starting at header row {winner[1]}.")
     else:
-        print("\n⚠️ WARNING: MARCA column not found in expected location")
-        print("Available columns:", list(df.columns))
-    
+        print("\nCONCLUSION: Could NOT find 'MARCA'/'MODELO' headers in any sheet (scanned first 20 rows).")
+
 except Exception as e:
     print(f"CRITICAL ERROR: {e}")

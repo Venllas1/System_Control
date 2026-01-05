@@ -1,20 +1,18 @@
-# Guía de Despliegue Final (Fix Base de Datos)
+# Guía de Despliegue Final (Fix Estructura Excel)
 
-He reprogramado la sincronización para que sea **inteligente**.
+He confirmado que la hoja correcta es **"CONTROL DE EQUIPOS CABELAB"**, pero a veces los encabezados no están en la primera fila o Vercel se confunde.
 
-Ahora el sistema:
-1.  Busca específicamente la hoja **"CONTROL DE EQUIPOS CABELAB"**.
-2.  Si por alguna razón el Excel exporta con otro nombre (ej. "Hoja1"), el sistema **busca automáticamente** la hoja que tenga las columnas "MARCA" y "MODELO", ignorando las demás.
+He reprogramado el lector para que **escanee renglón por renglón** hasta encontrar donde dice "MARCA" y "MODELO".
+Esto garantiza que encontrará tus datos aunque muevas la fila de títulos.
 
-Esto asegura que tus equipos aparezcan sí o sí.
-
-## Paso Único: Actualizar
-Sube este cambio final:
+## Actualizar código
+Ejecuta esto para aplicar la solución definitiva:
 
 ```powershell
 git add .
-git commit -m "Forzar lectura de hoja correcta"
+git commit -m "Lectura inteligente de encabezados"
 git push origin main
 ```
 
-**Nota:** Recuerda que la primera vez que entras tarda unos segundos en descargar los datos.
+**Espera 1 minuto** para que se despliegue.
+Al entrar, dale a **Refrescar** (arriba a la derecha) si no salen a la primera.

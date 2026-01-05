@@ -19,35 +19,39 @@ def sync_excel_to_db(app, local_filename=None):
     # 1. Try Google Sheet URL
     try:
         print(f"Excel Sync: Downloading workbook from {GOOGLE_SHEET_URL}...")
-        # Load ALL sheets to find the correct one
-        xls = pd.read_excel(GOOGLE_SHEET_URL, sheet_name=None, header=1, engine='openpyxl')
+        # Load ALL sheets without header first to start scanning
+        xls = pd.read_excel(GOOGLE_SHEET_URL, sheet_name=None, header=None, engine='openpyxl')
         
-        target_name = 'CONTROL DE EQUIPOS CABELAB'
         df = None
+        target_name = 'CONTROL DE EQUIPOS CABELAB'
         
-        # Strategy A: Exact Name Match (User Request)
-        # Case-insensitive check just in case
-        for name, data in xls.items():
-            if name.strip().upper() == target_name.strip().upper():
-                print(f"Excel Sync: Found target sheet '{name}'.")
-                df = data
+        # Priority search: specific name first
+        sheets_to_check = [target_name] + [k for k in xls.keys() if k != target_name]
+        
+        for name in sheets_to_check:
+            if name not in xls: continue
+            
+            raw_df = xls[name]
+            # Scan first 10 rows for Header Signature
+            for i in range(min(10, len(raw_df))):
+                # Convert row to checks
+                row_vals = [str(x).upper().strip() for x in raw_df.iloc[i].tolist()]
+                
+                # Signature: must have MARCA and MODELO
+                if 'MARCA' in row_vals and 'MODELO' in row_vals:
+                    print(f"Excel Sync: FOUND HEADERS in sheet '{name}' at row {i}.")
+                    
+                    # Reload or Slice? Slicing is faster.
+                    # Set header
+                    raw_df.columns = raw_df.iloc[i] # Set header to this row
+                    df = raw_df[i+1:].reset_index(drop=True) # Data is everything below
+                    break
+            
+            if df is not None: 
                 break
         
-        # Strategy B: Content Match (Fallback if name changed/missing in export)
-        # Search for a sheet containing 'MARCA' or 'FR' column
         if df is None:
-            print(f"Excel Sync: Sheet '{target_name}' not found. Searching by column structure...")
-            for name, data in xls.items():
-                cols = [str(c).upper().strip() for c in data.columns]
-                if 'MARCA' in cols and 'MODELO' in cols:
-                    print(f"Excel Sync: Auto-detected equipment sheet: '{name}'")
-                    df = data
-                    break
-        
-        if df is None:
-            print("Excel Sync: CRITICAL - Could not find equipment data in any sheet.")
-            # Fallback to first sheet as last resort?
-            # df = list(xls.values())[0] 
+            print("Excel Sync: CRITICAL - Could not find 'MARCA'/'MODELO' columns in any sheet.")
             return False
 
         print(f"Excel Sync: Loaded data. Shape: {df.shape}")
