@@ -467,8 +467,8 @@ def debug_sync_route():
         print("=== INICIANDO DEBUG SYNC ===")
         print(f"Hora: {datetime.now()}")
         
-        # Run Sync
-        result = sync_excel_to_db(app)
+        # Run Sync (FORCE=True to bypass cooldown for debugging)
+        result = sync_excel_to_db(app, force=True)
         
         print(f"\nResultado de Sincronización: {result}")
         
@@ -501,6 +501,10 @@ def initialize_on_first_request():
             inspector = inspect(db.engine)
             # FORCE RE-CREATION OF EQUIPMENT TABLE to apply schema changes (String 50 -> 255)
             # Since data comes from Excel, this is safe and necessary.
+            # Also create GlobalSettings if missing
+            if not inspector.has_table("global_settings"):
+                 db.create_all()
+            
             try:
                 from models import Equipment
                 Equipment.__table__.drop(db.engine, checkfirst=True)

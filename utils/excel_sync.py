@@ -7,13 +7,28 @@ from models import Equipment
 # PUBLIC LINK PROVIDED BY USER
 GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/1P878SusAnFOkX9PZC5NlqVNyQ3qywkY1/export?format=xlsx"
 
-def sync_excel_to_db(app, local_filename=None):
+def sync_excel_to_db(app, local_filename=None, force=False):
     """
     Reads from Google Drive Public Link (Priority) or Local File (Fallback).
-    Populates SQLite database.
+    Populates SQLite/Postgres database.
+    force: If True, ignores the 5-minute cooldown.
     """
     source_name = "Remote Google Sheet"
     df = None
+
+    from models import GlobalSettings
+    from datetime import timedelta
+
+    with app.app_context():
+        # 0. Check Cooldown (Anti-Duplication)
+        if not force:
+            setting = GlobalSettings.query.filter_by(key='last_sync').first()
+            if setting:
+                now = datetime.utcnow()
+                # If synced less than 3 minutes ago, skip
+                if setting.updated_at and (now - setting.updated_at) < timedelta(minutes=3):
+                    print("Excel Sync: Skipped (Cooldown active). Data is fresh.")
+                    return True
 
     # 1. Try Google Sheet URL
     # 1. Try Google Sheet URL
@@ -138,6 +153,16 @@ def sync_excel_to_db(app, local_filename=None):
                 count += 1
             
             db.session.commit()
+            
+            # Update Timestamp
+            setting = GlobalSettings.query.filter_by(key='last_sync').first()
+            if not setting:
+                setting = GlobalSettings(key='last_sync')
+                db.session.add(setting)
+            setting.updated_at = datetime.utcnow()
+            setting.value = "Success"
+            db.session.commit()
+
             print(f"Excel Sync: Imported {count} records from {source_name}.")
             return True
 

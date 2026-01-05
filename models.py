@@ -71,3 +71,11 @@ class Equipment(db.Model):
             'ENCARGADO': self.encargado,
             'FECHA': self.fecha_ingreso.strftime('%Y-%m-%d') if self.fecha_ingreso else None
         }
+            'FECHA': self.fecha_ingreso.strftime('%Y-%m-%d') if self.fecha_ingreso else None
+        }
+
+class GlobalSettings(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(50), unique=True)
+    value = db.Column(db.String(255))
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow)

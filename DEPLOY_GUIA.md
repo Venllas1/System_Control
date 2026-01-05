@@ -1,19 +1,20 @@
-# Guía de Despliegue Final (Fix Columnas Largas)
+# Guía de Despliegue Final (Anti-Duplicados)
 
-El error que viste (`StringDataRightTruncation`) significa que el Excel tiene textos muy largos en alguna celda (más letras de las que la base de datos esperaba).
+La duplicación ocurría porque el servidor "se ponía nervioso" y arrancaba 2 o 3 veces a la vez, copiando los datos varias veces.
 
-He actualizado la base de datos para aceptar textos largos (hasta 255 caracteres).
-Además, he configurado el sistema para que **actualice la estructura automáticamente** al arrancar.
+He implementado un **semáforo** (cooldown):
+*   Ahora el sistema verifica si se actualizó hace menos de 3 minutos. Si es así, no hace nada (evita duplicados).
+*   He mejorado la herramienta `/debug_sync` para que **FUERCE** una limpieza total y recarga fresca.
 
-## Instrucciones Finales
+## Solución Definitiva
 1.  Sube el cambio:
 
 ```powershell
 git add .
-git commit -m "Aumentar limite caracteres DB"
+git commit -m "Evitar duplicados y crear historial"
 git push origin main
 ```
 
-2.  Espera 1 minuto.
-3.  Entra a la web. **La primera carga borrará la tabla antigua y creará la nueva** con capacidad ampliada.
-4.  Si tarda, dale a refrescar. ¡Ahora sí deberían verse tus equipos!
+2.  Entra a: `https://TU-APP.vercel.app/debug_sync`
+    *   Al entrar aquí, se borrarán todos los duplicados y se bajarán los datos limpios y nuevos de tu Excel.
+    *   Si agregas un equipo nuevo en Excel, **recuerda esperar 2-3 minutos** (Google tarda un poco en publicar el cambio) y luego refresca tu página.
