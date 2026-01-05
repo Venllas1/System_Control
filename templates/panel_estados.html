@@ -402,7 +402,7 @@
                 <tr>
                     <td class="ps-4">
                         <div class="d-flex flex-column">
-                            <span class="fw-bold text-white">${item.marca} ${item.modelo}</span>
+                            <span class="fw-bold text-white text-uppercase">${item.marca} ${item.modelo}</span>
                             <span class="text-xs text-info">${frDisplay}</span>
                         </div>
                     </td>
@@ -417,6 +417,25 @@
         }
 
         // MAIN LOGIC
+
+        // ------------------ GLOBAL KPI CALCULATION ------------------
+        // Runs for ALL roles so the cards at the top are always correct
+        let countDiag = 0, countPend = 0, countApro = 0, countRev = 0;
+
+        equipments.forEach(item => {
+            const s = (item.estado || '').toLowerCase();
+            if (s.includes('revision') || s.includes('reevaluacion')) countRev++;
+            else if (s.includes('diagnostico')) countDiag++;
+            else if (s.includes('pendiente') || s.includes('espera de aprobacion')) countPend++;
+            else if (s.includes('aprobado') || s.includes('servicio') || s.includes('repuesto')) countApro++;
+        });
+
+        if (document.getElementById('kpiTotal')) document.getElementById('kpiTotal').innerText = equipments.length;
+        if (document.getElementById('kpiDiag')) document.getElementById('kpiDiag').innerText = countDiag;
+        if (document.getElementById('kpiPend')) document.getElementById('kpiPend').innerText = countPend;
+        if (document.getElementById('kpiApro')) document.getElementById('kpiApro').innerText = countApro;
+        // -----------------------------------------------------
+
         if (userRole === 'visualizador') {
             // SORT BY FR DESCENDING
             equipments.sort((a, b) => {
@@ -426,25 +445,7 @@
                 return (b.fr || '').localeCompare(a.fr || '');
             });
 
-            // ------------------ KPI CALCULATION ------------------
-            let countDiag = 0, countPend = 0, countApro = 0, countRev = 0;
-
-            equipments.forEach(item => {
-                const s = (item.estado || '').toLowerCase();
-                if (s.includes('revision') || s.includes('reevaluacion')) countRev++;
-                else if (s.includes('diagnostico')) countDiag++;
-                else if (s.includes('pendiente') || s.includes('espera de aprobacion')) countPend++;
-                else if (s.includes('aprobado') || s.includes('servicio') || s.includes('repuesto')) countApro++;
-                // Entregado/Culminado are NOT counted in 'Aprobado' card per user request.
-                // They are only in TOTAL.
-            });
-
-            document.getElementById('kpiTotal').innerText = equipments.length;
-            document.getElementById('kpiDiag').innerText = countDiag;
-            document.getElementById('kpiPend').innerText = countPend;
-            document.getElementById('kpiApro').innerText = countApro;
-            // Note: No KPI card for Revision requested, but internal count is tracked.
-            // -----------------------------------------------------
+            const tDiag = document.getElementById('tableDiagnostico');
 
             const tDiag = document.getElementById('tableDiagnostico');
             const tPend = document.getElementById('tablePendiente'); // PAGINATED
