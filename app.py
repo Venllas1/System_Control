@@ -278,13 +278,24 @@ def create_app(config_class=Config):
     @app.route('/api/refresh')
     @login_required
     def refresh_data():
-        # En versión SQL, "refresh" no tiene mucho sentido si es DB directa, 
-        # a menos que volvamos a leer el Excel (importación manual).
-        # Por ahora simularemos éxito.
-        return jsonify({
-            'success': True, 
-            'message': 'Datos sincronizados (Base de datos en tiempo real)'
-        })
+        # User Request: Force sync when button is pressed
+        from utils.excel_sync import sync_excel_to_db
+        try:
+            print("Manual Refresh: Forcing sync from Google Drive...")
+            success = sync_excel_to_db(app, force=True)
+            
+            if success:
+                return jsonify({
+                    'success': True, 
+                    'message': 'Datos actualizados correctamente desde Google Drive'
+                })
+            else:
+               return jsonify({
+                    'success': False, 
+                    'message': 'No se pudo leer el Excel (Intente de nuevo)'
+                }) 
+        except Exception as e:
+            return jsonify({'success': False, 'error': str(e)}), 500
 
     @app.route('/api/export/<formato>')
     @login_required
