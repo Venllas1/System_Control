@@ -6,8 +6,14 @@ class Config:
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
     
     # Database
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'sqlite:///' + os.path.join(BASE_DIR, 'cabelab.db')
+    if os.environ.get('VERCEL'):
+        # Vercel: Use writable /tmp directory
+        SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/cabelab.db'
+    else:
+        # Local: Use project root
+        SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+            'sqlite:///' + os.path.join(BASE_DIR, 'cabelab.db')
+            
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Security

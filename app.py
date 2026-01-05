@@ -451,22 +451,43 @@ def manual_sync_excel():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-        
-        # SYNC ON STARTUP (Google Drive)
-        print("Startup Sync: Updating from Google Drive...")
-        from utils.excel_sync import sync_excel_to_db
-        sync_excel_to_db(app)
+# --- VERCEL INITIALIZATION LOGIC ---
+# Global flag to ensure we only init once per lambda instance
+is_initialized = False
 
-        # Crear admin si no existe
-        if not User.query.first():
-            print("Creando usuario admin inicial...")
-            u = User(username='admin', is_admin=True, is_approved=True)
-            u.set_password('admin123')
-            db.session.add(u)
-            db.session.commit()
+@app.before_request
+def initialize_on_first_request():
+    global is_initialized
+    if not is_initialized:
+        # Check if DB setup is needed (e.g. on Vercel cold boot)
+        from sqlalchemy import inspect
+        try:
+            inspector = inspect(db.engine)
+            if not inspector.has_table("user"):
+                print("Vercel/Startup: Initializing Database...")
+                db.create_all()
+                
+                print("Vercel/Startup: Syncing from Google Drive...")
+                from utils.excel_sync import sync_excel_to_db
+                sync_excel_to_db(app)
+                
+                # Check for admin again
+                if not User.query.filter_by(username='admin').first():
+                    print("Vercel/Startup: Creating admin...")
+                    u = User(username='admin', is_admin=True, is_approved=True)
+                    u.set_password('admin123')
+                    db.session.add(u)
+                    db.session.commit()
+            
+            is_initialized = True
+        except Exception as e:
+            print(f"Startup Init Error: {e}")
+
+if __name__ == '__main__':
+    # Local Development Run
+    with app.app_context():
+        # Force init checks locally too
+        initialize_on_first_request()
     
     # Start Background Thread (Only for local dev persistence)
     # Note: On Vercel this thread will die, but startup sync works on each cold boot.
