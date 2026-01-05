@@ -18,10 +18,40 @@ def sync_excel_to_db(app, local_filename=None):
     # 1. Try Google Sheet URL
     # 1. Try Google Sheet URL
     try:
-        print(f"Excel Sync: Attempting to read from {GOOGLE_SHEET_URL}...")
-        # Header is on Row 2 (Index 1). Explicitly use openpyxl engine.
-        df = pd.read_excel(GOOGLE_SHEET_URL, header=1, engine='openpyxl')
-        print(f"Excel Sync: Download success. Shape: {df.shape}")
+        print(f"Excel Sync: Downloading workbook from {GOOGLE_SHEET_URL}...")
+        # Load ALL sheets to find the correct one
+        xls = pd.read_excel(GOOGLE_SHEET_URL, sheet_name=None, header=1, engine='openpyxl')
+        
+        target_name = 'CONTROL DE EQUIPOS CABELAB'
+        df = None
+        
+        # Strategy A: Exact Name Match (User Request)
+        # Case-insensitive check just in case
+        for name, data in xls.items():
+            if name.strip().upper() == target_name.strip().upper():
+                print(f"Excel Sync: Found target sheet '{name}'.")
+                df = data
+                break
+        
+        # Strategy B: Content Match (Fallback if name changed/missing in export)
+        # Search for a sheet containing 'MARCA' or 'FR' column
+        if df is None:
+            print(f"Excel Sync: Sheet '{target_name}' not found. Searching by column structure...")
+            for name, data in xls.items():
+                cols = [str(c).upper().strip() for c in data.columns]
+                if 'MARCA' in cols and 'MODELO' in cols:
+                    print(f"Excel Sync: Auto-detected equipment sheet: '{name}'")
+                    df = data
+                    break
+        
+        if df is None:
+            print("Excel Sync: CRITICAL - Could not find equipment data in any sheet.")
+            # Fallback to first sheet as last resort?
+            # df = list(xls.values())[0] 
+            return False
+
+        print(f"Excel Sync: Loaded data. Shape: {df.shape}")
+
     except Exception as e:
         print(f"Excel Sync: Failed to read from Google Drive. Error: {str(e)}")
         
