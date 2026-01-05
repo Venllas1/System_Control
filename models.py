@@ -34,13 +34,13 @@ class UserRoles:
 
 class Equipment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    fr = db.Column(db.String(50), nullable=True)  # File Reference / ID
-    marca = db.Column(db.String(100))
-    modelo = db.Column(db.String(100))
+    fr = db.Column(db.String(255), nullable=True)  # Increased limit
+    marca = db.Column(db.String(255)) # Increased limit
+    modelo = db.Column(db.String(255)) # Increased limit
     reporte_cliente = db.Column(db.Text)
-    estado = db.Column(db.String(50), index=True)
-    condicion = db.Column(db.String(50))
-    encargado = db.Column(db.String(100))
+    estado = db.Column(db.String(255), index=True) # Increased limit
+    condicion = db.Column(db.String(255)) # Increased limit
+    encargado = db.Column(db.String(255)) # Increased limit
     fecha_ingreso = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Campos adicionales para mantener integridad con el Excel original si es necesario

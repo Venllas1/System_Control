@@ -499,9 +499,21 @@ def initialize_on_first_request():
         from sqlalchemy import inspect
         try:
             inspector = inspect(db.engine)
+            # FORCE RE-CREATION OF EQUIPMENT TABLE to apply schema changes (String 50 -> 255)
+            # Since data comes from Excel, this is safe and necessary.
+            try:
+                from models import Equipment
+                Equipment.__table__.drop(db.engine, checkfirst=True)
+                print("Vercel/Startup: Dropped Equipment table to update schema.")
+            except Exception as e:
+                print(f"Schema Update Error: {e}")
+
             if not inspector.has_table("user"):
                 print("Vercel/Startup: Initializing Database...")
                 db.create_all()
+            else:
+                # If User exists but we dropped Equipment, we need to create Equipment again
+                db.create_all() # safe, checks existence
                 
                 print("Vercel/Startup: Syncing from Google Drive...")
                 from utils.excel_sync import sync_excel_to_db

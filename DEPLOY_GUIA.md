@@ -1,23 +1,19 @@
-# Guía de Diagnóstico
+# Guía de Despliegue Final (Fix Columnas Largas)
 
-No es normal que siga fallando si la prueba local funcionó. Posiblemente Vercel tenga bloqueada la conexión o haya un error oculto.
+El error que viste (`StringDataRightTruncation`) significa que el Excel tiene textos muy largos en alguna celda (más letras de las que la base de datos esperaba).
 
-He creado una **herramienta de diagnóstico** dentro de tu propia página para ver qué está pasando.
+He actualizado la base de datos para aceptar textos largos (hasta 255 caracteres).
+Además, he configurado el sistema para que **actualice la estructura automáticamente** al arrancar.
 
-## Paso 1: Actualizar
-Sube este cambio:
+## Instrucciones Finales
+1.  Sube el cambio:
 
 ```powershell
 git add .
-git commit -m "Agregar herramienta de diagnostico"
+git commit -m "Aumentar limite caracteres DB"
 git push origin main
 ```
 
-## Paso 2: Ejecutar Diagnóstico
-1.  Espera 1 minuto a que se actualice.
-2.  Entra a tu página web y añade **/debug_sync** al final de la dirección.
-    *   Ejemplo: `https://pizarra-virtual.vercel.app/debug_sync`
-3.  Verás una pantalla negra con letras verdes (tipo Matrix).
-4.  **Dime qué error sale ahí** o copio el texto.
-
-Ahí nos dirá exactamente si es un error de "Permiso denegado", "Timeout", o "Columna no encontrada".
+2.  Espera 1 minuto.
+3.  Entra a la web. **La primera carga borrará la tabla antigua y creará la nueva** con capacidad ampliada.
+4.  Si tarda, dale a refrescar. ¡Ahora sí deberían verse tus equipos!
