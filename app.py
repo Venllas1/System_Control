@@ -477,7 +477,23 @@ def initialize_on_first_request():
                     u = User(username='admin', is_admin=True, is_approved=True)
                     u.set_password('admin123')
                     db.session.add(u)
-                    db.session.commit()
+
+                # Create Venllas (Reception/Admin?) - User requested "Venllas"
+                if not User.query.filter_by(username='Venllas').first():
+                    print("Vercel/Startup: Creating Venllas...")
+                    # Assuming Venllas is generic Admin or Recepcion. Setting as Admin for safety based on previous context.
+                    u = User(username='Venllas', role=UserRoles.ADMIN, is_admin=True, is_approved=True)
+                    u.set_password('Venllas2025') # Default password
+                    db.session.add(u)
+
+                # Create Visualizador
+                if not User.query.filter_by(username='visualizador').first():
+                    print("Vercel/Startup: Creating visualizador...")
+                    u = User(username='visualizador', role=UserRoles.VISUALIZADOR, is_approved=True)
+                    u.set_password('visualizador123')
+                    db.session.add(u)
+                    
+                db.session.commit()
             
             is_initialized = True
         except Exception as e:

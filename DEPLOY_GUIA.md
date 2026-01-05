@@ -1,21 +1,20 @@
-# Guía de Despliegue Final (Actualizada para Vercel)
+# Guía de Despliegue Final (Fix Usuarios)
 
-El error "Internal Server Error" ocurría porque en Vercel no se puede guardar nada en la carpeta principal, solo en la carpeta temporal `/tmp`.
+He actualizado el código para que cree automáticamente los usuarios **"Venllas"** y **"visualizador"** cuando arranque en Vercel, ya que la base de datos se crea desde cero.
 
-He modificado el código para arreglar esto automáticamente. Sigue estos pasos para subir la corrección:
+**Contraseñas por defecto (Cámbialas al entrar si es posible):**
+*   **Venllas**: `Venllas2025`
+*   **visualizador**: `visualizador123`
+*   **admin**: `admin123`
 
-## Paso Único: Actualizar en GitHub
-Copia y pega estos comandos en tu terminal:
+## Instrucciones para actualizar:
+Ejecuta esto en tu terminal:
 
 ```powershell
 git add .
-git commit -m "Fix Vercel deployment: use temp DB and init on request"
+git commit -m "Add Venllas and Visualizador users"
 git push origin main
 ```
 
-**¿Qué pasará?**
-1.  Vercel detectará el nuevo cambio y volverá a construir la app (esto tarda 1-2 minutos).
-2.  Cuando termine, el error desaparecerá.
-3.  Al entrar la primera vez, **tardará unos segundos extra** porque estará descargando tu Excel de Google Drive.
-
-¡Con esto debería funcionar el login de Admin perfectamente!
+**Nota sobre los Equipos:**
+Si no aparecen los equipos, espera unos 10-20 segundos después de iniciar sesión la primera vez, ya que el sistema los está descargando de Google Drive en segundo plano. Si siguen sin aparecer, verifica que el link de Google Sheet en `utils/excel_sync.py` siga siendo público y accesible.
