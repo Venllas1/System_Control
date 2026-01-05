@@ -1,16 +1,21 @@
-# Arreglo Final: KPIs y Mayúsculas
+# Limpieza y Reparación Final
 
-Había un detalle visual: Los contadores (esas tarjetas de colores arriba) solo se calculaban para el "Visualizador". Por eso Recepción veía ceros.
+Tenías toda la razón: Había un conflicto de código.
+Al mover las lógicas de un lado a otro, **se duplicó una línea** (`const tDiag = ...`).
+En programación, definir la misma cosa dos veces es un pecado capital y bloquea todo el script. Por eso se veía todo blanco/vacío.
 
 **Corrección Aplicada:**
-1.  **KPIs Globales:** He movido la calculadora de estados para que funcione para TODOS los roles. Ahora Recepción verá "Pendientes: 5" (o los que sean) al entrar.
-2.  **Todo Mayúsculas:** He forzado que Marca y Modelo también se vean en mayúsculas, además de los Estados.
+1.  **Eliminado el duplicado:** Borré la línea conflictiva.
+2.  **Limpieza:** El código ahora está limpio y estructurado:
+    *   Primero: Herramientas (etiquetas, botones).
+    *   Segundo: Cálculos Globales (KPIs para todos).
+    *   Tercero: Lógica específica (Visualizador vs Operarios).
 
-**Sube este cambio:**
+**Sube este cambio urgente:**
 ```powershell
 git add .
-git commit -m "Activar KPIs para todos y mayusculas"
+git commit -m "Reparar error de sintaxis duplicado"
 git push origin main
 ```
 
-Con esto, el panel de Recepción debería reflejar la realidad inmediatamente.
+Esto resucitará el panel inmediatamente.
