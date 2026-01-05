@@ -1,21 +1,20 @@
-# Limpieza y Reparación Final
+# Arreglo Urgente: Código Duplicado
 
-Tenías toda la razón: Había un conflicto de código.
-Al mover las lógicas de un lado a otro, **se duplicó una línea** (`const tDiag = ...`).
-En programación, definir la misma cosa dos veces es un pecado capital y bloquea todo el script. Por eso se veía todo blanco/vacío.
+Confirmado y corregido.
+El archivo tenía estas líneas exactas repetidas una tras otra:
+```javascript
+const tDiag = document.getElementById('tableDiagnostico');
+const tDiag = document.getElementById('tableDiagnostico');
+```
+Esto provoca un error fatal en el navegador ("Variable re-declarada").
 
-**Corrección Aplicada:**
-1.  **Eliminado el duplicado:** Borré la línea conflictiva.
-2.  **Limpieza:** El código ahora está limpio y estructurado:
-    *   Primero: Herramientas (etiquetas, botones).
-    *   Segundo: Cálculos Globales (KPIs para todos).
-    *   Tercero: Lógica específica (Visualizador vs Operarios).
+**He borrado la repetición.**
+Ahora solo hay una definición, como debe ser.
 
-**Sube este cambio urgente:**
+**Sube este cambio:**
 ```powershell
 git add .
-git commit -m "Reparar error de sintaxis duplicado"
+git commit -m "Borrar linea duplicada JS"
 git push origin main
 ```
-
-Esto resucitará el panel inmediatamente.
+Esto solucionará la "pantalla vacía" inmediatamente.
