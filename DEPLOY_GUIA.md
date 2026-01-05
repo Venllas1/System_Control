@@ -1,19 +1,20 @@
-# Guía Final: Botón "Actualizar" Real
+# Guía Final: Reparación Botón "Refrescar"
 
-He modificado el botón de "Actualizar" (el de las flechitas en el panel) para que **fuerce la descarga inmediata** desde Google Drive, ignorando el tiempo de espera.
+Detecté el problema: El botón que estabas presionando ("Refrescar Datos") estaba configurado solo para **recargar la página** (F5), lo cual activaba el "Modo Seguro" y no descargaba nada nuevo.
 
-Ahora:
-1.  Si abres la página normal, usa el modo seguro (espera 3 min para no duplicar).
-2.  Si le das al botón **Actualizar/Refrescar** dentro del panel, **trae los datos nuevos YA** (Bypass del modo seguro).
+Lo he reprogramado para que ahora sí active la **Descarga Forzada**.
 
-## Instrucciones
-Sube este cambio final:
+## Último Paso
+Sube este cambio:
 
 ```powershell
 git add .
-git commit -m "Activar boton forzar actualizacion"
+git commit -m "Arreglar boton refrescar"
 git push origin main
 ```
 
-**Uso:**
-Cuando agregues un equipo al Excel, ves a la web y dale al botón de actualizar del panel. Debería aparecer casi al instante (lo que tarde Google en guardar).
+**Prueba:**
+1.  Espera 1 minuto.
+2.  Entra a la web.
+3.  Dale al botón de actualizar (flechitas).
+4.  Verás que el icono gira y te sale un mensaje verde: "Datos actualizados". ¡Eso significa que funcionó!
