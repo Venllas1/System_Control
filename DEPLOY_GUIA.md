@@ -1,18 +1,23 @@
-# Guía de Despliegue Final (Fix Estructura Excel)
+# Guía de Diagnóstico
 
-He confirmado que la hoja correcta es **"CONTROL DE EQUIPOS CABELAB"**, pero a veces los encabezados no están en la primera fila o Vercel se confunde.
+No es normal que siga fallando si la prueba local funcionó. Posiblemente Vercel tenga bloqueada la conexión o haya un error oculto.
 
-He reprogramado el lector para que **escanee renglón por renglón** hasta encontrar donde dice "MARCA" y "MODELO".
-Esto garantiza que encontrará tus datos aunque muevas la fila de títulos.
+He creado una **herramienta de diagnóstico** dentro de tu propia página para ver qué está pasando.
 
-## Actualizar código
-Ejecuta esto para aplicar la solución definitiva:
+## Paso 1: Actualizar
+Sube este cambio:
 
 ```powershell
 git add .
-git commit -m "Lectura inteligente de encabezados"
+git commit -m "Agregar herramienta de diagnostico"
 git push origin main
 ```
 
-**Espera 1 minuto** para que se despliegue.
-Al entrar, dale a **Refrescar** (arriba a la derecha) si no salen a la primera.
+## Paso 2: Ejecutar Diagnóstico
+1.  Espera 1 minuto a que se actualice.
+2.  Entra a tu página web y añade **/debug_sync** al final de la dirección.
+    *   Ejemplo: `https://pizarra-virtual.vercel.app/debug_sync`
+3.  Verás una pantalla negra con letras verdes (tipo Matrix).
+4.  **Dime qué error sale ahí** o copio el texto.
+
+Ahí nos dirá exactamente si es un error de "Permiso denegado", "Timeout", o "Columna no encontrada".

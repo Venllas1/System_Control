@@ -451,6 +451,42 @@ def manual_sync_excel():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
+@app.route('/debug_sync')
+def debug_sync_route():
+    """Ruta de diagnóstico para ver logs de sincronización en tiempo real"""
+    import io
+    import sys
+    from utils.excel_sync import sync_excel_to_db
+    
+    # Capture stdout
+    old_stdout = sys.stdout
+    new_stdout = io.StringIO()
+    sys.stdout = new_stdout
+    
+    try:
+        print("=== INICIANDO DEBUG SYNC ===")
+        print(f"Hora: {datetime.now()}")
+        
+        # Run Sync
+        result = sync_excel_to_db(app)
+        
+        print(f"\nResultado de Sincronización: {result}")
+        
+        # Check DB count
+        count = Equipment.query.count()
+        print(f"Total Equipos en DB: {count}")
+        
+    except Exception as e:
+        print(f"\nCRITICAL ERROR: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        
+    # Restore stdout and return
+    output = new_stdout.getvalue()
+    sys.stdout = old_stdout
+    
+    return f"<pre style='background:#222; color:#0f0; padding:20px;'>{output}</pre>"
+
 # --- VERCEL INITIALIZATION LOGIC ---
 # Global flag to ensure we only init once per lambda instance
 is_initialized = False
