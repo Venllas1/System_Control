@@ -300,55 +300,83 @@
             let actionsHtml = '';
             if (!isVisualizador) {
                 actionsHtml = `<div class="btn-group">`;
-                // Simplified logic (copy from previous impl) - Valid buttons logic remains same
-                // ... (keeping simplified for brevity as user didn't request logic change here)
-                // Reusing existing logic for unified view
-                // 1. DIAGNOSTICO
-                if (item.estado === 'Espera de Diagnostico') {
-                    actionsHtml += `<button class="btn btn-sm btn-info" onclick="updateStatus(${item.id}, 'En Diagnostico')">Iniciar</button>`;
-                }
-                else if (item.estado.includes('En Diagnostico') || item.estado.includes('en Diagnostico')) {
-                    actionsHtml += `<button class="btn btn-sm btn-success" onclick="updateStatus(${item.id}, 'Pendiente Aprobacion')">Diagnosticar</button>`;
-                    actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'Espera Repuesto')">Repuestos</button>`;
+                // --- ROBUST STATE MACHINE & ROLE LOGIC ---
+                // Helper to check state roughly (case insensitive)
+                const s = (item.estado || '').toLowerCase(); // Normalized state
+                const role = userRole.toLowerCase();
+                const isAdmin = role === 'admin' || role === 'venllas';
+                const isOps = role === 'operaciones' || isAdmin;
+                const isRec = role === 'recepcion' || isAdmin;
+                const isAlm = role === 'almacen' || isAdmin;
+
+                // 1. ESPERA DE DIAGNOSTICO -> Start -> En Diagnostico
+                if (s.includes('espera de diagnostico') || s === 'espera diagnostico') {
+                    if (isOps) {
+                        actionsHtml += `<button class="btn btn-sm btn-info" onclick="updateStatus(${item.id}, 'en Diagnostico')">Iniciar Diag</button>`;
+                    }
                 }
 
-                // 2. REPUESTOS (Almacen)
-                else if (item.estado.includes('Espera Repuesto')) {
-                    // Solo Almacen deberia ver esto? O todos? Lo dejamos visible.
-                    actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'Repuesto Entregado')">Llegó Repuesto</button>`;
-                }
-                else if (item.estado === 'Repuesto Entregado') {
-                    // Backend Rule: REPUESTO_ENTREGADO -> PENDIENTE_APROBACION (Operaciones termina diagnostico/cotizacion)
-                    actionsHtml += `<button class="btn btn-sm btn-primary" onclick="updateStatus(${item.id}, 'Pendiente Aprobacion')">Retomar Diag</button>`;
+                // 2. EN DIAGNOSTICO -> Finish -> Pendiente Aprobacion OR Repuestos
+                else if (s.includes('en diagnostico')) {
+                    if (isOps) {
+                        actionsHtml += `<button class="btn btn-sm btn-success" onclick="updateStatus(${item.id}, 'Pendiente de aprobacion')">Terminar Diag</button>`;
+                        actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'espera de repuesto o consumible')">Pedir Repuestos</button>`;
+                    }
                 }
 
-                // 3. APROBACION (Recepcion/Admin)
-                else if (item.estado.toLowerCase().includes('pendiente de aprobacion') || item.estado === 'Pendiente Aprobacion') {
-                    actionsHtml += `<button class="btn btn-sm btn-success" onclick="updateStatus(${item.id}, 'Aprobado')">Aprobar</button>`;
-                    actionsHtml += `<button class="btn btn-sm btn-danger" onclick="updateStatus(${item.id}, 'Rechazado')">Rechazar</button>`;
+                // 3. ESPERA DE REPUESTO -> Arrived -> Repuesto Entregado
+                else if (s.includes('espera de repuesto')) {
+                    if (isAlm) {
+                        actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'Repuesto entregado')">Confirmar Llegada</button>`;
+                    }
                 }
 
-                // 4. SERVICIO (Operaciones)
-                else if (item.estado === 'Aprobado') {
-                    actionsHtml += `<button class="btn btn-sm btn-primary" onclick="updateStatus(${item.id}, 'Inicio de Servicio')">Iniciar Servicio</button>`;
-                }
-                else if (item.estado === 'Inicio de Servicio' || item.estado === 'En Servicio') {
-                    actionsHtml += `<button class="btn btn-sm btn-success" onclick="updateStatus(${item.id}, 'Servicio Culminado')">Culminar</button>`;
-                    actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'Espera Repuestos')">Falta (Serv)</button>`;
-                }
-                else if (item.estado === 'Espera Repuestos') {
-                    // Almacen entrega repuesto de servicio -> Vuelve a En Servicio
-                    actionsHtml += `<button class="btn btn-sm btn-primary" onclick="updateStatus(${item.id}, 'En Servicio')">Llegó (Serv)</button>`;
+                // 4. REPUESTO ENTREGADO -> Resume -> Pendiente Aprobacion
+                else if (s.includes('repuesto entregado')) {
+                    if (isOps) {
+                        actionsHtml += `<button class="btn btn-sm btn-primary" onclick="updateStatus(${item.id}, 'Pendiente de aprobacion')">Continuar (Fin Diag)</button>`;
+                    }
                 }
 
-                // 5. ENTREGA (Recepcion)
-                else if (item.estado === 'Servicio Culminado') {
-                    actionsHtml += `<button class="btn btn-sm btn-info" onclick="updateStatus(${item.id}, 'Entregado')">Entregar Cliente</button>`;
+                // 5. PENDIENTE APROBACION -> Approve/Reject
+                else if (s.includes('pendiente de aprobacion') || s.includes('pendiente aprobacion')) {
+                    if (isRec) {
+                        actionsHtml += `<button class="btn btn-sm btn-success" onclick="updateStatus(${item.id}, 'Aprobado')">Aprobar</button>`;
+                        actionsHtml += `<button class="btn btn-sm btn-danger" onclick="updateStatus(${item.id}, 'Rechazado')">Rechazar</button>`;
+                    }
                 }
 
-                // 6. DELETE BUTTON (Admin/Venllas Only)
-                // userRole is defined in scope above.
-                if (userRole === 'admin' || userRole === 'venllas') {
+                // 6. APROBADO -> Start Service -> Inicio de Servicio
+                else if (s === 'aprobado') {
+                    if (isOps) {
+                        actionsHtml += `<button class="btn btn-sm btn-primary" onclick="updateStatus(${item.id}, 'Inicio de Servicio')">Iniciar Mantenimiento</button>`;
+                    }
+                }
+
+                // 7. EN SERVICIO (Maintenance) -> Finish OR Parts
+                else if (s.includes('inicio de servicio') || s.includes('en servicio')) {
+                    if (isOps) {
+                        actionsHtml += `<button class="btn btn-sm btn-success" onclick="updateStatus(${item.id}, 'Servicio culminado')">Terminar Mantenimiento</button>`;
+                        actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'espera de repuestos')">Pedir Repuestos</button>`;
+                    }
+                }
+
+                // 8. ESPERA REPUESTOS (Service) -> Arrived -> En servicio
+                else if (s.includes('espera de repuestos')) {
+                    if (isAlm) {
+                        actionsHtml += `<button class="btn btn-sm btn-primary" onclick="updateStatus(${item.id}, 'En servicio')">Confirmar Llegada (Serv)</button>`;
+                    }
+                }
+
+                // 9. SERVICIO CULMINADO -> Deliver -> Entregado
+                else if (s.includes('servicio culminado')) {
+                    if (isRec) {
+                        actionsHtml += `<button class="btn btn-sm btn-info" onclick="updateStatus(${item.id}, 'Entregado')">Entregar Cliente</button>`;
+                    }
+                }
+
+                // DELETE BUTTON (Admin/Venllas Only)
+                if (isAdmin) {
                     actionsHtml += `<button class="btn btn-sm btn-outline-danger ms-2" onclick="deleteEquipment(${item.id})" title="Eliminar"><i class="fas fa-trash"></i></button>`;
                 }
 

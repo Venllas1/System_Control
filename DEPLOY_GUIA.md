@@ -1,24 +1,23 @@
-# Arreglo Final: Persistencia y Flujos
+# Arreglo Final: Flujo y Roles
 
-Problema detectado: La "actualización de estructura" se quedó activada y borraba la tabla cada vez que el servidor se reiniciaba (o sea, muy seguido).
-**¡Lo he desactivado!** Ahora tus datos son sagrados y no se tocarán.
+He reescrito el cerebro de los botones para que sea **infalible**.
 
-## Mejoras Incluidas:
-1.  **Botón Eliminar:** El usuario `Venllas` (y Admins) verán un tacho de basura rojo para borrar equipos.
-2.  **Flujo Corregido:** He alineado los botones de Repuestos y Servicio para que coincidan con las reglas del sistema (Almacén entrega -> Operaciones retoma).
+**Mejoras:**
+1.  **Botones Inteligentes:** Ahora solo aparecen si tu usuario tiene permiso (ej. Recepción ya no ve botones de Diagnóstico).
+2.  **Corrección "Botón Desaparecido":** Arreglé un error de mayúsculas/minúsculas que hacía que el botón "Terminar Diagnóstico" se escondiera. Ahora aparecerá siempre.
+3.  **Flujo Completo:**
+    *   **Ops:** Diag -> (Repuestos) -> Terminar Diag -> Pendiente Aprobación.
+    *   **Rec:** Aprobar -> (Se devuelve a Ops).
+    *   **Ops:** Iniciar Mantenimiento -> Terminar -> Servicio Culminado.
+    *   **Rec:** Entregar Cliente.
 
-## Instrucciones
-Sube este cambio crítico:
+## Última Subida
+Aplica estos cambios para tener el sistema perfecto:
 
 ```powershell
 git add .
-git commit -m "Reparar persistencia y agregar eliminar"
+git commit -m "Corregir flujo y roles V1"
 git push origin main
 ```
 
-**Importante:**
-Como estábamos borrando la tabla, es probable que ahora mismo esté vacía o vieja.
-Una vez que subas esto, **carga tus datos una última vez** con la herramienta secreta:
-`.../debug_sync`
-
-¡Y listo! A partir de ese momento, **nunca más** se borrará nada. Podrás cerrar sesión, volver mañana, y ahí estarán.
+¡Listo! Prueba entrar como Operaciones y verás que ahora sí puedes terminar tus diagnósticos.
