@@ -1,20 +1,20 @@
-# Guía Final: Reparación Botón "Refrescar"
+# Guía Final: Correción de Cache
 
-Detecté el problema: El botón que estabas presionando ("Refrescar Datos") estaba configurado solo para **recargar la página** (F5), lo cual activaba el "Modo Seguro" y no descargaba nada nuevo.
+El problema persiste porque Google (o un intermediario) guarda una copia "Vieja" del archivo para ahorrar energía, aunque tú lo hayas cambiado.
 
-Lo he reprogramado para que ahora sí active la **Descarga Forzada**.
+He añadido un **truco de programador**: Cada vez que actualices, el sistema inventa un número único y se lo pega al enlace de Google. Esto confunde a Google y le obliga a **entregarte el archivo nuevo fresco** cada vez.
 
-## Último Paso
-Sube este cambio:
+## Poner en Producción
+Sube este cambio final:
 
 ```powershell
 git add .
-git commit -m "Arreglar boton refrescar"
+git commit -m "Forzar cache de Google Drive"
 git push origin main
 ```
 
-**Prueba:**
+**Prueba definitiva:**
 1.  Espera 1 minuto.
 2.  Entra a la web.
-3.  Dale al botón de actualizar (flechitas).
-4.  Verás que el icono gira y te sale un mensaje verde: "Datos actualizados". ¡Eso significa que funcionó!
+3.  Dale al botón de **Actualizar**.
+4.  Debería actualizarse (ahora sí, sin excusas).

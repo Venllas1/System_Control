@@ -31,11 +31,16 @@ def sync_excel_to_db(app, local_filename=None, force=False):
                     return True
 
     # 1. Try Google Sheet URL
+    import time
+    
     # 1. Try Google Sheet URL
     try:
-        print(f"Excel Sync: Downloading workbook from {GOOGLE_SHEET_URL}...")
+        # Cache Busting: Add generic unique param
+        unique_url = f"{GOOGLE_SHEET_URL}&t={int(time.time())}"
+        print(f"Excel Sync: Downloading workbook from {unique_url}...")
+        
         # Load ALL sheets without header first to start scanning
-        xls = pd.read_excel(GOOGLE_SHEET_URL, sheet_name=None, header=None, engine='openpyxl')
+        xls = pd.read_excel(unique_url, sheet_name=None, header=None, engine='openpyxl')
         
         df = None
         target_name = 'CONTROL DE EQUIPOS CABELAB'
