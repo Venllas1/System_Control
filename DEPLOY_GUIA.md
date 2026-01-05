@@ -1,21 +1,17 @@
-# Arreglo Final: Conflicto de Repuestos (Confirmado)
+# Arreglo Definitivo: Conflicto Reparado
 
-El problema de "Confirmar Llegada" en Almacén se debía a que el sistema confundía el Singular ("Repuesto") con el Plural ("Repuestos").
+El problema era que el sistema leía "Repuestos" y se detenía en la primera coincidencia ("Repuesto"), activando el botón equivocado.
 
 **Corrección Aplicada:**
-He re-escrito la lógica para que sea **muy estricta**:
-*   Si dice "Repuesto" (singular) -> Es de Diagnóstico -> Botón para entregar a Diag.
-*   Si dice "Repuestos" (plural) -> Es de Mantenimiento -> Botón para entregar a Serv.
+He vuelto el código "inteligente":
+*   Ahora sabe que **"Repuesto" (sin S)** es de Diagnóstico.
+*   Y que **"Repuestos" (con S)** es de Mantenimiento.
 
-Esto eliminará el error de "Almacén no puede cambiar...".
+El botón de Almacén funcionará correctamente en ambos casos sin mezclarse.
 
-**También incluido:**
-*   Etiquetas en **MAYÚSCULAS**.
-*   Compatibilidad con equipos antiguos.
-
-## Sube el código ahora:
+**Sube este cambio:**
 ```powershell
 git add .
-git commit -m "Fix final repuestos"
+git commit -m "Reparar logica string repuestos"
 git push origin main
 ```

@@ -325,8 +325,9 @@
                     }
                 }
 
-                // 3. ESPERA DE REPUESTO -> Arrived -> Repuesto Entregado
-                else if (s.includes('espera de repuesto')) {
+                // 3. ESPERA DE REPUESTO (Diagnostico) -> Arrived -> Repuesto Entregado
+                // Fix: Check for 'consumible' specifically OR 'repuesto' BUT NOT 'repuestos'
+                else if (s.includes('consumible') || (s.includes('espera de repuesto') && !s.includes('repuestos'))) {
                     if (isAlm) {
                         actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'Repuesto entregado')">Confirmar Llegada</button>`;
                     }
