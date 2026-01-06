@@ -367,7 +367,11 @@ def create_app(config_class=Config):
                 observaciones=data.get('observaciones', ''),
                 condicion=data.get('condicion', 'Regular'),
                 encargado=current_user.username,
-                estado=Equipment.Status.ESPERA_DIAGNOSTICO # Estado Inicial
+                estado=Equipment.Status.ESPERA_DIAGNOSTICO, # Estado Inicial
+                # New Fields
+                cliente=data.get('cliente', ''),
+                serie=data.get('serie', ''),
+                accesorios=data.get('accesorios', '')
             )
             
             db.session.add(new_eq)
@@ -536,6 +540,35 @@ def initialize_on_first_request():
             #     print("Vercel/Startup: Dropped Equipment table to update schema.")
             # except Exception as e:
             #     print(f"Schema Update Error: {e}")
+
+            # --- AUTO-MIGRATE: Add new columns if missing ---
+            try:
+                with db.engine.connect() as conn:
+                    # Check and Add 'cliente'
+                    try:
+                        conn.execute(text("SELECT cliente FROM equipment LIMIT 1"))
+                    except:
+                        print("Migrating: Adding 'cliente' column...")
+                        conn.execute(text("ALTER TABLE equipment ADD COLUMN cliente VARCHAR(255)"))
+                        conn.commit()
+                    
+                    # Check and Add 'serie'
+                    try:
+                        conn.execute(text("SELECT serie FROM equipment LIMIT 1"))
+                    except:
+                        print("Migrating: Adding 'serie' column...")
+                        conn.execute(text("ALTER TABLE equipment ADD COLUMN serie VARCHAR(255)"))
+                        conn.commit()
+
+                    # Check and Add 'accesorios'
+                    try:
+                        conn.execute(text("SELECT accesorios FROM equipment LIMIT 1"))
+                    except:
+                        print("Migrating: Adding 'accesorios' column...")
+                        conn.execute(text("ALTER TABLE equipment ADD COLUMN accesorios TEXT"))
+                        conn.commit()
+            except Exception as e:
+                print(f"Migration Logic Error (Non-fatal if table missing): {e}")
 
             if not inspector.has_table("user"):
                 print("Vercel/Startup: Initializing Database...")

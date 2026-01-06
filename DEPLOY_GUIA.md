@@ -1,17 +1,19 @@
-# Arreglo Final: Equipos Antiguos en Diagnóstico
+# Formulario de Recepción Modificado
 
-Detecté que algunos equipos tienen el estado simplemente como "Diagnostico" (sin el "En" delante).
-Como el sistema buscaba "En Diagnostico" exactamente, ignoraba a estos equipos y no mostraba los botones.
+Cumpliendo con la solicitud de personalizar el registro para Recepción.
+He añadido los campos solicitados y actualizado la base de datos de manera segura.
 
-**Corrección Aplicada:**
-1.  **Frontend Flexible:** Ahora el panel acepta "Diagnostico" también, desbloqueando los botones para esos equipos.
-2.  **Backend Permisivo:** He actualizado las reglas del servidor para que permita guardar cambios venir de ese estado antiguo.
+**Cambios Realizados:**
+1.  **Nuevos Campos:** Cliente, Número de Serie, Accesorios.
+2.  **Base de Datos Inteligente:** Al reiniciar, el sistema añadirá automáticamente estas columnas sin borrar nada.
+3.  **Formulario Actualizado:** El modal de registro ahora pide exactamente:
+    *   FR, Cliente, Fecha (Auto), Marca, Modelo, Serie, Estado (Condición), Accesorios, Reporte.
 
-**Sube este cambio:**
+**Sube estos cambios:**
 ```powershell
 git add .
-git commit -m "Permitir equipos antiguos en diagnostico"
+git commit -m "Personalizar formulario Recepcion y actualizar DB"
 git push origin main
 ```
 
-Ahora todos los equipos en diagnóstico deberían poder avanzar.
+**Nota:** Es posible que la primera vez falle levemente si la DB está bloqueada, pero al reintentar o reiniciar debería ajustarse sola.

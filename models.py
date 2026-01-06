@@ -45,6 +45,11 @@ class Equipment(db.Model):
     
     # Campos adicionales para mantener integridad con el Excel original si es necesario
     observaciones = db.Column(db.Text)
+    
+    # New Fields requested by User (Recepcion)
+    cliente = db.Column(db.String(255))
+    serie = db.Column(db.String(255))
+    accesorios = db.Column(db.Text)
 
     # Constantes de Estado
     class Status:

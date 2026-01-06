@@ -242,12 +242,14 @@
                                 placeholder="Ej: 1234">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Condición de Ingreso</label>
-                            <select name="condicion" class="form-select bg-dark text-light border-secondary">
-                                <option value="Bueno">Bueno</option>
-                                <option value="Regular" selected>Regular</option>
-                                <option value="Malo">Malo</option>
-                            </select>
+                            <label class="form-label">Cliente <span class="text-danger">*</span></label>
+                            <input type="text" name="cliente" class="form-control bg-dark text-light border-secondary"
+                                required placeholder="Nombre del Cliente">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha de Ingreso</label>
+                            <input type="text" class="form-control bg-dark text-light border-secondary"
+                                value="Automático (Hoy)" disabled readonly>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Marca <span class="text-danger">*</span></label>
@@ -259,16 +261,31 @@
                             <input type="text" name="modelo" class="form-control bg-dark text-light border-secondary"
                                 required>
                         </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Número de Serie</label>
+                            <input type="text" name="serie" class="form-control bg-dark text-light border-secondary"
+                                placeholder="S/N">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Estado (Condición)</label>
+                            <select name="condicion" class="form-select bg-dark text-light border-secondary">
+                                <option value="Bueno">Bueno</option>
+                                <option value="Regular" selected>Regular</option>
+                                <option value="Malo">Malo</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Accesorios</label>
+                            <textarea name="accesorios" class="form-control bg-dark text-light border-secondary"
+                                rows="2" placeholder="Cargador, Funda, etc."></textarea>
+                        </div>
                         <div class="col-12">
                             <label class="form-label">Reporte del Cliente <span class="text-danger">*</span></label>
                             <textarea name="reporte_cliente" class="form-control bg-dark text-light border-secondary"
                                 rows="3" required></textarea>
                         </div>
-                        <div class="col-12">
-                            <label class="form-label">Observaciones Adicionales</label>
-                            <textarea name="observaciones" class="form-control bg-dark text-light border-secondary"
-                                rows="2"></textarea>
-                        </div>
+                        <!-- Observaciones removed/merged as user didn't ask for it specifically, but keeping logic just in case? 
+                             User said "solo esos". I will remove "Observaciones" to be strict. -->
                     </div>
                 </div>
                 <div class="modal-footer border-secondary">
