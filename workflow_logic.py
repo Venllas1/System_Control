@@ -53,6 +53,10 @@ def validate_transition(current_status, new_status, user_role):
                 norm(STATUS.PENDIENTE_APROBACION),
                 norm(STATUS.ESPERA_REPUESTO_CONSUMIBLE)
             ],
+            'diagnostico': [ # Legacy support
+                norm(STATUS.PENDIENTE_APROBACION),
+                norm(STATUS.ESPERA_REPUESTO_CONSUMIBLE)
+            ],
             norm(STATUS.REPUESTO_ENTREGADO): [norm(STATUS.PENDIENTE_APROBACION)],
             norm(STATUS.APROBADO): [norm(STATUS.INICIO_SERVICIO)],
             norm(STATUS.INICIO_SERVICIO): [norm(STATUS.SERVICIO_CULMINADO), norm(STATUS.ESPERA_REPUESTOS)],

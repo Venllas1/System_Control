@@ -318,7 +318,10 @@
                 }
 
                 // 2. EN DIAGNOSTICO -> Finish -> Pendiente Aprobacion OR Repuestos
-                else if (s.includes('en diagnostico')) {
+                // Fix: Relax check to include legacy 'Diagnostico' (without 'en')
+                // Note: 'Espera de Diagnostico' is caught by block 1, so strict exclusion is implicitly handled by else-if order, 
+                // but we add explicit exclusion for safety.
+                else if (s.includes('diagnostico') && !s.includes('espera')) {
                     if (isOps) {
                         actionsHtml += `<button class="btn btn-sm btn-success" onclick="updateStatus(${item.id}, 'Pendiente de aprobacion')">Terminar Diag</button>`;
                         actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'espera de repuesto o consumible')">Pedir Repuestos</button>`;
