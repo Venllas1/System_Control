@@ -6,7 +6,7 @@ from flask import Flask, render_template, jsonify, request, send_file, redirect,
 from datetime import datetime, timedelta
 import os
 import pandas as pd
-from sqlalchemy import or_, and_, case, func
+from sqlalchemy import or_, and_, case, func, text
 import json
 
 from config import Config

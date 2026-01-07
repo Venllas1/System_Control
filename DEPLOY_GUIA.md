@@ -1,19 +1,18 @@
-# Formulario de Recepción Modificado
+# Arreglo Urgente: Error de Servidor (500)
 
-Cumpliendo con la solicitud de personalizar el registro para Recepción.
-He añadido los campos solicitados y actualizado la base de datos de manera segura.
+**Causa:**
+Al agregar la lógica para actualizar la base de datos automáticamente, usé una función especial llamada `text()` para enviar comandos SQL, pero olvidé importar esa herramienta al principio del archivo.
+El servidor intentaba arrancar, no encontraba la herramienta y colapsaba.
 
-**Cambios Realizados:**
-1.  **Nuevos Campos:** Cliente, Número de Serie, Accesorios.
-2.  **Base de Datos Inteligente:** Al reiniciar, el sistema añadirá automáticamente estas columnas sin borrar nada.
-3.  **Formulario Actualizado:** El modal de registro ahora pide exactamente:
-    *   FR, Cliente, Fecha (Auto), Marca, Modelo, Serie, Estado (Condición), Accesorios, Reporte.
+**Corrección:**
+Agregué una pequeña palabra en la línea 9: `, text`.
+Ahora el servidor tiene todo lo necesario para funcionar y crear las columnas nuevas.
 
-**Sube estos cambios:**
+**Sube este cambio:**
 ```powershell
 git add .
-git commit -m "Personalizar formulario Recepcion y actualizar DB"
+git commit -m "Reparar importacion text sqlalchemy"
 git push origin main
 ```
 
-**Nota:** Es posible que la primera vez falle levemente si la DB está bloqueada, pero al reintentar o reiniciar debería ajustarse sola.
+Esto solucionará el error 500 inmediatamente.
