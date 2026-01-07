@@ -1,15 +1,16 @@
-# Segunda Subida: Dashboard Tables
+# Error 500 Solucionado
 
-Hubo un error en la aplicación de los cambios visuales anteriores, por eso el dashboard no se actualizó aunque el código de servidor (Python) sí lo hizo.
-He reescrito el archivo visual (`dashboard.html`) para forzar el cambio.
+**Causa:**
+El servidor falló porque algunos equipos antiguos no tienen guardada la `fecha de ingreso`. Al intentar ordenarlos en la nueva vista de "Atención Prioritaria" de Recepción, el sistema intentaba formatear una fecha inexistente (`None`), provocando el error crítico.
 
-**Instrucciones:**
-Sube nuevamente los cambios a la rama `dev`. Esta vez debería detectarse el cambio significativo en el HTML.
+**Solución:**
+Agregué una protección en el código visual (`dashboard.html`) para que, si no hay fecha, muestre "N/A" en lugar de romperse.
 
+**Sube este cambio:**
 ```powershell
 git add .
-git commit -m "UI Repair: Force Dashboard Table Layout"
+git commit -m "Fix 500 error: handle null dates in dashboard"
 git push origin dev
 ```
 
-Ahora sí deberías ver las tablas y los contadores en el Preview.
+Ahora el sistema es robusto ante datos antiguos o incompletos.
