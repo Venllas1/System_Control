@@ -295,9 +295,22 @@
                         {% endif %}
 
                         <td>
-                            <a href="{{ url_for('panel_estados') }}" class="btn btn-sm btn-outline-primary">
-                                <i class="fas fa-external-link-alt"></i> Gestionar
-                            </a>
+                        <td>
+                            <div class="d-flex gap-1">
+                                {% if current_user.role|lower == UserRoles.RECEPCION|lower and 'pendiente' in (eq.estado
+                                or '')|lower %}
+                                <button class="btn btn-sm btn-success" onclick="updateStatus({{ eq.id }}, 'Aprobado')">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="updateStatus({{ eq.id }}, 'Rechazado')">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                {% endif %}
+                                <a href="{{ url_for('panel_estados') }}" class="btn btn-sm btn-outline-primary"
+                                    title="Ver en Panel Completo">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     {% else %}
@@ -485,5 +498,27 @@
         font-weight: 600;
     }
 </style>
+
+<script>
+    // Global Action for Dashboard Buttons
+    window.updateStatus = function (id, newStatus, newEncargado = null) {
+        let msg = `¿Cambiar estado a: ${newStatus}?`;
+        if (newEncargado) msg += `\nAsignando a: ${newEncargado}`;
+
+        if (!confirm(msg)) return;
+
+        const formData = new FormData();
+        formData.append('status', newStatus);
+        if (newEncargado) formData.append('encargado', newEncargado);
+
+        fetch(`/api/equipment/${id}/update_status`, { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) location.reload();
+                else alert('Error: ' + data.error);
+            })
+            .catch(err => alert('Error de red: ' + err));
+    };
+</script>
 
 {% endblock %}

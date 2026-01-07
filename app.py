@@ -153,6 +153,7 @@ def create_app(config_class=Config):
                     db.or_(
                         Equipment.estado == Equipment.Status.ESPERA_DIAGNOSTICO,
                         Equipment.estado == Equipment.Status.PENDIENTE_APROBACION,
+                        Equipment.estado.ilike('%pendiente%aprobacion%'), # Handle variations
                         Equipment.estado == Equipment.Status.SERVICIO_CULMINADO
                     )
                 ).order_by(Equipment.fecha_ingreso.desc()).all()
