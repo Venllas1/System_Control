@@ -502,9 +502,13 @@
                 return doRender;
             }
 
-            // 1. Diagnostico (Loose match + REVISION/STANDBY)
-            // 1. Diagnostico (Loose match, NO REVISION, NO STANDBY)
-            renderSection(tDiag, s => s.includes('diagnostico') && !s.includes('revision'), 'searchDiagnostico');
+            // 1. Diagnostico (Loose match + Spares in Diag + NO REVISION)
+            renderSection(tDiag, s =>
+                (s.includes('diagnostico') && !s.includes('revision')) ||
+                s.includes('consumible') ||
+                (s.includes('repuesto') && !s.includes('repuestos')),
+                'searchDiagnostico'
+            );
 
             // 2. Revision (New Section)
             const tRev = document.getElementById('tableRevision');
@@ -515,13 +519,14 @@
             // 3. Pendiente (Paginated)
             const renderPendiente = renderSection(tPend, s => s.includes('pendiente') || s.includes('espera de aprobacion'), 'searchPendiente', true);
 
-            // 4. Aprobado (Hidden but rendered to avoid JS errors if elements exist, or just ignored)
-            // User asked to hide it. We kept elements as d-none so logic runs but user sees nothing.
+            // 4. Aprobado / En Servicio
             if (tApro) {
-                // FIXED: Show 'Aprobado' list, but EXCLUDE 'Entregado'/'Culminado'.
-                // They are only calculated in the TOP KPI stats.
-                renderSection(tApro, s => (s.includes('aprobado') || s.includes('servicio') || s.includes('repuesto')) &&
-                    !s.includes('entregado') && !s.includes('culminado'), 'searchAprobado');
+                // FIXED: Include 'repuestos' (Plural) which is for Service. Exclude Singular 'repuesto' (Diag).
+                renderSection(tApro, s =>
+                    (s.includes('aprobado') || s.includes('servicio') || s.includes('repuestos')) &&
+                    !s.includes('entregado') && !s.includes('culminado'),
+                    'searchAprobado'
+                );
             }
 
             // Pagination Listeners
