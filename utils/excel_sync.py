@@ -109,7 +109,9 @@ def sync_excel_to_db(app, local_filename=None, force=False):
             'fecha_ingreso': ['FECHA DE INGRESO', 'FECHA', 'INGRESO'],
             'observaciones': ['OBSERVACIONES DIAGNOSTICO', 'OBSERVACIONES', 'NOTA', 'COMENTARIOS', 'OBSERVACIONES DE MANTENIMIENTO'],
             'reporte_cliente': ['REPORTE DE CLIENTE', 'REPORTE', 'FALLA', 'PROBLEMA'],
-            'cliente': ['CLIENTE', 'NOMBRE', 'PROPIETARIO', 'USUARIO']
+            'cliente': ['CLIENTE', 'NOMBRE', 'PROPIETARIO', 'USUARIO'],
+            'serie': ['SERIE', 'NRO SERIE', 'S/N', 'NUMERO DE SERIE', 'SN'],
+            'accesorios': ['ACCESORIOS', 'COMPONENTES', 'EXTRAS']
         }
 
         # Cleaning Helper
@@ -165,14 +167,29 @@ def sync_excel_to_db(app, local_filename=None, force=False):
                 elif pd.notna(fecha):
                      pass # Keep default 2020 if unknown type
 
+                # Specific Defaults per User Request
+                val_fr = clean_text(get_val(row, col_map['fr']))
+                if val_fr == 'sin info': val_fr = 'Sin FR'
+                
+                val_serie = clean_text(get_val(row, col_map['serie']))
+                if val_serie == 'sin info': val_serie = 'S/N'
+
+                val_encargado = clean_text(get_val(row, col_map['encargado']))
+                if val_encargado == 'sin info': val_encargado = 'No asignado'
+
+                val_accesorios = clean_text(get_val(row, col_map['accesorios']))
+                if val_accesorios == 'sin info': val_accesorios = 'Sin accesorios'
+
                 eq = Equipment(
-                    fr=fr,
+                    fr=val_fr,
                     marca=marca,
                     modelo=modelo,
                     cliente=cliente,
+                    serie=val_serie,
+                    accesorios=val_accesorios,
                     estado=estado,
                     condicion=clean_text(get_val(row, col_map['condicion'])),
-                    encargado=clean_text(get_val(row, col_map['encargado'])),
+                    encargado=val_encargado,
                     observaciones=clean_text(get_val(row, col_map['observaciones'])),
                     reporte_cliente=clean_text(get_val(row, col_map['reporte_cliente'])),
                     fecha_ingreso=fecha_obj

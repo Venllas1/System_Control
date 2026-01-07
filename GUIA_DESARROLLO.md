@@ -1,17 +1,21 @@
-# Asignación de Encargado en Mantenimiento
+# Sincronización v3.0 (Reglas Estrictas)
 
-**Requerimiento:** "Pedir encargado al iniciar mantenimiento y mostrarlo en la tabla".
+**Requerimiento:** "Forzar valores por defecto (Sin FR, S/N, No Asignado) y asegurar texto en Serie/Accesorios".
 
 **Solución:**
-1.  **Nuevo Prompt:** Ahora, al pulsar "Iniciar Mantenimiento" (desde el estado Aprobado), el sistema mostrará una ventana pidiendo el nombre del responsable.
-2.  **Visualización:** Ese nombre se guardará y aparecerá en la columna "Encargado" de la tabla de Aprobados/En Servicio.
-3.  **Tiempos:** Como ya activamos el historial, este cambio de estado (y quién lo hizo) quedará registrado con su hora exacta.
+He actualizado el motor de importación. Ahora, si el Excel tiene celdas vacías, el sistema no pondrá "null" ni "sin info", sino exactamente lo que pediste:
+*   Falta FR -> **"Sin FR"**
+*   Falta Serie -> **"S/N"**
+*   Falta Encargado -> **"No asignado"**
+*   Falta Accesorios -> **"Sin accesorios"**
+
+Además, me aseguré de que "Serie" y "Accesorios" se lean siempre como texto, para que no falte nada.
 
 **Sube este cambio:**
 ```powershell
 git add .
-git commit -m "Prompt encargado maintenance"
+git commit -m "Update Excel Sync defaults"
 git push origin dev
 ```
 
-Prueba iniciar un mantenimiento y verás que ahora te pide el nombre.
+Y nuevamente, dale a **"Sincronizar Cloud"** para aplicar estas reglas a todos tus datos.
