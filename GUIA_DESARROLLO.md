@@ -1,16 +1,24 @@
-# Corrección de Error HTML
+# Implementación de Registro de Tiempos (Data Generation)
 
-**El error:**
-Se duplicó una etiqueta `<td>` (columna de tabla) al agregar los botones nuevos, lo que rompió la estructura visual de la tabla (desplazando todo).
+**Requerimiento:** "Guardar la fecha y hora exacta de cada cambio para generar data de tiempos".
 
-**La solución:**
-He eliminado la etiqueta duplicada. Ahora la tabla tiene la estructura correcta.
+**Solución Implementada:**
+1.  **Nueva Tabla `StatusHistory`:** Se creó una "caja negra" en la base de datos que registra:
+    *   ID del 	Equipo
+    *   Estado Anterior vs. Nuevo
+    *   Usuario que hizo el cambio
+    *   Fecha y Hora exacta (Timestamp)
+2.  **Registro Automático:** Cada vez que das click en "Aprobar", "Diagnosticar", etc., el sistema guarda silenciosamente este evento.
 
-**Sube este cambio:**
+**Para Activar:**
+Como hemos cambiado la estructura de la base de datos (nueva tabla), necesitamos subir los cambios y dejar que el sistema cree la tabla automáticamente.
+
+**Sube estos cambios:**
 ```powershell
 git add .
-git commit -m "Fix duplicate td tag"
+git commit -m "Add StatusHistory for KPIs"
 git push origin dev
 ```
 
-Con esto, los botones de Recepción se verán alineados y funcionando.
+**Futuro:**
+Ahora el sistema está acumulando datos. En el futuro, podremos usar esta data para crear gráficos de "Tiempo Promedio de Reparación", "Cuello de Botella en Aprobación", etc.

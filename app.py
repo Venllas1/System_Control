@@ -11,7 +11,7 @@ import json
 
 from config import Config
 from extensions import db, login_manager
-from models import User, Equipment, UserRoles
+from models import User, Equipment, UserRoles, StatusHistory
 from auth.routes import auth_bp
 from workflow_logic import validate_transition
 from flask_login import current_user, login_required

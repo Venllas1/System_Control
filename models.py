@@ -82,3 +82,13 @@ class GlobalSettings(db.Model):
     key = db.Column(db.String(50), unique=True)
     value = db.Column(db.String(255))
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class StatusHistory(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    equipment_id = db.Column(db.Integer, db.ForeignKey('equipment.id'), nullable=False)
+    previous_status = db.Column(db.String(255))
+    new_status = db.Column(db.String(255))
+    changed_by = db.Column(db.String(80)) # Username
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    equipment = db.relationship('Equipment', backref=db.backref('history', lazy=True))
