@@ -1,19 +1,17 @@
-# Exclusión de Servicios Culminados en KPI
+# Personalización Fina de Flujo
 
-Solicitud: "Cuando termine mantenimiento, que ya no cuente como aprobado".
+Se han realizado los últimos ajustes de usabilidad solicitados:
 
-**Corrección:**
-Ajusté el contador de "Aprobados".
-Antes contaba todo lo que decía "Servicio".
-Ahora cuenta "Servicio" **PERO** excluye específicamente "Servicio Culminado" y "Entregado".
+1.  **Calendario en Fecha:** Ahora el campo "Fecha de Ingreso" es un selector de calendario real.
+2.  **Encargado Inicial:** Al registrar, el encargado sale como "No asignado" automáticamente.
+3.  **Asignación en Diagnóstico:** Cuando Operaciones presiona "Iniciar Diag", el sistema **pregunta el nombre del técnico** y lo asigna al equipo.
+4.  **Limpieza de Formulario:** Se quitó "Condición" y se aseguró "Observaciones".
 
-Así, el número reflejará solo los equipos que están **actualmente en el taller**, y bajará automáticamente cuando se terminen.
-
-**Sube este cambio:**
+**Sube estos cambios:**
 ```powershell
 git add .
-git commit -m "Excluir servicios culminados de KPI aprobados"
+git commit -m "Ajustes finales calendario y asignacion tecnico"
 git push origin main
 ```
 
-El tablero ahora es un reflejo exacto de la carga de trabajo actual.
+El flujo ahora es: **Recepción registra (sin asignar) -> Operaciones toma el equipo (y se asigna)**.

@@ -313,7 +313,7 @@
                 // 1. ESPERA DE DIAGNOSTICO -> Start -> En Diagnostico
                 if (s.includes('espera de diagnostico') || s === 'espera diagnostico') {
                     if (isOps) {
-                        actionsHtml += `<button class="btn btn-sm btn-info" onclick="updateStatus(${item.id}, 'en Diagnostico')">Iniciar Diag</button>`;
+                        actionsHtml += `<button class="btn btn-sm btn-info" onclick="startDiagnostics(${item.id}, 'en Diagnostico')">Iniciar Diag</button>`;
                     }
                 }
 
@@ -560,10 +560,26 @@
         }
 
         // Global Action
-        window.updateStatus = function (id, newStatus) {
-            if (!confirm(`¿Cambiar estado a: ${newStatus}?`)) return;
+        window.startDiagnostics = function (id, status) {
+            const encargado = prompt("ASIGNACIÓN DE TÉCNICO:\nPor favor, ingrese el nombre del encargado:");
+            if (encargado === null) return; // Cancelled
+            if (!encargado.trim()) {
+                alert("Debe asignar un encargado para iniciar el diagnóstico.");
+                return;
+            }
+            updateStatus(id, status, encargado.trim());
+        };
+
+        window.updateStatus = function (id, newStatus, newEncargado = null) {
+            let msg = `¿Cambiar estado a: ${newStatus}?`;
+            if (newEncargado) msg += `\nAsignando a: ${newEncargado}`;
+
+            if (!confirm(msg)) return;
+
             const formData = new FormData();
             formData.append('status', newStatus);
+            if (newEncargado) formData.append('encargado', newEncargado);
+
             fetch(`/api/equipment/${id}/update_status`, { method: 'POST', body: formData })
                 .then(r => r.json())
                 .then(data => {

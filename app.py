@@ -359,19 +359,29 @@ def create_app(config_class=Config):
             if not all([marca, modelo, reporte]):
                 return jsonify({'success': False, 'error': 'Faltan campos obligatorios'}), 400
             
+            # Date Logic
+            fecha_str = data.get('fecha_ingreso')
+            fecha_obj = datetime.now()
+            if fecha_str:
+                try:
+                    fecha_obj = datetime.strptime(fecha_str, '%Y-%m-%d')
+                except:
+                    pass # Fallback to now
+
             new_eq = Equipment(
-                fr=data.get('fr', ''), # FR puede ser autogenerado si se desea
+                fr=data.get('fr', ''), 
                 marca=marca,
                 modelo=modelo,
                 reporte_cliente=reporte,
                 observaciones=data.get('observaciones', ''),
-                condicion=data.get('condicion', 'Regular'),
-                encargado=current_user.username,
-                estado=Equipment.Status.ESPERA_DIAGNOSTICO, # Estado Inicial
+                condicion='Regular', # Default static since removed from UI
+                encargado='No asignado', # Fixed default per User Request
+                estado=Equipment.Status.ESPERA_DIAGNOSTICO, 
                 # New Fields
                 cliente=data.get('cliente', ''),
                 serie=data.get('serie', ''),
-                accesorios=data.get('accesorios', '')
+                accesorios=data.get('accesorios', ''),
+                fecha_ingreso=fecha_obj
             )
             
             db.session.add(new_eq)
@@ -391,6 +401,10 @@ def create_app(config_class=Config):
         data = request.get_json(silent=True) or request.form
         new_status = data.get('status')
         observaciones = data.get('observaciones')
+        new_encargado = data.get('encargado')
+        
+        if new_encargado:
+            equipment.encargado = new_encargado
         
         if not new_status:
             return jsonify({'success': False, 'error': 'Nuevo estado no especificado'}), 400

@@ -248,8 +248,8 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Fecha de Ingreso</label>
-                            <input type="text" class="form-control bg-dark text-light border-secondary"
-                                value="Automático (Hoy)" disabled readonly>
+                            <input type="date" name="fecha_ingreso"
+                                class="form-control bg-dark text-light border-secondary">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Marca <span class="text-danger">*</span></label>
@@ -266,14 +266,8 @@
                             <input type="text" name="serie" class="form-control bg-dark text-light border-secondary"
                                 placeholder="S/N">
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Estado (Condición)</label>
-                            <select name="condicion" class="form-select bg-dark text-light border-secondary">
-                                <option value="Bueno">Bueno</option>
-                                <option value="Regular" selected>Regular</option>
-                                <option value="Malo">Malo</option>
-                            </select>
-                        </div>
+                        <!-- Removed Condition Select per User Request -->
+
                         <div class="col-12">
                             <label class="form-label">Accesorios</label>
                             <textarea name="accesorios" class="form-control bg-dark text-light border-secondary"
@@ -284,8 +278,11 @@
                             <textarea name="reporte_cliente" class="form-control bg-dark text-light border-secondary"
                                 rows="3" required></textarea>
                         </div>
-                        <!-- Observaciones removed/merged as user didn't ask for it specifically, but keeping logic just in case? 
-                             User said "solo esos". I will remove "Observaciones" to be strict. -->
+                        <div class="col-12">
+                            <label class="form-label">Observaciones</label>
+                            <textarea name="observaciones" class="form-control bg-dark text-light border-secondary"
+                                rows="2" placeholder="Notas adicionales"></textarea>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer border-secondary">
