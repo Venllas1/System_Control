@@ -1,18 +1,19 @@
-# Arreglo Urgente: Error de Servidor (500)
+# Arreglo Final: Base de Datos (Columnas Faltantes)
 
-**Causa:**
-Al agregar la lógica para actualizar la base de datos automáticamente, usé una función especial llamada `text()` para enviar comandos SQL, pero olvidé importar esa herramienta al principio del archivo.
-El servidor intentaba arrancar, no encontraba la herramienta y colapsaba.
+**El Problema:**
+El método "bruto" para añadir columnas (intentar leer la columna y si falla, crearla) fallaba porque la base de datos se "ofendía" con el error inicial y **bloqueaba toda la operación**, impidiendo que se crearan las columnas nuevas.
 
-**Corrección:**
-Agregué una pequeña palabra en la línea 9: `, text`.
-Ahora el servidor tiene todo lo necesario para funcionar y crear las columnas nuevas.
+**La Solución:**
+Cambié a un método "educado":
+1.  Le pregunto amablemente a la base de datos qué columnas tiene (`inspector`).
+2.  Si falta alguna, envío el comando para crearla.
+3.  Todo esto sin causar errores previos, por lo que la base de datos acepta los cambios felizmente.
 
 **Sube este cambio:**
 ```powershell
 git add .
-git commit -m "Reparar importacion text sqlalchemy"
+git commit -m "Mejorar migracion base de datos"
 git push origin main
 ```
 
-Esto solucionará el error 500 inmediatamente.
+Esto reparará el error de "Column cliente does not exist".

@@ -543,32 +543,26 @@ def initialize_on_first_request():
 
             # --- AUTO-MIGRATE: Add new columns if missing ---
             try:
+                # Use Inspector to check columns safely without breaking transactions
+                columns = [c['name'] for c in inspector.get_columns('equipment')]
+                
                 with db.engine.connect() as conn:
-                    # Check and Add 'cliente'
-                    try:
-                        conn.execute(text("SELECT cliente FROM equipment LIMIT 1"))
-                    except:
+                    if 'cliente' not in columns:
                         print("Migrating: Adding 'cliente' column...")
                         conn.execute(text("ALTER TABLE equipment ADD COLUMN cliente VARCHAR(255)"))
                         conn.commit()
                     
-                    # Check and Add 'serie'
-                    try:
-                        conn.execute(text("SELECT serie FROM equipment LIMIT 1"))
-                    except:
+                    if 'serie' not in columns:
                         print("Migrating: Adding 'serie' column...")
                         conn.execute(text("ALTER TABLE equipment ADD COLUMN serie VARCHAR(255)"))
                         conn.commit()
 
-                    # Check and Add 'accesorios'
-                    try:
-                        conn.execute(text("SELECT accesorios FROM equipment LIMIT 1"))
-                    except:
+                    if 'accesorios' not in columns:
                         print("Migrating: Adding 'accesorios' column...")
                         conn.execute(text("ALTER TABLE equipment ADD COLUMN accesorios TEXT"))
                         conn.commit()
             except Exception as e:
-                print(f"Migration Logic Error (Non-fatal if table missing): {e}")
+                print(f"Migration Logic Error: {e}")
 
             if not inspector.has_table("user"):
                 print("Vercel/Startup: Initializing Database...")
