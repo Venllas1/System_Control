@@ -1,18 +1,15 @@
-# Solución definitiva al Error 500
+# Modo Diagnóstico Activado
 
-**El problema:**
-Los cambios anteriores para corregir la fecha no se aplicaron correctamente porque el sistema no encontró la línea exacta para reemplazar. Esta vez he sido quirúrgico.
+He envuelto la lógica del dashboard en un "Cazador de Errores".
+En lugar de mostrar una página blanca de "Error 500", ahora mostrará en pantalla el texto exacto del error (Traceback).
 
-**El error técnico:** `NoneType has no attribute 'strftime'` (Intentar formatear una fecha vacía).
+Además, he reforzado la lógica de ordenamiento en el servidor (`app.py`) para que use una fecha por defecto (año 2000) si encuentra un equipo sin fecha, evitando el error de comparación.
 
-**La solución:**
-He modificado las dos listas de "Atención Prioritaria" (Veteranos y Recientes) en `dashboard.html` para que verifiquen si existe fecha antes de mostrarla.
-
-**Sube este cambio:**
+**Sube esto para ver qué pasa:**
 ```powershell
 git add .
-git commit -m "Fix dashboard 500 error null dates"
+git commit -m "Enable Debug Mode and Fix Sort"
 git push origin dev
 ```
 
-Ahora el sistema funcionará perfectamente incluso con equipos que no tengan fecha registrada.
+Si el error persiste, ahora por lo menos verás un texto técnico en pantalla. **Copia y pégame ese texto** para darte la solución final.
