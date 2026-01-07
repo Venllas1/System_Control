@@ -430,7 +430,7 @@
             if (s.includes('revision') || s.includes('reevaluacion')) countRev++;
             else if (s.includes('diagnostico')) countDiag++;
             else if (s.includes('pendiente') || s.includes('espera de aprobacion')) countPend++;
-            else if (s.includes('aprobado') || s.includes('servicio') || s.includes('repuesto')) countApro++;
+            else if ((s.includes('aprobado') || s.includes('servicio') || s.includes('repuesto')) && !s.includes('culminado') && !s.includes('entregado')) countApro++;
         });
 
         if (document.getElementById('kpiTotal')) document.getElementById('kpiTotal').innerText = equipments.length;

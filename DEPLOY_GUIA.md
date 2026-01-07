@@ -1,20 +1,19 @@
-# Organización Visual Correcta
+# Exclusión de Servicios Culminados en KPI
 
-El usuario reportó que los equipos "saltaban" de tabla incorrectamente al pedir repuestos.
+Solicitud: "Cuando termine mantenimiento, que ya no cuente como aprobado".
 
-**Causa:**
-El filtrado visual no distinguía entre pedir un repuesto para *Diagnóstico* (fase inicial) o para *Mantenimiento* (fase final). Ambos tienen la palabra "repuesto".
+**Corrección:**
+Ajusté el contador de "Aprobados".
+Antes contaba todo lo que decía "Servicio".
+Ahora cuenta "Servicio" **PERO** excluye específicamente "Servicio Culminado" y "Entregado".
 
-**Solución:**
-He ajustado los filtros del panel "Visualizador":
-1.  **Tabla Diagnóstico:** Ahora retiene los equipos si el estado es "Diagnóstico", "Consumible" o "Repuesto" (singular, que corresponde a esta etapa).
-2.  **Tabla Aprobados/Servicio:** Ahora retiene los equipos si el estado es "Aprobado", "Servicio" o "Repuestos" (plural, que corresponde a mantenimiento).
+Así, el número reflejará solo los equipos que están **actualmente en el taller**, y bajará automáticamente cuando se terminen.
 
 **Sube este cambio:**
 ```powershell
 git add .
-git commit -m "Corregir filtros visuales repuestos"
+git commit -m "Excluir servicios culminados de KPI aprobados"
 git push origin main
 ```
 
-Ahora cada equipo se quedará en su carril correspondiente hasta terminar la fase.
+El tablero ahora es un reflejo exacto de la carga de trabajo actual.
