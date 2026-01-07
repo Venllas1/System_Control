@@ -1,17 +1,17 @@
-# Personalización Fina de Flujo
+# Solución Error: "Transición Desconocida"
 
-Se han realizado los últimos ajustes de usabilidad solicitados:
+**Problema:**
+Algunos equipos (probablemente importados o antiguos) tienen el estado "Espera Diagnostico" (sin la preposición "de"), mientras que el sistema espera estrictamente "Espera **de** Diagnostico".
+Al intentar iniciar diagnóstico, el sistema dice "No reconozco este estado actual" y bloquea el cambio.
 
-1.  **Calendario en Fecha:** Ahora el campo "Fecha de Ingreso" es un selector de calendario real.
-2.  **Encargado Inicial:** Al registrar, el encargado sale como "No asignado" automáticamente.
-3.  **Asignación en Diagnóstico:** Cuando Operaciones presiona "Iniciar Diag", el sistema **pregunta el nombre del técnico** y lo asigna al equipo.
-4.  **Limpieza de Formulario:** Se quitó "Condición" y se aseguró "Observaciones".
+**Corrección:**
+Agregué una regla al "Cerebro" del sistema (`workflow_logic.py`) para que entienda que "Espera Diagnostico" es lo mismo que "Espera de Diagnostico" y permita avanzar.
 
-**Sube estos cambios:**
+**Sube este cambio:**
 ```powershell
 git add .
-git commit -m "Ajustes finales calendario y asignacion tecnico"
+git commit -m "Permitir transicion Espera Diagnostico legacy"
 git push origin main
 ```
 
-El flujo ahora es: **Recepción registra (sin asignar) -> Operaciones toma el equipo (y se asigna)**.
+Ahora podrás iniciar el diagnóstico de ese equipo Lincoln.

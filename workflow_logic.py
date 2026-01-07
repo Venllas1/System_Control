@@ -49,6 +49,7 @@ def validate_transition(current_status, new_status, user_role):
     if role_norm == UserRoles.OPERACIONES.lower():
         valid_transitions = {
             norm(STATUS.ESPERA_DIAGNOSTICO): [norm(STATUS.EN_DIAGNOSTICO)],
+            norm("Espera Diagnostico"): [norm(STATUS.EN_DIAGNOSTICO)], # Alias without 'de'
             norm(STATUS.EN_DIAGNOSTICO): [
                 norm(STATUS.PENDIENTE_APROBACION),
                 norm(STATUS.ESPERA_REPUESTO_CONSUMIBLE)
