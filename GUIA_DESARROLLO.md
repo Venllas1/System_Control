@@ -1,15 +1,16 @@
-# Modo Diagnóstico Activado
+# Arreglo de Syntax Error (Etiqueta huérfana)
 
-He envuelto la lógica del dashboard en un "Cazador de Errores".
-En lugar de mostrar una página blanca de "Error 500", ahora mostrará en pantalla el texto exacto del error (Traceback).
+**El error:** `Encountered unknown tag 'endif'`.
+**Causa:** Al cambiar de "Tarjetas" a "Tablas", eliminé un `{% if %}` condicional pero dejé su cierre `{% endif %}` por accidente. El sistema se confundió al encontrar un cierre sin apertura.
 
-Además, he reforzado la lógica de ordenamiento en el servidor (`app.py`) para que use una fecha por defecto (año 2000) si encuentra un equipo sin fecha, evitando el error de comparación.
+**Solución:**
+Eliminé la línea sobrante (Línea 316). Ahora el código es simétrico y debería cargar perfectamente.
 
-**Sube esto para ver qué pasa:**
+**Sube este cambio:**
 ```powershell
 git add .
-git commit -m "Enable Debug Mode and Fix Sort"
+git commit -m "Fix syntax error dashboard"
 git push origin dev
 ```
 
-Si el error persiste, ahora por lo menos verás un texto técnico en pantalla. **Copia y pégame ese texto** para darte la solución final.
+Esto debería desbloquear finalmente la vista.
