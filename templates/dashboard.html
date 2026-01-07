@@ -155,70 +155,160 @@
     </div>
 
     <!-- ESTADÍSTICA SIMPLE -->
-    <div class="stats-container">
-        <div class="stat-card total" style="max-width: 300px; margin: 0 auto;">
-            <div class="stat-icon">
-                <i class="fas fa-clipboard-list" style="color: var(--primary);"></i>
-            </div>
-            <div class="stat-number">{{ stats_user.mis_tareas }}</div>
-            <div class="stat-label">Tareas Pendientes</div>
-        </div>
-    </div>
+    <!-- ============================================ -->
+    <!-- NUEVA VISTA DE RESUMEN Y TABLAS -->
+    <!-- ============================================ -->
 
-    <!-- MIS EQUIPOS -->
-    <div class="section-header">
-        <div class="section-title">
-            <i class="fas fa-list-check"></i>
-            <span>Equipos Asignados</span>
+    <!-- 1. STATUS SUMMARY (BADGES) -->
+    <div class="row mb-4">
+        {% for status, count in stats_user.counts.items() %}
+        {% if count > 0 %}
+        <div class="col-auto">
+            <span class="badge rounded-pill bg-dark border border-secondary p-2 px-3">
+                <span class="text-uppercase text-light small">{{ status }}</span>
+                <span class="badge bg-primary ms-2">{{ count }}</span>
+            </span>
         </div>
-        <div class="d-flex gap-2">
-            {% if current_user.role in [UserRoles.RECEPCION, UserRoles.ADMIN] %}
-            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createEquipmentModal">
-                <i class="fas fa-plus-circle"></i> Registrar Nuevo Equipo
-            </button>
-            {% endif %}
-            <a href="{{ url_for('panel_estados') }}" class="btn btn-primary">
-                <i class="fas fa-tasks"></i> Gestionar Tareas
-            </a>
-        </div>
-    </div>
-
-    {% if equipos_relevantes %}
-    <div class="row g-4">
-        {% for eq in equipos_relevantes %}
-        <div class="col-md-6 col-lg-4">
-            <div class="card bg-dark-card border-secondary h-100 shadow-sm hover-lift">
-                <div class="card-header border-secondary d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 fw-bold text-info">{{ eq.fr or 'Sin FR' }}</h5>
-                    <span class="badge bg-secondary">{{ eq.estado }}</span>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <div class="fw-bold text-light">{{ eq.marca }}</div>
-                        <div class="text-muted small">{{ eq.modelo }}</div>
-                    </div>
-                    <div class="mb-2">
-                        <small class="text-muted">
-                            <i class="fas fa-user"></i> {{ eq.encargado }}
-                        </small>
-                    </div>
-                    <div class="mb-3">
-                        <small class="text-muted">
-                            <i class="fas fa-calendar"></i> {{ eq.fecha_ingreso.strftime('%d/%m/%Y') if eq.fecha_ingreso
-                            else 'N/A' }}
-                        </small>
-                    </div>
-                </div>
-            </div>
-        </div>
+        {% endif %}
         {% endfor %}
     </div>
-    {% else %}
-    <div class="text-center py-5">
-        <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
-        <h4 class="text-light">¡Todo al día!</h4>
-        <p class="text-muted">No tienes tareas pendientes en este momento</p>
+
+    <!-- 2. SECTION PRIORITARIA RECEPCION (Recientes vs Veteranos) -->
+    {% if current_user.role|lower == UserRoles.RECEPCION|lower and (recent_pending or veteran_pending) %}
+    <div class="row g-4 mb-5">
+        <div class="col-md-6">
+            <div class="card bg-dark bg-opacity-50 border-danger h-100">
+                <div class="card-header border-danger text-danger fw-bold">
+                    <i class="fas fa-hourglass-end me-2"></i> PENDIENTES MÁS ANTIGUOS
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for eq in veteran_pending %}
+                        <li
+                            class="list-group-item bg-transparent text-light border-secondary d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="badge bg-danger me-2">{{ eq.fr }}</span>
+                                <small>{{ eq.marca }} {{ eq.modelo }}</small>
+                            </div>
+                            <small class="text-muted">{{ eq.fecha_ingreso.strftime('%d/%m') }}</small>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card bg-dark bg-opacity-50 border-success h-100">
+                <div class="card-header border-success text-success fw-bold">
+                    <i class="fas fa-star me-2"></i> RECIÉN LLEGADOS APROBACIÓN
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for eq in recent_pending %}
+                        <li
+                            class="list-group-item bg-transparent text-light border-secondary d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="badge bg-success me-2">{{ eq.fr }}</span>
+                                <small>{{ eq.marca }} {{ eq.modelo }}</small>
+                            </div>
+                            <small class="text-muted">{{ eq.fecha_ingreso.strftime('%d/%m') }}</small>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
+    {% endif %}
+
+    <!-- 3. MAIN TABLE (REPLACES CARDS) -->
+    <div class="card bg-dark border-secondary shadow-lg">
+        <div class="card-header border-secondary">
+            <h5 class="mb-0"><i class="fas fa-list me-2"></i> Gestionar Tareas ({{ stats_user.mis_tareas }})</h5>
+            <div class="d-flex gap-2">
+                {% if current_user.role in [UserRoles.RECEPCION, UserRoles.ADMIN] %}
+                <!-- Button moved inside header for table layout -->
+                <button class="btn btn-sm btn-success ms-auto" data-bs-toggle="modal"
+                    data-bs-target="#createEquipmentModal">
+                    <i class="fas fa-plus-circle"></i> Nuevo Equipo
+                </button>
+                {% endif %}
+                <a href="{{ url_for('panel_estados') }}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-expand"></i> Pantalla Completa
+                </a>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>FR</th>
+                        {% if current_user.role|lower == UserRoles.RECEPCION|lower %}
+                        <th>Cliente</th>
+                        {% endif %}
+                        <th>Equipo</th>
+                        <th>Estado</th>
+                        <th>Fecha</th>
+                        {% if current_user.role|lower != UserRoles.RECEPCION|lower %}
+                        <th>Encargado</th>
+                        {% endif %}
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for eq in equipos_relevantes %}
+                    <tr>
+                        <td><span class="badge bg-secondary">{{ eq.fr or 'N/A' }}</span></td>
+
+                        {% if current_user.role|lower == UserRoles.RECEPCION|lower %}
+                        <td class="text-info small">{{ eq.cliente or 'No asignado' }}</td>
+                        {% endif %}
+
+                        <td>
+                            <div class="fw-bold">{{ eq.marca }}</div>
+                            <div class="small text-muted">{{ eq.modelo }}</div>
+                            {% if current_user.role|lower == UserRoles.OPERACIONES|lower %}
+                            <div class="small text-warning fst-italic">{{ eq.condicion }}</div>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <span class="badge bg-dark border border-secondary text-uppercase"
+                                style="font-size: 0.75rem;">
+                                {{ eq.estado }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <small class="text-muted">{{ eq.fecha_ingreso.strftime('%d/%m/%Y') if eq.fecha_ingreso else
+                                '' }}</small>
+                        </td>
+
+                        {% if current_user.role|lower != UserRoles.RECEPCION|lower %}
+                        <td>
+                            <small>{{ eq.encargado }}</small>
+                        </td>
+                        {% endif %}
+
+                        <td>
+                            <a href="{{ url_for('panel_estados') }}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-external-link-alt"></i> Gestionar
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            <i class="fas fa-check-circle fa-2x mb-2"></i><br>
+                            Sin tareas pendientes
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     {% endif %}
 
 </div>
