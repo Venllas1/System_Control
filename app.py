@@ -167,15 +167,67 @@ def create_app(config_class=Config):
                 ).order_by(Equipment.fecha_ingreso.desc()).all()
             
             # Estadísticas simples para usuarios
+            # Estadísticas detalladas para resumen
+            stats_counts = {
+                'diagnostico': 0,
+                'pendiente': 0,
+                'aprobado': 0, # Inicio Servicio / Aprobado
+                'mantenimiento': 0, # En Servicio
+                'espera_repuesto': 0,
+                'culminado': 0,
+                'entregado': 0
+            }
+
+            # Listas especiales para Recepción
+            pending_list = []
+
+            for eq in equipos_relevantes:
+                s = (eq.estado or '').lower()
+                # Categorización simplificada
+                if 'pendiente' in s:
+                    stats_counts['pendiente'] += 1
+                    if user_role_norm == UserRoles.RECEPCION.lower():
+                        pending_list.append(eq)
+                elif 'diagnostico' in s: 
+                    stats_counts['diagnostico'] += 1
+                elif 'espera de repuesto' in s and 'consumible' in s: # Diag spares
+                     stats_counts['diagnostico'] += 1
+                elif 'repuesto entregado' in s:
+                     stats_counts['diagnostico'] += 1
+                elif 'espera de repuestos' in s: # Service parts
+                    stats_counts['espera_repuesto'] += 1
+                elif 'inicio' in s or 'en servicio' in s:
+                    stats_counts['mantenimiento'] += 1
+                elif 'aprobado' in s:
+                    stats_counts['aprobado'] += 1
+                elif 'culminado' in s:
+                    stats_counts['culminado'] += 1
+                elif 'entregado' in s:
+                    stats_counts['entregado'] += 1
+
+            # Lógica especial Recepción: Recientes vs Veteranos
+            recent_pending = []
+            veteran_pending = []
+            if user_role_norm == UserRoles.RECEPCION.lower() and pending_list:
+                # Sort by date
+                pending_list.sort(key=lambda x: x.fecha_ingreso if x.fecha_ingreso else datetime.min)
+                # Veteranos (Oldest) - First in list
+                veteran_pending = pending_list[:5]
+                # Recientes (Newest) - Last in list (reversed)
+                recent_pending = sorted(pending_list, key=lambda x: x.fecha_ingreso if x.fecha_ingreso else datetime.min, reverse=True)[:5]
+
             stats_user = {
                 'mis_tareas': len(equipos_relevantes),
-                'ultima_actualizacion': datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+                'ultima_actualizacion': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
+                'counts': stats_counts
             }
             
             return render_template('dashboard.html',
                                  is_admin_view=False,
                                  stats_user=stats_user,
                                  equipos_relevantes=equipos_relevantes,
+                                 recent_pending=recent_pending,
+                                 veteran_pending=veteran_pending,
                                  UserRoles=UserRoles,
                                  Status=Equipment.Status)
 
