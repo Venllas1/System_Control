@@ -1,20 +1,17 @@
-# Restaurar Botón de Sincronización
+# Asignación de Encargado en Mantenimiento
 
-**El problema:** "No encuentro el botón".
-**La causa:** Se había borrado de la pantalla (HTML), aunque su cerebro (código JS) seguía ahí.
+**Requerimiento:** "Pedir encargado al iniciar mantenimiento y mostrarlo en la tabla".
 
 **Solución:**
-He vuelto a colocar el botón **"Sincronizar Cloud"** en la cabecera del Panel de Administrador (junto a "Backup DB").
-
-**Ruta para verlo:**
-1.  Debes entrar con un usuario **Administrador** (como `admin` o `Venllas`).
-2.  Verás el botón verde arriba a la derecha.
+1.  **Nuevo Prompt:** Ahora, al pulsar "Iniciar Mantenimiento" (desde el estado Aprobado), el sistema mostrará una ventana pidiendo el nombre del responsable.
+2.  **Visualización:** Ese nombre se guardará y aparecerá en la columna "Encargado" de la tabla de Aprobados/En Servicio.
+3.  **Tiempos:** Como ya activamos el historial, este cambio de estado (y quién lo hizo) quedará registrado con su hora exacta.
 
 **Sube este cambio:**
 ```powershell
 git add .
-git commit -m "Restore Sync Cloud Button"
+git commit -m "Prompt encargado maintenance"
 git push origin dev
 ```
 
-Una vez aparezca, púlsalo para traer los clientes y aplicar la limpieza.
+Prueba iniciar un mantenimiento y verás que ahora te pide el nombre.
