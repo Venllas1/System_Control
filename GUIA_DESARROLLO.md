@@ -1,24 +1,19 @@
-# Implementación de Registro de Tiempos (Data Generation)
+# Recuperación de Datos (Cliente y Observaciones)
 
-**Requerimiento:** "Guardar la fecha y hora exacta de cada cambio para generar data de tiempos".
+**El problema:** "Se perdió la información de Cliente y Observaciones en la importación inicial".
+**La causa:** El "mapa de traducción" del sistema no sabía que la columna "CLIENTE" del Excel correspondía al campo "cliente" de la base de datos, así que la ignoraba.
 
-**Solución Implementada:**
-1.  **Nueva Tabla `StatusHistory`:** Se creó una "caja negra" en la base de datos que registra:
-    *   ID del 	Equipo
-    *   Estado Anterior vs. Nuevo
-    *   Usuario que hizo el cambio
-    *   Fecha y Hora exacta (Timestamp)
-2.  **Registro Automático:** Cada vez que das click en "Aprobar", "Diagnosticar", etc., el sistema guarda silenciosamente este evento.
+**La solución:**
+1.  **Mapeo de Cliente:** He enseñado al sistema que busque columnas llamadas "CLIENTE", "NOMBRE" o "PROPIETARIO" y guarde esa info.
+2.  **Mapeo de Observaciones:** Ya existía, pero con la nueva limpieza (`clean_text`) nos aseguramos de que no se guarde como vacío si hay espacios ocultos.
 
-**Para Activar:**
-Como hemos cambiado la estructura de la base de datos (nueva tabla), necesitamos subir los cambios y dejar que el sistema cree la tabla automáticamente.
+**Para arreglar tu base de datos (Neon):**
+1.  Sube este cambio:
+    ```powershell
+    git add .
+    git commit -m "Fix excel mapping for Cliente"
+    git push origin dev
+    ```
+2.  **IMPORTANTE:** Una vez subido, ve a tu Dashboard y pulsa el botón **"Sincronizar Cloud"** (arriba a la derecha). Esto borrará los datos incompletos actuales y traerá todo de nuevo desde el Excel, esta vez incluyendo al Cliente y con la limpieza activada.
 
-**Sube estos cambios:**
-```powershell
-git add .
-git commit -m "Add StatusHistory for KPIs"
-git push origin dev
-```
-
-**Futuro:**
-Ahora el sistema está acumulando datos. En el futuro, podremos usar esta data para crear gráficos de "Tiempo Promedio de Reparación", "Cuello de Botella en Aprobación", etc.
+*Nota: Solo necesitas hacerlo una vez.*

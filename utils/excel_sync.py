@@ -108,8 +108,17 @@ def sync_excel_to_db(app, local_filename=None, force=False):
             'encargado': ['ENCARGADO', 'TECNICO', 'ASIGNADO'],
             'fecha_ingreso': ['FECHA DE INGRESO', 'FECHA', 'INGRESO'],
             'observaciones': ['OBSERVACIONES DIAGNOSTICO', 'OBSERVACIONES', 'NOTA', 'COMENTARIOS', 'OBSERVACIONES DE MANTENIMIENTO'],
-            'reporte_cliente': ['REPORTE DE CLIENTE', 'REPORTE', 'FALLA', 'PROBLEMA']
+            'reporte_cliente': ['REPORTE DE CLIENTE', 'REPORTE', 'FALLA', 'PROBLEMA'],
+            'cliente': ['CLIENTE', 'NOMBRE', 'PROPIETARIO', 'USUARIO']
         }
+
+        # Cleaning Helper
+        def clean_text(val):
+            if pd.isna(val) or val == '' or str(val).strip() == '':
+                return "sin info"
+            # Remove tabs, newlines, extra spaces
+            text = str(val).replace('\t', ' ').replace('\n', ' ').replace('\r', ' ')
+            return " ".join(text.split())
 
         def get_val(row, field_candidates):
             for col in field_candidates:
@@ -124,34 +133,48 @@ def sync_excel_to_db(app, local_filename=None, force=False):
             
             count = 0
             for index, row in df.iterrows():
-                fr = get_val(row, col_map['fr'])
-                marca = get_val(row, col_map['marca'])
-                modelo = get_val(row, col_map['modelo'])
-                estado = get_val(row, col_map['estado'])
+                fr = clean_text(get_val(row, col_map['fr']))
+                marca = clean_text(get_val(row, col_map['marca']))
+                modelo = clean_text(get_val(row, col_map['modelo']))
+                cliente = clean_text(get_val(row, col_map['cliente']))
                 
-                if not marca and not modelo: continue 
+                # Estado logic requires careful cleaning but maybe not 'sin info' default?
+                # User said "si no tiene informacion en su celda en fr o otro texto, pon 'sin info'"
+                # But 'estado' usually has specific logic.
+                raw_estado = get_val(row, col_map['estado'])
+                estado = clean_text(raw_estado)
+                if estado == 'sin info': estado = 'Espera de Diagnostico'
 
-                if not estado: estado = 'Espera de Diagnostico'
-                
+                # Date Logic
                 fecha = get_val(row, col_map['fecha_ingreso'])
-                fecha_obj = datetime.now()
+                # Default to Jan 1, 2020 as requested
+                fecha_obj = datetime(2020, 1, 1)
+                
                 if isinstance(fecha, datetime):
                     fecha_obj = fecha
                 elif isinstance(fecha, str):
                     try:
-                        fecha_obj = datetime.strptime(fecha, '%Y-%m-%d')
+                        # Attempt standard formats
+                        fecha_obj = datetime.strptime(fecha.strip(), '%Y-%m-%d')
                     except:
-                        pass
+                        try:
+                            # Try other common excel formats if needed, or just fallback
+                            fecha_obj = datetime.strptime(fecha.strip(), '%d/%m/%Y')
+                        except:
+                            pass # Keep default 2020
+                elif pd.notna(fecha):
+                     pass # Keep default 2020 if unknown type
 
                 eq = Equipment(
-                    fr=str(fr) if fr else '',
-                    marca=str(marca),
-                    modelo=str(modelo),
-                    estado=str(estado),
-                    condicion=str(get_val(row, col_map['condicion']) or 'Regular'),
-                    encargado=str(get_val(row, col_map['encargado']) or 'No asignado'),
-                    observaciones=str(get_val(row, col_map['observaciones']) or ''),
-                    reporte_cliente=str(get_val(row, col_map['reporte_cliente']) or 'Importado desde Excel'),
+                    fr=fr,
+                    marca=marca,
+                    modelo=modelo,
+                    cliente=cliente,
+                    estado=estado,
+                    condicion=clean_text(get_val(row, col_map['condicion'])),
+                    encargado=clean_text(get_val(row, col_map['encargado'])),
+                    observaciones=clean_text(get_val(row, col_map['observaciones'])),
+                    reporte_cliente=clean_text(get_val(row, col_map['reporte_cliente'])),
                     fecha_ingreso=fecha_obj
                 )
                 db.session.add(eq)
