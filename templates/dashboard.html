@@ -295,10 +295,9 @@
                         {% endif %}
 
                         <td>
-                        <td>
                             <div class="d-flex gap-1">
-                                {% if current_user.role|lower == UserRoles.RECEPCION|lower and 'pendiente' in (eq.estado
-                                or '')|lower %}
+                                {% if current_user.role|lower == UserRoles.RECEPCION|lower and 'pendiente' in
+                                eq.estado|default('')|lower %}
                                 <button class="btn btn-sm btn-success" onclick="updateStatus({{ eq.id }}, 'Aprobado')">
                                     <i class="fas fa-check"></i>
                                 </button>

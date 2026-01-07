@@ -1,24 +1,16 @@
-# Integración Total Recepción
+# Corrección de Error HTML
 
-**Requerimiento:** "Recepción no veía sus pendientes ni podía aprobar desde el listado".
+**El error:**
+Se duplicó una etiqueta `<td>` (columna de tabla) al agregar los botones nuevos, lo que rompió la estructura visual de la tabla (desplazando todo).
 
-**Solución 1: Visibilidad de Pendientes**
-He ampliado el filtro del servidor para que detecte cualquier variante de "Pendiente" (mayúsculas, sin acentos, duplicados, etc.) que pudiera existir en los datos antiguos.
-*Ahora todos los equipos pendientes aparecerán en tu lista.*
-
-**Solución 2: Botones de Acción Directa**
-He incrustado los controles de decisión directamente en tu tabla principal:
-*   ✅ **Botón Verde (Check):** Aprobar equipo
-*   ❌ **Botón Rojo (X):** Rechazar equipo
-*   ➡️ **Botón Azul (Flecha):** Ver detalle completo (Panel)
-
-Ya no necesitas entrar a otra pantalla para aprobar equipos de rutina.
+**La solución:**
+He eliminado la etiqueta duplicada. Ahora la tabla tiene la estructura correcta.
 
 **Sube este cambio:**
 ```powershell
 git add .
-git commit -m "Enable Recepcion Actions in Dashboard"
+git commit -m "Fix duplicate td tag"
 git push origin dev
 ```
 
-Esto completa el flujo de trabajo rápido para Recepción.
+Con esto, los botones de Recepción se verán alineados y funcionando.
