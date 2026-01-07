@@ -190,7 +190,9 @@
                                 <span class="badge bg-danger me-2">{{ eq.fr }}</span>
                                 <small>{{ eq.marca }} {{ eq.modelo }}</small>
                             </div>
-                            <small class="text-muted">{{ eq.fecha_ingreso.strftime('%d/%m') }}</small>
+                            <small class="text-muted">
+                                {{ eq.fecha_ingreso.strftime('%d/%m') if eq.fecha_ingreso else 'N/A' }}
+                            </small>
                         </li>
                         {% endfor %}
                     </ul>
@@ -211,7 +213,9 @@
                                 <span class="badge bg-success me-2">{{ eq.fr }}</span>
                                 <small>{{ eq.marca }} {{ eq.modelo }}</small>
                             </div>
-                            <small class="text-muted">{{ eq.fecha_ingreso.strftime('%d/%m') }}</small>
+                            <small class="text-muted">
+                                {{ eq.fecha_ingreso.strftime('%d/%m') if eq.fecha_ingreso else 'N/A' }}
+                            </small>
                         </li>
                         {% endfor %}
                     </ul>

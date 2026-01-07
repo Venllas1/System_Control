@@ -1,16 +1,18 @@
-# Error 500 Solucionado
+# Solución definitiva al Error 500
 
-**Causa:**
-El servidor falló porque algunos equipos antiguos no tienen guardada la `fecha de ingreso`. Al intentar ordenarlos en la nueva vista de "Atención Prioritaria" de Recepción, el sistema intentaba formatear una fecha inexistente (`None`), provocando el error crítico.
+**El problema:**
+Los cambios anteriores para corregir la fecha no se aplicaron correctamente porque el sistema no encontró la línea exacta para reemplazar. Esta vez he sido quirúrgico.
 
-**Solución:**
-Agregué una protección en el código visual (`dashboard.html`) para que, si no hay fecha, muestre "N/A" en lugar de romperse.
+**El error técnico:** `NoneType has no attribute 'strftime'` (Intentar formatear una fecha vacía).
+
+**La solución:**
+He modificado las dos listas de "Atención Prioritaria" (Veteranos y Recientes) en `dashboard.html` para que verifiquen si existe fecha antes de mostrarla.
 
 **Sube este cambio:**
 ```powershell
 git add .
-git commit -m "Fix 500 error: handle null dates in dashboard"
+git commit -m "Fix dashboard 500 error null dates"
 git push origin dev
 ```
 
-Ahora el sistema es robusto ante datos antiguos o incompletos.
+Ahora el sistema funcionará perfectamente incluso con equipos que no tengan fecha registrada.
