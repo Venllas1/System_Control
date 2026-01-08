@@ -341,7 +341,7 @@
             const today = new Date();
             const ingreso = new Date(item.fecha_ingreso);
             const diffDays = Math.ceil(Math.abs(today - ingreso) / (1000 * 60 * 60 * 24));
-            const s = (item.estado || '').toLowerCase();
+            const s = normalize(item.estado);
 
             // Info Button (Universal)
             const infoBtn = `<button class="btn btn-sm btn-outline-info ms-1" onclick="showInfo(${item.id})" title="Ver Detalles"><i class="fas fa-eye"></i></button>`;
@@ -537,26 +537,26 @@
             tDiag.innerHTML = dataDiag.map(i => createRow(i, true)).join('');
             // Search logic... (Simpler to reuse the factory)
 
-            // LET'S REFACTOR FILTERING TO BE CLEANER
+            // Helper to normalize strings (remove accents and lowercase)
+            const normalize = str => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
             function createRenderLogic(filterFn, tableId, searchId, paginationIds = null) {
-                let sectionData = equipments.filter(item => filterFn((item.estado || '').toLowerCase()));
+                let sectionData = equipments.filter(item => filterFn(normalize(item.estado)));
 
                 // Search filtering
                 const searchInput = document.getElementById(searchId);
                 let currentTerm = '';
 
-                // Pagination State
                 let pageState = { page: 1 };
 
                 function render() {
                     let filtered = sectionData.filter(item =>
-                        (item.fr && item.fr.toString().toLowerCase().includes(currentTerm)) ||
-                        (item.marca && item.marca.toLowerCase().includes(currentTerm)) ||
-                        (item.modelo && item.modelo.toLowerCase().includes(currentTerm))
+                        normalize(item.fr).includes(currentTerm) ||
+                        normalize(item.marca).includes(currentTerm) ||
+                        normalize(item.modelo).includes(currentTerm)
                     );
 
                     if (paginationIds) {
-                        // Paginated Render
                         const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
                         if (pageState.page > totalPages) pageState.page = 1;
 
@@ -573,7 +573,6 @@
                         document.getElementById(paginationIds.next).disabled = (pageState.page === totalPages);
 
                     } else {
-                        // Normal Render
                         const table = document.getElementById(tableId);
                         table.innerHTML = filtered.length ? filtered.map(i => createRow(i, true)).join('')
                             : `<tr><td colspan="7" class="text-center text-muted py-3">Sin resultados</td></tr>`;
@@ -582,7 +581,7 @@
 
                 if (searchInput) {
                     searchInput.addEventListener('input', (e) => {
-                        currentTerm = e.target.value.toLowerCase();
+                        currentTerm = normalize(e.target.value);
                         pageState.page = 1;
                         render();
                     });
@@ -593,11 +592,10 @@
                         if (pageState.page > 1) { pageState.page--; render(); }
                     });
                     document.getElementById(paginationIds.next).addEventListener('click', () => {
-                        // Need to calc total pages again or store it
                         const filtered = sectionData.filter(item =>
-                            (item.fr && item.fr.toString().toLowerCase().includes(currentTerm)) ||
-                            (item.marca && item.marca.toLowerCase().includes(currentTerm)) ||
-                            (item.modelo && item.modelo.toLowerCase().includes(currentTerm))
+                            normalize(item.fr).includes(currentTerm) ||
+                            normalize(item.marca).includes(currentTerm) ||
+                            normalize(item.modelo).includes(currentTerm)
                         );
                         const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
                         if (pageState.page < totalPages) { pageState.page++; render(); }

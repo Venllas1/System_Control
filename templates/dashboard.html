@@ -142,8 +142,8 @@
                             data-fr="{{ eq.fr or 'N/A' }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
                             data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
                             data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') if eq.fecha_ingreso else 'N/A' }}"
-                            data-reporte="{{ eq.reporte_cliente }}" data-cliente="{{ eq.cliente or 'N/A' }}"
-                            data-observaciones="{{ eq.observaciones or 'Sin observaciones' }}">
+                            data-reporte="{{ eq.reporte_cliente | e }}" data-cliente="{{ eq.cliente | e or 'N/A' }}"
+                            data-observaciones="{{ eq.observaciones | e or 'Sin observaciones' }}">
                             <i class="fas fa-eye"></i>
                         </button>
                     </td>
@@ -324,8 +324,9 @@
                                     data-fr="{{ eq.fr or 'N/A' }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
                                     data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
                                     data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') if eq.fecha_ingreso else 'N/A' }}"
-                                    data-reporte="{{ eq.reporte_cliente }}" data-cliente="{{ eq.cliente or 'N/A' }}"
-                                    data-observaciones="{{ eq.observaciones or 'Sin observaciones' }}">
+                                    data-reporte="{{ eq.reporte_cliente | e }}"
+                                    data-cliente="{{ eq.cliente | e or 'N/A' }}"
+                                    data-observaciones="{{ eq.observaciones | e or 'Sin observaciones' }}">
                                     <i class="fas fa-eye"></i>
                                 </button>
                             </div>
@@ -362,9 +363,9 @@
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label">Número de FR (Opcional)</label>
+                            <label class="form-label">Número de FR <span class="text-danger">*</span></label>
                             <input type="text" name="fr" class="form-control bg-dark text-light border-secondary"
-                                placeholder="Ej: 1234">
+                                placeholder="Ej: 100-1">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Cliente <span class="text-danger">*</span></label>
