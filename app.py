@@ -289,6 +289,7 @@ def create_app(config_class=Config):
             'estado': eq.estado,
             'encargado': eq.encargado,
             'fecha_ingreso': eq.fecha_ingreso.strftime('%Y-%m-%d') if eq.fecha_ingreso else None,
+            'condicion': eq.condicion,
             'cliente': eq.cliente,
             'serie': eq.serie,
             'accesorios': eq.accesorios,

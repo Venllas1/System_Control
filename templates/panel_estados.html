@@ -292,170 +292,195 @@
                         <span id="infoFr" class="badge bg-secondary mt-1"></span>
                     </div>
                     <div class="row g-3">
-                        <div class="col-6">
+                        <div class="col-md-6">
+                            <small class="text-secondary text-uppercase">Cliente</small>
+                            <p id="infoCliente" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-secondary text-uppercase">Serie</small>
+                            <p id="infoSerie" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
+                        </div>
+
+                        <div class="col-md-6">
+                            <small class="text-secondary text-uppercase">Fecha Ingreso</small>
+                            <p id="infoFecha" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-secondary text-uppercase">Condición</small>
+                            <p id="infoCondicion" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
+                        </div>
+
+                        <div class="col-md-6">
+                            <small class="text-secondary text-uppercase">Encargado Mantenimiento</small>
+                            <p id="infoEncargado" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-secondary text-uppercase">Accesorios</small>
+                            <p id="infoAccesorios" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
+                        </div>
+                        <div class="col-12 mt-3">
                             <small class="text-secondary text-uppercase">Estado</small>
                             <div id="infoEstado" class="mt-1"></div>
                         </div>
-                        <div class="col-6">
-                            <small class="text-secondary text-uppercase">Fecha Ingreso</small>
-                            <p id="infoFecha" class="fw-bold mb-0"></p>
-                        </div>
-                        <div class="col-6">
-                            <small class="text-secondary text-uppercase">Encargado</small>
-                            <p id="infoEncargado" class="fw-bold mb-0"></p>
 
 
-                            <div class="col-12 mt-3">
-                                <small class="text-secondary text-uppercase">Reporte Cliente</small>
-                                <div class="p-2 bg-dark rounded border border-secondary text-light small"
-                                    id="infoReporte" style="max-height:100px; overflow-y:auto;"></div>
-                            </div>
+                        <div class="col-12 mt-3">
+                            <small class="text-secondary text-uppercase text-info"><i class="fas fa-file-alt me-1"></i>
+                                Reporte Cliente</small>
+                            <div class="p-2 bg-dark rounded border border-secondary text-light small" id="infoReporte"
+                                style="max-height:100px; overflow-y:auto;"></div>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <small class="text-secondary text-uppercase text-warning"><i
+                                    class="fas fa-sticky-note me-1"></i> Observaciones</small>
+                            <div class="p-2 bg-dark rounded border border-secondary text-light small mt-1"
+                                id="infoObservaciones" style="max-height:100px; overflow-y:auto;"></div>
                         </div>
                     </div>
-                    <div class="modal-footer border-secondary p-1">
-                        <button type="button" class="btn btn-sm btn-secondary w-100"
-                            data-bs-dismiss="modal">Cerrar</button>
-                    </div>
+                </div>
+                <div class="modal-footer border-secondary p-1">
+                    <button type="button" class="btn btn-sm btn-secondary w-100" data-bs-dismiss="modal">Cerrar</button>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- DATA -->
-    <div id="equipmentsData" data-equipments='{{ equipments_json|safe }}' data-user-role='{{ current_role|tojson }}'
-        style="display:none;"></div>
+<!-- DATA -->
+<div id="equipmentsData" data-equipments='{{ equipments_json|safe }}' data-user-role='{{ current_role|tojson }}'
+    style="display:none;"></div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const dataEl = document.getElementById('equipmentsData');
-            if (!dataEl) return;
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const dataEl = document.getElementById('equipmentsData');
+        if (!dataEl) return;
 
-            let equipments = JSON.parse(dataEl.dataset.equipments);
-            let userRole = JSON.parse(dataEl.dataset.userRole);
-            if (userRole) userRole = userRole.toLowerCase();
+        let equipments = JSON.parse(dataEl.dataset.equipments);
+        let userRole = JSON.parse(dataEl.dataset.userRole);
+        if (userRole) userRole = userRole.toLowerCase();
 
-            // Helper to normalize strings (remove accents and lowercase)
-            const normalize = str => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        // Helper to normalize strings (remove accents and lowercase)
+        const normalize = str => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
-            // Helper functions
-            function getStatusBadge(status) {
-                let badgeClass = 'bg-secondary';
-                let icon = 'fa-circle';
-                let s = status.toLowerCase();
+        // Helper functions
+        function getStatusBadge(status) {
+            let badgeClass = 'bg-secondary';
+            let icon = 'fa-circle';
+            let s = status.toLowerCase();
 
-                if (s.includes('diagnostico') || s.includes('revision') || s.includes('standby')) { badgeClass = 'bg-info text-dark'; icon = 'fa-stethoscope'; }
-                else if (s.includes('aprobado')) { badgeClass = 'bg-success'; icon = 'fa-check-circle'; }
-                else if (s.includes('espera') || s.includes('pendiente')) { badgeClass = 'bg-warning text-dark'; icon = 'fa-clock'; }
-                else if (s.includes('servicio') || s.includes('reparacion')) { badgeClass = 'bg-primary'; icon = 'fa-tools'; }
-                else if (s.includes('culminado') || s.includes('entregado')) { badgeClass = 'bg-success'; icon = 'fa-flag-checkered'; }
+            if (s.includes('diagnostico') || s.includes('revision') || s.includes('standby')) { badgeClass = 'bg-info text-dark'; icon = 'fa-stethoscope'; }
+            else if (s.includes('aprobado')) { badgeClass = 'bg-success'; icon = 'fa-check-circle'; }
+            else if (s.includes('espera') || s.includes('pendiente')) { badgeClass = 'bg-warning text-dark'; icon = 'fa-clock'; }
+            else if (s.includes('servicio') || s.includes('reparacion')) { badgeClass = 'bg-primary'; icon = 'fa-tools'; }
+            else if (s.includes('culminado') || s.includes('entregado')) { badgeClass = 'bg-success'; icon = 'fa-flag-checkered'; }
 
-                return `<span class="badge ${badgeClass} text-uppercase"><i class="fas ${icon} me-1"></i> ${status}</span>`;
-            }
+            return `<span class="badge ${badgeClass} text-uppercase"><i class="fas ${icon} me-1"></i> ${status}</span>`;
+        }
 
-            function createRow(item, isVisualizador = false) {
-                const today = new Date();
-                const ingreso = new Date(item.fecha_ingreso);
-                const diffDays = Math.ceil(Math.abs(today - ingreso) / (1000 * 60 * 60 * 24));
-                const s = normalize(item.estado);
+        function createRow(item, isVisualizador = false) {
+            const today = new Date();
+            const ingreso = new Date(item.fecha_ingreso);
+            const diffDays = Math.ceil(Math.abs(today - ingreso) / (1000 * 60 * 60 * 24));
+            const s = normalize(item.estado);
 
-                // Info Button (Universal)
-                const infoBtn = `<button class="btn btn-sm btn-outline-info ms-1" onclick="showInfo(${item.id})" title="Ver Detalles"><i class="fas fa-eye"></i></button>`;
+            // Info Button (Universal)
+            const infoBtn = `<button class="btn btn-sm btn-outline-info ms-1" onclick="showInfo(${item.id})" title="Ver Detalles"><i class="fas fa-eye"></i></button>`;
 
-                let actionsHtml = '';
-                if (!isVisualizador) {
-                    actionsHtml = `<div class="btn-group">`;
-                    const role = userRole.toLowerCase();
-                    const isAdmin = role === 'admin' || role === 'venllas';
-                    const isOps = role === 'operaciones' || isAdmin;
-                    const isRec = role === 'recepcion' || isAdmin;
-                    const isAlm = role === 'almacen' || isAdmin;
+            let actionsHtml = '';
+            if (!isVisualizador) {
+                actionsHtml = `<div class="btn-group">`;
+                const role = userRole.toLowerCase();
+                const isAdmin = role === 'admin' || role === 'venllas';
+                const isOps = role === 'operaciones' || isAdmin;
+                const isRec = role === 'recepcion' || isAdmin;
+                const isAlm = role === 'almacen' || isAdmin;
 
-                    // State Machine Logic
-                    if (s.includes('espera de diagnostico') || s === 'espera diagnostico') {
-                        if (isOps) actionsHtml += `<button class="btn btn-sm btn-info" onclick="startDiagnostics(${item.id}, 'en Diagnostico')">Iniciar Diag</button>`;
+                // State Machine Logic
+                if (s.includes('espera de diagnostico') || s === 'espera diagnostico') {
+                    if (isOps) actionsHtml += `<button class="btn btn-sm btn-info" onclick="startDiagnostics(${item.id}, 'en Diagnostico')">Iniciar Diag</button>`;
+                }
+                else if (s.includes('diagnostico') && !s.includes('espera')) {
+                    if (isOps) {
+                        actionsHtml += `<button class="btn btn-sm btn-success" onclick="updateStatus(${item.id}, 'Pendiente de aprobacion')">Terminar Diag</button>`;
+                        actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'espera de repuesto o consumible')">Pedir Repuestos</button>`;
                     }
-                    else if (s.includes('diagnostico') && !s.includes('espera')) {
-                        if (isOps) {
-                            actionsHtml += `<button class="btn btn-sm btn-success" onclick="updateStatus(${item.id}, 'Pendiente de aprobacion')">Terminar Diag</button>`;
-                            actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'espera de repuesto o consumible')">Pedir Repuestos</button>`;
-                        }
+                }
+                else if (s.includes('consumible') || (s.includes('repuesto') && !s.includes('repuestos'))) {
+                    if (isAlm) actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'Repuesto entregado')">Confirmar Llegada</button>`;
+                }
+                else if (s.includes('repuesto entregado')) {
+                    if (isOps) actionsHtml += `<button class="btn btn-sm btn-primary" onclick="updateStatus(${item.id}, 'Pendiente de aprobacion')">Continuar (Fin Diag)</button>`;
+                }
+                else if (s.includes('pendiente de aprobacion') || s.includes('pendiente aprobacion')) {
+                    if (isRec) {
+                        actionsHtml += `<button class="btn btn-sm btn-success" onclick="updateStatus(${item.id}, 'Aprobado')">Aprobar</button>`;
+                        actionsHtml += `<button class="btn btn-sm btn-danger" onclick="updateStatus(${item.id}, 'Rechazado')">Rechazar</button>`;
                     }
-                    else if (s.includes('consumible') || (s.includes('repuesto') && !s.includes('repuestos'))) {
-                        if (isAlm) actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'Repuesto entregado')">Confirmar Llegada</button>`;
+                }
+                else if (s === 'aprobado') {
+                    if (isOps) actionsHtml += `<button class="btn btn-sm btn-primary" onclick="updateStatus(${item.id}, 'Inicio de Servicio')">Iniciar Mantenimiento</button>`;
+                }
+                else if (s.includes('inicio de servicio') || s.includes('en servicio')) {
+                    if (isOps) {
+                        actionsHtml += `<button class="btn btn-sm btn-success" onclick="updateStatus(${item.id}, 'Servicio culminado')">Terminar Mantenimiento</button>`;
+                        actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'espera de repuestos')">Pedir Repuestos</button>`;
                     }
-                    else if (s.includes('repuesto entregado')) {
-                        if (isOps) actionsHtml += `<button class="btn btn-sm btn-primary" onclick="updateStatus(${item.id}, 'Pendiente de aprobacion')">Continuar (Fin Diag)</button>`;
-                    }
-                    else if (s.includes('pendiente de aprobacion') || s.includes('pendiente aprobacion')) {
-                        if (isRec) {
-                            actionsHtml += `<button class="btn btn-sm btn-success" onclick="updateStatus(${item.id}, 'Aprobado')">Aprobar</button>`;
-                            actionsHtml += `<button class="btn btn-sm btn-danger" onclick="updateStatus(${item.id}, 'Rechazado')">Rechazar</button>`;
-                        }
-                    }
-                    else if (s === 'aprobado') {
-                        if (isOps) actionsHtml += `<button class="btn btn-sm btn-primary" onclick="updateStatus(${item.id}, 'Inicio de Servicio')">Iniciar Mantenimiento</button>`;
-                    }
-                    else if (s.includes('inicio de servicio') || s.includes('en servicio')) {
-                        if (isOps) {
-                            actionsHtml += `<button class="btn btn-sm btn-success" onclick="updateStatus(${item.id}, 'Servicio culminado')">Terminar Mantenimiento</button>`;
-                            actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'espera de repuestos')">Pedir Repuestos</button>`;
-                        }
-                    }
-                    else if (s.includes('espera de repuestos')) {
-                        if (isAlm) actionsHtml += `<button class="btn btn-sm btn-primary" onclick="updateStatus(${item.id}, 'En servicio')">Confirmar Llegada (Serv)</button>`;
-                    }
-                    else if (s.includes('servicio culminado')) {
-                        if (isRec) actionsHtml += `<button class="btn btn-sm btn-info" onclick="updateStatus(${item.id}, 'Entregado')">Entregar Cliente</button>`;
-                    }
-
-                    if (isAdmin) {
-                        actionsHtml += `<button class="btn btn-sm btn-outline-danger ms-2" onclick="deleteEquipment(${item.id})" title="Eliminar"><i class="fas fa-trash"></i></button>`;
-                    }
-
-                    // Add Info Button
-                    actionsHtml += infoBtn;
-                    actionsHtml += `</div>`;
-                } else {
-                    // Visualizador Actions (Just Info Button)
-                    actionsHtml = infoBtn;
+                }
+                else if (s.includes('espera de repuestos')) {
+                    if (isAlm) actionsHtml += `<button class="btn btn-sm btn-primary" onclick="updateStatus(${item.id}, 'En servicio')">Confirmar Llegada (Serv)</button>`;
+                }
+                else if (s.includes('servicio culminado')) {
+                    if (isRec) actionsHtml += `<button class="btn btn-sm btn-info" onclick="updateStatus(${item.id}, 'Entregado')">Entregar Cliente</button>`;
                 }
 
-                const frDisplay = item.fr || 'Sin FR';
+                if (isAdmin) {
+                    actionsHtml += `<button class="btn btn-sm btn-outline-danger ms-2" onclick="deleteEquipment(${item.id})" title="Eliminar"><i class="fas fa-trash"></i></button>`;
+                }
 
-                if (isVisualizador) {
-                    // Days logic for visualizador: Only for "En Diagnostico"
-                    let daysCell = '';
-                    // Check if table is "Diagnostico" type based on state content.
-                    // We'll trust the caller passes items filtered. 
-                    // But specifically, user asked for "Días" column only for "En diagnóstico".
-                    // Since this function builds a row, we check the item state.
+                // Add Info Button
+                actionsHtml += infoBtn;
+                actionsHtml += `</div>`;
+            } else {
+                // Visualizador Actions (Just Info Button)
+                actionsHtml = infoBtn;
+            }
 
-                    // However, we need to know if we should render the TD or not depending on the table header.
-                    // The table headers are static in HTML. We need to match.
-                    // 1. Diagnostico Table -> Has "Días"? No, header says specific cols.
-                    // 2. Approved Table -> No days column requested?
+            const frDisplay = item.fr || 'Sin FR';
 
-                    // Actually, the request says "Añade una columna “Días” ... calcularse únicamente para equipos en estado “En diagnóstico”."
-                    // This implies the Diagnostico table needs that column.
-                    // The generic createRow returns a TR string. formatting must match the TABLE THEAD.
+            if (isVisualizador) {
+                // Days logic for visualizador: Only for "En Diagnostico"
+                let daysCell = '';
+                // Check if table is "Diagnostico" type based on state content.
+                // We'll trust the caller passes items filtered. 
+                // But specifically, user asked for "Días" column only for "En diagnóstico".
+                // Since this function builds a row, we check the item state.
 
-                    // Current Table 1 (Diag) Headers: FR, Marca/Modelo, Estado, Encargado, Fecha. (5 cols)
-                    // We need to ADD "Días" header to table 1 HTML.
-                    // And for other tables, we shouldn't show it? Or show it but empty?
-                    // The cleanest way is to just render it for all tables in Visualizador mode, but only populate it for Diag items.
-                    // BUT, HTML Thead must match.
-                    // I will add "Días" header to ALL Visualizador tables for consistency, or dynamically.
-                    // Let's assume I'll update the HTML headers to include "Días" for all 3 tables or just Diag.
-                    // User said "Esta columna debe calcularse únicamente para equipos en estado “En diagnóstico”."
-                    // If I add the column <td> to the row, I must add <th> to the table.
+                // However, we need to know if we should render the TD or not depending on the table header.
+                // The table headers are static in HTML. We need to match.
+                // 1. Diagnostico Table -> Has "Días"? No, header says specific cols.
+                // 2. Approved Table -> No days column requested?
 
-                    let daysValue = '-';
-                    if (s.includes('diagnostico') && !s.includes('espera')) {
-                        daysValue = `<span class="badge ${diffDays > 3 ? 'bg-danger' : 'bg-success'}">${diffDays} días</span>`;
-                    }
+                // Actually, the request says "Añade una columna “Días” ... calcularse únicamente para equipos en estado “En diagnóstico”."
+                // This implies the Diagnostico table needs that column.
+                // The generic createRow returns a TR string. formatting must match the TABLE THEAD.
 
-                    // Assuming all Visualizador tables will have the 'Días' column added to THEAD
-                    return `
+                // Current Table 1 (Diag) Headers: FR, Marca/Modelo, Estado, Encargado, Fecha. (5 cols)
+                // We need to ADD "Días" header to table 1 HTML.
+                // And for other tables, we shouldn't show it? Or show it but empty?
+                // The cleanest way is to just render it for all tables in Visualizador mode, but only populate it for Diag items.
+                // BUT, HTML Thead must match.
+                // I will add "Días" header to ALL Visualizador tables for consistency, or dynamically.
+                // Let's assume I'll update the HTML headers to include "Días" for all 3 tables or just Diag.
+                // User said "Esta columna debe calcularse únicamente para equipos en estado “En diagnóstico”."
+                // If I add the column <td> to the row, I must add <th> to the table.
+
+                let daysValue = '-';
+                if (s.includes('diagnostico') && !s.includes('espera')) {
+                    daysValue = `<span class="badge ${diffDays > 3 ? 'bg-danger' : 'bg-success'}">${diffDays} días</span>`;
+                }
+
+                // Assuming all Visualizador tables will have the 'Días' column added to THEAD
+                return `
                 <tr>
                     <td class="ps-4 fw-bold text-info">${frDisplay}</td>
                     <td>${item.marca} ${item.modelo}</td>
@@ -466,8 +491,8 @@
                     <td class="text-end pe-4">${actionsHtml}</td> <!-- Actions including Info -->
                 </tr>
             `;
-                } else {
-                    return `
+            } else {
+                return `
                 <tr>
                     <td class="ps-4">
                         <div class="d-flex flex-column">
@@ -482,249 +507,256 @@
                     <td class="text-end pe-4">${actionsHtml}</td>
                 </tr>
             `;
+            }
+        }
+
+        // ... [KPI Logic unchanged] ...
+        let countDiag = 0, countPend = 0, countApro = 0, countRev = 0;
+        equipments.forEach(item => {
+            const s = (item.estado || '').toLowerCase();
+            if (s.includes('revision') || s.includes('reevaluacion')) countRev++;
+            else if (s.includes('diagnostico')) countDiag++;
+            else if (s.includes('pendiente') || s.includes('espera de aprobacion')) countPend++;
+            else if ((s.includes('aprobado') || s.includes('servicio') || s.includes('repuesto')) && !s.includes('culminado') && !s.includes('entregado')) countApro++;
+        });
+
+        if (document.getElementById('kpiTotal')) document.getElementById('kpiTotal').innerText = equipments.length;
+        if (document.getElementById('kpiDiag')) document.getElementById('kpiDiag').innerText = countDiag;
+        if (document.getElementById('kpiPend')) document.getElementById('kpiPend').innerText = countPend;
+        if (document.getElementById('kpiApro')) document.getElementById('kpiApro').innerText = countApro;
+
+
+        if (userRole === 'visualizador') {
+            const ITEMS_PER_PAGE = 5; // Updated to 5 per request (was 15)
+
+            // Helper for Pagination
+            function setupPagination(data, tableId, pageInfoId, btnPrevId, btnNextId, pageState) {
+                const table = document.getElementById(tableId);
+                const pageInfo = document.getElementById(pageInfoId);
+                const btnPrev = document.getElementById(btnPrevId);
+                const btnNext = document.getElementById(btnNextId);
+
+                if (!table) return () => { };
+
+                function render() {
+                    const totalPages = Math.ceil(data.length / ITEMS_PER_PAGE) || 1;
+                    if (pageState.page > totalPages) pageState.page = 1;
+
+                    const start = (pageState.page - 1) * ITEMS_PER_PAGE;
+                    const end = start + ITEMS_PER_PAGE;
+                    const pageData = data.slice(start, end);
+
+                    table.innerHTML = pageData.length ? pageData.map(i => createRow(i, true)).join('')
+                        : `<tr><td colspan="7" class="text-center text-muted py-3">Sin equipos</td></tr>`;
+
+                    if (pageInfo) pageInfo.innerText = `${pageState.page}/${totalPages}`;
+                    if (btnPrev) btnPrev.disabled = (pageState.page === 1);
+                    if (btnNext) btnNext.disabled = (pageState.page === totalPages);
                 }
+
+                if (btnPrev) {
+                    btnPrev.onclick = () => { if (pageState.page > 1) { pageState.page--; render(); } };
+                }
+                if (btnNext) {
+                    btnNext.onclick = () => { const totalPages = Math.ceil(data.length / ITEMS_PER_PAGE); if (pageState.page < totalPages) { pageState.page++; render(); } };
+                }
+
+                return render;
             }
 
-            // ... [KPI Logic unchanged] ...
-            let countDiag = 0, countPend = 0, countApro = 0, countRev = 0;
-            equipments.forEach(item => {
-                const s = (item.estado || '').toLowerCase();
-                if (s.includes('revision') || s.includes('reevaluacion')) countRev++;
-                else if (s.includes('diagnostico')) countDiag++;
-                else if (s.includes('pendiente') || s.includes('espera de aprobacion')) countPend++;
-                else if ((s.includes('aprobado') || s.includes('servicio') || s.includes('repuesto')) && !s.includes('culminado') && !s.includes('entregado')) countApro++;
-            });
+            function createRenderLogic(filterFn, tableId, searchId, paginationIds = null) {
+                let sectionData = equipments.filter(item => filterFn(normalize(item.estado)));
 
-            if (document.getElementById('kpiTotal')) document.getElementById('kpiTotal').innerText = equipments.length;
-            if (document.getElementById('kpiDiag')) document.getElementById('kpiDiag').innerText = countDiag;
-            if (document.getElementById('kpiPend')) document.getElementById('kpiPend').innerText = countPend;
-            if (document.getElementById('kpiApro')) document.getElementById('kpiApro').innerText = countApro;
+                // Search filtering
+                const searchInput = document.getElementById(searchId);
+                let currentTerm = '';
 
+                let pageState = { page: 1 };
 
-            if (userRole === 'visualizador') {
-                const ITEMS_PER_PAGE = 5; // Updated to 5 per request (was 15)
+                function render() {
+                    let filtered = sectionData.filter(item =>
+                        normalize(item.fr).includes(currentTerm) ||
+                        normalize(item.marca).includes(currentTerm) ||
+                        normalize(item.modelo).includes(currentTerm)
+                    );
 
-                // Helper for Pagination
-                function setupPagination(data, tableId, pageInfoId, btnPrevId, btnNextId, pageState) {
-                    const table = document.getElementById(tableId);
-                    const pageInfo = document.getElementById(pageInfoId);
-                    const btnPrev = document.getElementById(btnPrevId);
-                    const btnNext = document.getElementById(btnNextId);
-
-                    if (!table) return () => { };
-
-                    function render() {
-                        const totalPages = Math.ceil(data.length / ITEMS_PER_PAGE) || 1;
+                    if (paginationIds) {
+                        const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
                         if (pageState.page > totalPages) pageState.page = 1;
 
                         const start = (pageState.page - 1) * ITEMS_PER_PAGE;
                         const end = start + ITEMS_PER_PAGE;
-                        const pageData = data.slice(start, end);
+                        const pageData = filtered.slice(start, end);
 
+                        const table = document.getElementById(tableId);
                         table.innerHTML = pageData.length ? pageData.map(i => createRow(i, true)).join('')
-                            : `<tr><td colspan="7" class="text-center text-muted py-3">Sin equipos</td></tr>`;
+                            : `<tr><td colspan="7" class="text-center text-muted py-3">Sin resultados</td></tr>`;
 
-                        if (pageInfo) pageInfo.innerText = `${pageState.page}/${totalPages}`;
-                        if (btnPrev) btnPrev.disabled = (pageState.page === 1);
-                        if (btnNext) btnNext.disabled = (pageState.page === totalPages);
-                    }
+                        document.getElementById(paginationIds.info).innerText = `${pageState.page}/${totalPages}`;
+                        document.getElementById(paginationIds.prev).disabled = (pageState.page === 1);
+                        document.getElementById(paginationIds.next).disabled = (pageState.page === totalPages);
 
-                    if (btnPrev) {
-                        btnPrev.onclick = () => { if (pageState.page > 1) { pageState.page--; render(); } };
+                    } else {
+                        const table = document.getElementById(tableId);
+                        table.innerHTML = filtered.length ? filtered.map(i => createRow(i, true)).join('')
+                            : `<tr><td colspan="7" class="text-center text-muted py-3">Sin resultados</td></tr>`;
                     }
-                    if (btnNext) {
-                        btnNext.onclick = () => { const totalPages = Math.ceil(data.length / ITEMS_PER_PAGE); if (pageState.page < totalPages) { pageState.page++; render(); } };
-                    }
-
-                    return render;
                 }
 
-                function createRenderLogic(filterFn, tableId, searchId, paginationIds = null) {
-                    let sectionData = equipments.filter(item => filterFn(normalize(item.estado)));
+                if (searchInput) {
+                    searchInput.addEventListener('input', (e) => {
+                        currentTerm = normalize(e.target.value);
+                        pageState.page = 1;
+                        render();
+                    });
+                }
 
-                    // Search filtering
-                    const searchInput = document.getElementById(searchId);
-                    let currentTerm = '';
-
-                    let pageState = { page: 1 };
-
-                    function render() {
-                        let filtered = sectionData.filter(item =>
+                if (paginationIds) {
+                    document.getElementById(paginationIds.prev).addEventListener('click', () => {
+                        if (pageState.page > 1) { pageState.page--; render(); }
+                    });
+                    document.getElementById(paginationIds.next).addEventListener('click', () => {
+                        const filtered = sectionData.filter(item =>
                             normalize(item.fr).includes(currentTerm) ||
                             normalize(item.marca).includes(currentTerm) ||
                             normalize(item.modelo).includes(currentTerm)
                         );
-
-                        if (paginationIds) {
-                            const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
-                            if (pageState.page > totalPages) pageState.page = 1;
-
-                            const start = (pageState.page - 1) * ITEMS_PER_PAGE;
-                            const end = start + ITEMS_PER_PAGE;
-                            const pageData = filtered.slice(start, end);
-
-                            const table = document.getElementById(tableId);
-                            table.innerHTML = pageData.length ? pageData.map(i => createRow(i, true)).join('')
-                                : `<tr><td colspan="7" class="text-center text-muted py-3">Sin resultados</td></tr>`;
-
-                            document.getElementById(paginationIds.info).innerText = `${pageState.page}/${totalPages}`;
-                            document.getElementById(paginationIds.prev).disabled = (pageState.page === 1);
-                            document.getElementById(paginationIds.next).disabled = (pageState.page === totalPages);
-
-                        } else {
-                            const table = document.getElementById(tableId);
-                            table.innerHTML = filtered.length ? filtered.map(i => createRow(i, true)).join('')
-                                : `<tr><td colspan="7" class="text-center text-muted py-3">Sin resultados</td></tr>`;
-                        }
-                    }
-
-                    if (searchInput) {
-                        searchInput.addEventListener('input', (e) => {
-                            currentTerm = normalize(e.target.value);
-                            pageState.page = 1;
-                            render();
-                        });
-                    }
-
-                    if (paginationIds) {
-                        document.getElementById(paginationIds.prev).addEventListener('click', () => {
-                            if (pageState.page > 1) { pageState.page--; render(); }
-                        });
-                        document.getElementById(paginationIds.next).addEventListener('click', () => {
-                            const filtered = sectionData.filter(item =>
-                                normalize(item.fr).includes(currentTerm) ||
-                                normalize(item.marca).includes(currentTerm) ||
-                                normalize(item.modelo).includes(currentTerm)
-                            );
-                            const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
-                            if (pageState.page < totalPages) { pageState.page++; render(); }
-                        });
-                    }
-
-                    render();
+                        const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
+                        if (pageState.page < totalPages) { pageState.page++; render(); }
+                    });
                 }
 
-                // 1. Diagnostico
-                createRenderLogic(
-                    s => (s.includes('diagnostico') && !s.includes('revision')) || s.includes('consumible') || (s.includes('repuesto') && !s.includes('repuestos')),
-                    'tableDiagnostico',
-                    'searchDiagnostico'
-                );
-
-                // 2. Aprobados (NOW PAGINATED)
-                createRenderLogic(
-                    s => (s.includes('aprobado') || s.includes('servicio') || s.includes('repuestos')) && !s.includes('entregado') && !s.includes('culminado'),
-                    'tableAprobado',
-                    'searchAprobado',
-                    { prev: 'btnPrevAprobado', next: 'btnNextAprobado', info: 'pageInfoAprobado' }
-                );
-
-                // 3. Revisión
-                createRenderLogic(
-                    s => s.includes('revision') || s.includes('reevaluacion'),
-                    'tableRevision',
-                    'searchRevision'
-                );
-
-                // 4. Pendiente (Paginated)
-                createRenderLogic(
-                    s => s.includes('pendiente') || s.includes('espera de aprobacion'),
-                    'tablePendiente',
-                    'searchPendiente',
-                    { prev: 'btnPrevPendiente', next: 'btnNextPendiente', info: 'pageInfoPendiente' }
-                );
-
-            } else {
-                // UNIFIED VIEW LOGIC
-                const tableBody = document.getElementById('tableBody');
-                const searchInput = document.getElementById('searchInput');
-
-                function renderUnified(data) {
-                    tableBody.innerHTML = data.length ? data.map(i => createRow(i, false)).join('')
-                        : `<tr><td colspan="6" class="text-center py-5 text-muted">No se encontraron equipos</td></tr>`;
-                }
-                renderUnified(equipments);
-                searchInput.addEventListener('input', (e) => {
-                    const term = e.target.value.toLowerCase();
-                    const filtered = equipments.filter(eq =>
-                        (eq.marca && eq.marca.toLowerCase().includes(term)) ||
-                        (eq.modelo && eq.modelo.toLowerCase().includes(term)) ||
-                        (eq.fr && eq.fr.toLowerCase().includes(term)) ||
-                        (eq.estado && eq.estado.toLowerCase().includes(term))
-                    );
-                    renderUnified(filtered);
-                });
+                render();
             }
 
-            // Global Action wrappers
-            window.startDiagnostics = function (id, status) {
-                const encargado = prompt("ASIGNACIÓN DE TÉCNICO:\nPor favor, ingrese el nombre del encargado:");
-                if (encargado === null) return;
-                if (!encargado.trim()) { alert("Debe asignar un encargado."); return; }
-                updateStatus(id, status, encargado.trim());
-            };
+            // 1. Diagnostico
+            createRenderLogic(
+                s => (s.includes('diagnostico') && !s.includes('revision')) || s.includes('consumible') || (s.includes('repuesto') && !s.includes('repuestos')),
+                'tableDiagnostico',
+                'searchDiagnostico'
+            );
 
-            window.updateStatus = function (id, newStatus, newEncargado = null) {
-                let msg = `¿Cambiar estado a: ${newStatus}?`;
-                if (newEncargado) msg += `\nAsignando a: ${newEncargado}`;
-                if (!confirm(msg)) return;
+            // 2. Aprobados (NOW PAGINATED)
+            createRenderLogic(
+                s => (s.includes('aprobado') || s.includes('servicio') || s.includes('repuestos')) && !s.includes('entregado') && !s.includes('culminado'),
+                'tableAprobado',
+                'searchAprobado',
+                { prev: 'btnPrevAprobado', next: 'btnNextAprobado', info: 'pageInfoAprobado' }
+            );
 
-                const formData = new FormData();
-                formData.append('status', newStatus);
-                if (newEncargado) formData.append('encargado', newEncargado);
+            // 3. Revisión
+            createRenderLogic(
+                s => s.includes('revision') || s.includes('reevaluacion'),
+                'tableRevision',
+                'searchRevision'
+            );
 
-                fetch(`/api/equipment/${id}/update_status`, { method: 'POST', body: formData })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.success) location.reload();
-                        else alert('Error: ' + data.error);
-                    })
-                    .catch(err => alert('Error de red: ' + err));
-            };
+            // 4. Pendiente (Paginated)
+            createRenderLogic(
+                s => s.includes('pendiente') || s.includes('espera de aprobacion'),
+                'tablePendiente',
+                'searchPendiente',
+                { prev: 'btnPrevPendiente', next: 'btnNextPendiente', info: 'pageInfoPendiente' }
+            );
 
-            window.deleteEquipment = function (id) {
-                if (!confirm('¿ESTÁ SEGURO DE ELIMINAR ESTE EQUIPO?')) return;
-                fetch(`/api/equipment/${id}/delete`, { method: 'POST' })
-                    .then(r => r.json()).then(d => { if (d.success) location.reload(); else alert(d.error); });
-            };
+        } else {
+            // UNIFIED VIEW LOGIC
+            const tableBody = document.getElementById('tableBody');
+            const searchInput = document.getElementById('searchInput');
 
-            // Show Info Modal Logic
-            window.showInfo = function (id) {
-                // Find item
-                const item = equipments.find(e => e.id === id);
-                if (!item) return;
-
-                // Populate Modal
-                document.getElementById('infoFr').innerText = item.fr || 'N/A';
-                document.getElementById('infoMarca').innerText = `${item.marca} ${item.modelo}`;
-                document.getElementById('infoEstado').innerHTML = getStatusBadge(item.estado);
-                document.getElementById('infoEncargado').innerText = item.encargado || 'Sin asignar';
-                document.getElementById('infoFecha').innerText = item.fecha_ingreso || 'N/A';
-                document.getElementById('infoReporte').innerText = item.reporte_cliente || 'Sin reporte';
-
-                const myModal = new bootstrap.Modal(document.getElementById('detailedInfoModal'));
-                myModal.show();
-            };
-        });
-    </script>
-
-    <style>
-        .bg-dark-card {
-            background-color: #1e1e2f;
+            function renderUnified(data) {
+                tableBody.innerHTML = data.length ? data.map(i => createRow(i, false)).join('')
+                    : `<tr><td colspan="6" class="text-center py-5 text-muted">No se encontraron equipos</td></tr>`;
+            }
+            renderUnified(equipments);
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                const filtered = equipments.filter(eq =>
+                    (eq.marca && eq.marca.toLowerCase().includes(term)) ||
+                    (eq.modelo && eq.modelo.toLowerCase().includes(term)) ||
+                    (eq.fr && eq.fr.toLowerCase().includes(term)) ||
+                    (eq.estado && eq.estado.toLowerCase().includes(term))
+                );
+                renderUnified(filtered);
+            });
         }
 
-        .card-header {
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
+        // Global Action wrappers
+        window.startDiagnostics = function (id, status) {
+            const encargado = prompt("ASIGNACIÓN DE TÉCNICO:\nPor favor, ingrese el nombre del encargado:");
+            if (encargado === null) return;
+            if (!encargado.trim()) { alert("Debe asignar un encargado."); return; }
+            updateStatus(id, status, encargado.trim());
+        };
 
-        .icon-shape {
-            width: 48px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 0.75rem;
-        }
-    </style>
-    {% endblock %}
+        window.updateStatus = function (id, newStatus, newEncargado = null) {
+            let msg = `¿Cambiar estado a: ${newStatus}?`;
+            if (newEncargado) msg += `\nAsignando a: ${newEncargado}`;
+            if (!confirm(msg)) return;
+
+            const formData = new FormData();
+            formData.append('status', newStatus);
+            if (newEncargado) formData.append('encargado', newEncargado);
+
+            fetch(`/api/equipment/${id}/update_status`, { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) location.reload();
+                    else alert('Error: ' + data.error);
+                })
+                .catch(err => alert('Error de red: ' + err));
+        };
+
+        window.deleteEquipment = function (id) {
+            if (!confirm('¿ESTÁ SEGURO DE ELIMINAR ESTE EQUIPO?')) return;
+            fetch(`/api/equipment/${id}/delete`, { method: 'POST' })
+                .then(r => r.json()).then(d => { if (d.success) location.reload(); else alert(d.error); });
+        };
+
+        // Show Info Modal Logic
+        window.showInfo = function (id) {
+            // Find item
+            const item = equipments.find(e => e.id === id);
+            if (!item) return;
+
+            // Populate Modal
+            document.getElementById('infoFr').innerText = item.fr || 'N/A';
+            document.getElementById('infoMarca').innerText = `${item.marca} ${item.modelo}`;
+            document.getElementById('infoEstado').innerHTML = getStatusBadge(item.estado);
+            document.getElementById('infoEncargado').innerText = item.encargado || 'No Asignado';
+            document.getElementById('infoFecha').innerText = item.fecha_ingreso || 'N/A';
+            document.getElementById('infoReporte').innerText = item.reporte_cliente || 'Sin reporte';
+
+            // New Fields
+            if (document.getElementById('infoCliente')) document.getElementById('infoCliente').innerText = item.cliente || 'N/A';
+            if (document.getElementById('infoSerie')) document.getElementById('infoSerie').innerText = item.serie || 'N/A';
+            if (document.getElementById('infoCondicion')) document.getElementById('infoCondicion').innerText = item.condicion || 'Regular';
+            if (document.getElementById('infoAccesorios')) document.getElementById('infoAccesorios').innerText = item.accesorios || 'Ninguno';
+            if (document.getElementById('infoObservaciones')) document.getElementById('infoObservaciones').innerText = item.observaciones || 'Sin observaciones';
+
+            const myModal = new bootstrap.Modal(document.getElementById('detailedInfoModal'));
+            myModal.show();
+        };
+    });
+</script>
+
+<style>
+    .bg-dark-card {
+        background-color: #1e1e2f;
+    }
+
+    .card-header {
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .icon-shape {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.75rem;
+    }
+</style>
+{% endblock %}

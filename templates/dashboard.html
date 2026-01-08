@@ -141,7 +141,10 @@
                             data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
                             data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') if eq.fecha_ingreso else 'N/A' }}"
                             data-reporte="{{ eq.reporte_cliente | e }}" data-cliente="{{ eq.cliente | e or 'N/A' }}"
-                            data-observaciones="{{ eq.observaciones | e or 'Sin observaciones' }}">
+                            data-observaciones="{{ eq.observaciones | e or 'Sin observaciones' }}"
+                            data-serie="{{ eq.serie | e or 'N/A' }}"
+                            data-accesorios="{{ eq.accesorios | e or 'Ninguno' }}"
+                            data-condicion="{{ eq.condicion | e or 'Regular' }}">
                             <i class="fas fa-eye"></i>
                         </button>
                     </td>
@@ -323,8 +326,12 @@
                                     data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
                                     data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') if eq.fecha_ingreso else 'N/A' }}"
                                     data-reporte="{{ eq.reporte_cliente | e }}"
+                                    data-reporte="{{ eq.reporte_cliente | e }}"
                                     data-cliente="{{ eq.cliente | e or 'N/A' }}"
-                                    data-observaciones="{{ eq.observaciones | e or 'Sin observaciones' }}">
+                                    data-observaciones="{{ eq.observaciones | e or 'Sin observaciones' }}"
+                                    data-serie="{{ eq.serie | e or 'N/A' }}"
+                                    data-accesorios="{{ eq.accesorios | e or 'Ninguno' }}"
+                                    data-condicion="{{ eq.condicion | e or 'Regular' }}">
                                     <i class="fas fa-eye"></i>
                                 </button>
                             </div>
@@ -528,10 +535,17 @@
         const d = btn.dataset;
         document.getElementById('infoFr').innerText = d.fr;
         document.getElementById('infoMarca').innerText = d.marca;
-        document.getElementById('infoEstado').innerHTML = `<span class="badge bg-secondary">${d.estado}</span>`; // Simple badge for dashboard
-        document.getElementById('infoEncargado').innerText = d.encargado;
+        document.getElementById('infoEstado').innerHTML = `<span class="badge bg-secondary">${d.estado}</span>`;
+        document.getElementById('infoEncargado').innerText = d.encargado || 'No Asignado';
         document.getElementById('infoFecha').innerText = d.fecha;
         document.getElementById('infoReporte').innerText = d.reporte;
+
+        // New Fields
+        document.getElementById('infoCliente').innerText = d.cliente;
+        document.getElementById('infoSerie').innerText = d.serie;
+        document.getElementById('infoCondicion').innerText = d.condicion;
+        document.getElementById('infoAccesorios').innerText = d.accesorios;
+        document.getElementById('infoObservaciones').innerText = d.observaciones;
 
         // New Lifecycle Fields
 
@@ -551,38 +565,71 @@
                     aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="mb-3 border-bottom border-secondary pb-2">
-                    <small class="text-secondary text-uppercase d-block">Equipo</small>
-                    <h4 id="infoMarca" class="mb-0"></h4>
-                    <span id="infoFr" class="badge bg-secondary mt-1"></span>
-                </div>
-                <div class="row g-3">
-                    <div class="col-6">
-                        <small class="text-secondary text-uppercase">Estado</small>
-                        <div id="infoEstado" class="mt-1"></div>
-                    </div>
-                    <div class="col-6">
-                        <small class="text-secondary text-uppercase">Fecha Ingreso</small>
-                        <p id="infoFecha" class="fw-bold mb-0"></p>
+                <div class="modal-body">
+                    <!-- Header Info -->
+                    <div class="mb-3 border-bottom border-secondary pb-2">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <small class="text-secondary text-uppercase d-block">Equipo</small>
+                                <h4 id="infoMarca" class="mb-0 text-white"></h4>
+                                <span id="infoFr" class="badge bg-info mt-1"></span>
+                            </div>
+                            <div class="text-end">
+                                <small class="text-secondary text-uppercase d-block">Estado</small>
+                                <div id="infoEstado" class="mt-1"></div>
+                            </div>
+                        </div>
                     </div>
 
+                    <!-- Grid Details -->
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <small class="text-secondary text-uppercase">Cliente</small>
+                            <p id="infoCliente" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-secondary text-uppercase">Serie</small>
+                            <p id="infoSerie" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
+                        </div>
 
-                    <div class="col-6">
-                        <small class="text-secondary text-uppercase">Encargado</small>
-                        <p id="infoEncargado" class="fw-bold mb-0"></p>
-                    </div>
-                    <div class="col-12 mt-3">
-                        <small class="text-secondary text-uppercase">Reporte Cliente</small>
-                        <div class="p-2 bg-dark rounded border border-secondary text-light small" id="infoReporte"
-                            style="max-height:100px; overflow-y:auto;"></div>
+                        <div class="col-md-6">
+                            <small class="text-secondary text-uppercase">Fecha Ingreso</small>
+                            <p id="infoFecha" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-secondary text-uppercase">Condición</small>
+                            <p id="infoCondicion" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
+                        </div>
+
+                        <div class="col-md-6">
+                            <small class="text-secondary text-uppercase">Encargado Mantenimiento</small>
+                            <p id="infoEncargado" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-secondary text-uppercase">Accesorios</small>
+                            <p id="infoAccesorios" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
+                        </div>
+
+                        <div class="col-12 mt-3">
+                            <small class="text-secondary text-uppercase text-info"><i class="fas fa-file-alt me-1"></i>
+                                Reporte Cliente</small>
+                            <div class="p-2 bg-dark rounded border border-secondary text-light small mt-1"
+                                id="infoReporte" style="max-height:100px; overflow-y:auto;"></div>
+                        </div>
+
+                        <div class="col-12 mt-2">
+                            <small class="text-secondary text-uppercase text-warning"><i
+                                    class="fas fa-sticky-note me-1"></i> Observaciones</small>
+                            <div class="p-2 bg-dark rounded border border-secondary text-light small mt-1"
+                                id="infoObservaciones" style="max-height:100px; overflow-y:auto;"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer border-secondary p-1">
-                <button type="button" class="btn btn-sm btn-secondary w-100" data-bs-dismiss="modal">Cerrar</button>
+                <div class="modal-footer border-secondary p-1">
+                    <button type="button" class="btn btn-sm btn-secondary w-100" data-bs-dismiss="modal">Cerrar</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-{% endblock %}
+    {% endblock %}
