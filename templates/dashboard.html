@@ -17,9 +17,7 @@
             <a href="{{ url_for('backup_db') }}" class="btn btn-primary shadow-sm">
                 <i class="fas fa-download me-2"></i> Backup DB
             </a>
-            <button id="btnSyncCloud" class="btn btn-success shadow-sm ms-2">
-                <i class="fas fa-cloud-download-alt me-2"></i> Sincronizar Cloud
-            </button>
+
         </div>
         <div class="subtitle">Vista Completa del Sistema - Última actualización: {{ stats_admin.ultima_actualizacion }}
         </div>
@@ -459,31 +457,7 @@
             });
         }
         // Cloud Sync Logic
-        const btnSync = document.getElementById('btnSyncCloud');
-        if (btnSync) {
-            btnSync.addEventListener('click', function () {
-                if (!confirm('¿Estás seguro de forzar la sincronización con Google Drive?\nEsto reemplazará los datos actuales.')) return;
 
-                btnSync.disabled = true;
-                btnSync.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando...';
-
-                fetch('/admin/sync_excel', { method: 'POST' })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('¡Sincronización completada con éxito!');
-                            location.reload();
-                        } else {
-                            alert('Error: ' + data.error);
-                        }
-                    })
-                    .catch(err => alert('Error de red: ' + err))
-                    .finally(() => {
-                        btnSync.disabled = false;
-                        btnSync.innerHTML = '<i class="fas fa-cloud-download-alt"></i> Sincronizar Cloud';
-                    });
-            });
-        }
     });
 </script>
 

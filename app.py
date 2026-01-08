@@ -342,24 +342,11 @@ def create_app(config_class=Config):
     @app.route('/api/refresh')
     @login_required
     def refresh_data():
-        # User Request: Force sync when button is pressed
-        from utils.excel_sync import sync_excel_to_db
-        try:
-            print("Manual Refresh: Forcing sync from Google Drive...")
-            success = sync_excel_to_db(app, force=True)
-            
-            if success:
-                return jsonify({
-                    'success': True, 
-                    'message': 'Datos actualizados correctamente desde Google Drive'
-                })
-            else:
-               return jsonify({
-                    'success': False, 
-                    'message': 'No se pudo leer el Excel (Intente de nuevo)'
-                }) 
-        except Exception as e:
-            return jsonify({'success': False, 'error': str(e)}), 500
+        # Manual refresh is now a no-op or simple reload message since we don't sync from Excel
+        return jsonify({
+            'success': True, 
+            'message': 'Datos actualizados.'
+        })
 
     @app.route('/api/export/<formato>')
     @login_required
@@ -525,73 +512,7 @@ def create_app(config_class=Config):
 # Instancia para ejecución simple o WSGI
 app = create_app()
 
-# --- EXCEL SYNC THREAD & ROUTES (ADDED) ---
-import threading
-import time
 
-def background_sync_task(app):
-    """Syncs Excel every 15 minutes in background"""
-    with app.app_context():
-        while True:
-            time.sleep(900) # 15 minutes
-            print("Background Sync: Starting update from Google Drive...")
-            try:
-                from utils.excel_sync import sync_excel_to_db
-                sync_excel_to_db(app)
-            except Exception as e:
-                print(f"Background Sync Error: {e}")
-
-@app.route('/admin/sync_excel', methods=['POST'])
-@login_required
-def manual_sync_excel():
-    if current_user.role not in [UserRoles.ADMIN, UserRoles.RECEPCION]:
-        return jsonify({'success': False, 'error': 'No autorizado'}), 403
-    
-    try:
-        from utils.excel_sync import sync_excel_to_db
-        success = sync_excel_to_db(app)
-        if success:
-           return jsonify({'success': True, 'message': 'Sincronización completada.'})
-        else:
-           return jsonify({'success': False, 'error': 'Error al leer Google Drive.'}), 500
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-@app.route('/debug_sync')
-def debug_sync_route():
-    """Ruta de diagnóstico para ver logs de sincronización en tiempo real"""
-    import io
-    import sys
-    from utils.excel_sync import sync_excel_to_db
-    
-    # Capture stdout
-    old_stdout = sys.stdout
-    new_stdout = io.StringIO()
-    sys.stdout = new_stdout
-    
-    try:
-        print("=== INICIANDO DEBUG SYNC ===")
-        print(f"Hora: {datetime.now()}")
-        
-        # Run Sync (FORCE=True to bypass cooldown for debugging)
-        result = sync_excel_to_db(app, force=True)
-        
-        print(f"\nResultado de Sincronización: {result}")
-        
-        # Check DB count
-        count = Equipment.query.count()
-        print(f"Total Equipos en DB: {count}")
-        
-    except Exception as e:
-        print(f"\nCRITICAL ERROR: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        
-    # Restore stdout and return
-    output = new_stdout.getvalue()
-    sys.stdout = old_stdout
-    
-    return f"<pre style='background:#222; color:#0f0; padding:20px;'>{output}</pre>"
 
 # --- VERCEL INITIALIZATION LOGIC ---
 # Global flag to ensure we only init once per lambda instance
@@ -693,11 +614,7 @@ if __name__ == '__main__':
         # Force init checks locally too
         initialize_on_first_request()
     
-    # Start Background Thread (Only for local dev persistence)
-    # Note: On Vercel this thread will die, but startup sync works on each cold boot.
-    # We use daemon=True so it doesn't block shutdown
-    sync_thread = threading.Thread(target=background_sync_task, args=(app,), daemon=True)
-    sync_thread.start()
+
 
     app.run(
         debug=Config.DEBUG,
