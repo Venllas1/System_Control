@@ -140,9 +140,20 @@
                 <div
                     class="card-header border-secondary d-flex justify-content-between align-items-center bg-success bg-opacity-10">
                     <h5 class="mb-0 text-success"><i class="fas fa-check-circle me-2"></i> Aprobados / En Servicio</h5>
-                    <div class="input-group input-group-sm w-25">
-                        <input type="text" id="searchAprobado" class="form-control bg-dark text-light border-secondary"
-                            placeholder="Filtrar...">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="input-group input-group-sm" style="width: 200px;">
+                            <input type="text" id="searchAprobado"
+                                class="form-control bg-dark text-light border-secondary" placeholder="Filtrar...">
+                        </div>
+                        <!-- Pagination Controls -->
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-secondary" id="btnPrevAprobado" disabled><i
+                                    class="fas fa-chevron-left"></i></button>
+                            <span class="btn btn-outline-secondary disabled text-light border-secondary"
+                                id="pageInfoAprobado">1/1</span>
+                            <button class="btn btn-outline-secondary" id="btnNextAprobado" disabled><i
+                                    class="fas fa-chevron-right"></i></button>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body p-0">
