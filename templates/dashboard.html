@@ -143,13 +143,7 @@
                             data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
                             data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') if eq.fecha_ingreso else 'N/A' }}"
                             data-reporte="{{ eq.reporte_cliente | e }}" data-cliente="{{ eq.cliente | e or 'N/A' }}"
-                            data-observaciones="{{ eq.observaciones | e or 'Sin observaciones' }}"
-                            data-fecha-diag="{{ eq.fecha_fin_diagnostico.strftime('%Y-%m-%d %H:%M') if eq.fecha_fin_diagnostico else '-' }}"
-                            data-obs-diag="{{ eq.observaciones_diagnostico | e or '' }}"
-                            data-fecha-inicio-serv="{{ eq.fecha_inicio_servicio.strftime('%Y-%m-%d %H:%M') if eq.fecha_inicio_servicio else '-' }}"
-                            data-obs-inicio-serv="{{ eq.observaciones_inicio_servicio | e or '' }}"
-                            data-fecha-fin-serv="{{ eq.fecha_fin_servicio.strftime('%Y-%m-%d %H:%M') if eq.fecha_fin_servicio else '-' }}"
-                            data-obs-fin-serv="{{ eq.observaciones_fin_servicio | e or '' }}">
+                            data-observaciones="{{ eq.observaciones | e or 'Sin observaciones' }}">
                             <i class="fas fa-eye"></i>
                         </button>
                     </td>
@@ -332,13 +326,7 @@
                                     data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') if eq.fecha_ingreso else 'N/A' }}"
                                     data-reporte="{{ eq.reporte_cliente | e }}"
                                     data-cliente="{{ eq.cliente | e or 'N/A' }}"
-                                    data-observaciones="{{ eq.observaciones | e or 'Sin observaciones' }}"
-                                    data-fecha-diag="{{ eq.fecha_fin_diagnostico.strftime('%Y-%m-%d %H:%M') if eq.fecha_fin_diagnostico else '-' }}"
-                                    data-obs-diag="{{ eq.observaciones_diagnostico | e or '' }}"
-                                    data-fecha-inicio-serv="{{ eq.fecha_inicio_servicio.strftime('%Y-%m-%d %H:%M') if eq.fecha_inicio_servicio else '-' }}"
-                                    data-obs-inicio-serv="{{ eq.observaciones_inicio_servicio | e or '' }}"
-                                    data-fecha-fin-serv="{{ eq.fecha_fin_servicio.strftime('%Y-%m-%d %H:%M') if eq.fecha_fin_servicio else '-' }}"
-                                    data-obs-fin-serv="{{ eq.observaciones_fin_servicio | e or '' }}">
+                                    data-observaciones="{{ eq.observaciones | e or 'Sin observaciones' }}">
                                     <i class="fas fa-eye"></i>
                                 </button>
                             </div>
@@ -546,20 +534,11 @@
         let msg = `¿Cambiar estado a: ${newStatus}?`;
         if (newEncargado) msg += `\nAsignando a: ${newEncargado}`;
 
-        let observaciones = null;
-        const sLower = newStatus.toLowerCase();
-        // Prompt for observations on key transitions
-        if (sLower.includes('pendiente de aprobacion') || sLower === 'inicio de servicio' || sLower.includes('servicio culminado')) {
-            observaciones = prompt(`${msg}\n\nPor favor, ingrese sus OBSERVACIONES para este cambio de estado:`);
-            if (observaciones === null) return; // User cancelled
-        } else {
-            if (!confirm(msg)) return;
-        }
+        if (!confirm(msg)) return;
 
         const formData = new FormData();
         formData.append('status', newStatus);
         if (newEncargado) formData.append('encargado', newEncargado);
-        if (observaciones) formData.append('observaciones', observaciones);
 
         fetch(`/api/equipment/${id}/update_status`, { method: 'POST', body: formData })
             .then(r => r.json())
@@ -581,14 +560,7 @@
         document.getElementById('infoReporte').innerText = d.reporte;
 
         // New Lifecycle Fields
-        document.getElementById('infoFechaDiag').innerText = d.fechaDiag || '-';
-        document.getElementById('infoObsDiag').innerText = d.obsDiag || '';
 
-        document.getElementById('infoFechaInicioServ').innerText = d.fechaInicioServ || '-';
-        document.getElementById('infoObsInicioServ').innerText = d.obsInicioServ || '';
-
-        document.getElementById('infoFechaFinServ').innerText = d.fechaFinServ || '-';
-        document.getElementById('infoObsFinServ').innerText = d.obsFinServ || '';
 
         const myModal = new bootstrap.Modal(document.getElementById('detailedInfoModal'));
         myModal.show();
@@ -620,36 +592,7 @@
                         <p id="infoFecha" class="fw-bold mb-0"></p>
                     </div>
 
-                    <div class="col-12 mt-3">
-                        <h6 class="border-bottom border-secondary pb-1 mb-2 text-info">Ciclo de Vida</h6>
 
-                        <!-- Diagnostico -->
-                        <div class="mb-2">
-                            <small class="text-secondary text-uppercase d-block">Fin Diagnóstico</small>
-                            <div class="d-flex justify-content-between">
-                                <span id="infoFechaDiag" class="fw-bold fs-7"></span>
-                            </div>
-                            <p id="infoObsDiag" class="text-muted small mb-0 fst-italic"></p>
-                        </div>
-
-                        <!-- Inicio Servicio -->
-                        <div class="mb-2">
-                            <small class="text-secondary text-uppercase d-block">Inicio Servicio</small>
-                            <div class="d-flex justify-content-between">
-                                <span id="infoFechaInicioServ" class="fw-bold fs-7"></span>
-                            </div>
-                            <p id="infoObsInicioServ" class="text-muted small mb-0 fst-italic"></p>
-                        </div>
-
-                        <!-- Fin Servicio -->
-                        <div>
-                            <small class="text-secondary text-uppercase d-block">Fin Servicio</small>
-                            <div class="d-flex justify-content-between">
-                                <span id="infoFechaFinServ" class="fw-bold fs-7"></span>
-                            </div>
-                            <p id="infoObsFinServ" class="text-muted small mb-0 fst-italic"></p>
-                        </div>
-                    </div>
                     <div class="col-6">
                         <small class="text-secondary text-uppercase">Encargado</small>
                         <p id="infoEncargado" class="fw-bold mb-0"></p>

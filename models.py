@@ -51,14 +51,6 @@ class Equipment(db.Model):
     serie = db.Column(db.String(255))
     accesorios = db.Column(db.Text)
 
-    # New Fields for Lifecycle Tracking (Diagnostico/Servicio)
-    fecha_fin_diagnostico = db.Column(db.DateTime)
-    observaciones_diagnostico = db.Column(db.Text)
-    fecha_inicio_servicio = db.Column(db.DateTime)
-    observaciones_inicio_servicio = db.Column(db.Text)
-    fecha_fin_servicio = db.Column(db.DateTime)
-    observaciones_fin_servicio = db.Column(db.Text)
-
     # Constantes de Estado
     class Status:
         ESPERA_DIAGNOSTICO = 'Espera de Diagnostico'

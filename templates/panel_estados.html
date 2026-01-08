@@ -303,36 +303,7 @@
                         <div class="col-6">
                             <small class="text-secondary text-uppercase">Encargado</small>
                             <p id="infoEncargado" class="fw-bold mb-0"></p>
-                            <div class="col-12 mt-3">
-                                <h6 class="border-bottom border-secondary pb-1 mb-2 text-info">Ciclo de Vida</h6>
 
-                                <!-- Diagnostico -->
-                                <div class="mb-2">
-                                    <small class="text-secondary text-uppercase d-block">Fin Diagnóstico</small>
-                                    <div class="d-flex justify-content-between">
-                                        <span id="infoFechaDiag" class="fw-bold fs-7"></span>
-                                    </div>
-                                    <p id="infoObsDiag" class="text-muted small mb-0 fst-italic"></p>
-                                </div>
-
-                                <!-- Inicio Servicio -->
-                                <div class="mb-2">
-                                    <small class="text-secondary text-uppercase d-block">Inicio Servicio</small>
-                                    <div class="d-flex justify-content-between">
-                                        <span id="infoFechaInicioServ" class="fw-bold fs-7"></span>
-                                    </div>
-                                    <p id="infoObsInicioServ" class="text-muted small mb-0 fst-italic"></p>
-                                </div>
-
-                                <!-- Fin Servicio -->
-                                <div>
-                                    <small class="text-secondary text-uppercase d-block">Fin Servicio</small>
-                                    <div class="d-flex justify-content-between">
-                                        <span id="infoFechaFinServ" class="fw-bold fs-7"></span>
-                                    </div>
-                                    <p id="infoObsFinServ" class="text-muted small mb-0 fst-italic"></p>
-                                </div>
-                            </div>
 
                             <div class="col-12 mt-3">
                                 <small class="text-secondary text-uppercase">Reporte Cliente</small>
@@ -696,21 +667,11 @@
             window.updateStatus = function (id, newStatus, newEncargado = null) {
                 let msg = `¿Cambiar estado a: ${newStatus}?`;
                 if (newEncargado) msg += `\nAsignando a: ${newEncargado}`;
-
-                let observaciones = null;
-                const sLower = newStatus.toLowerCase();
-                // Prompt for observations on key transitions
-                if (sLower.includes('pendiente de aprobacion') || sLower === 'inicio de servicio' || sLower.includes('servicio culminado')) {
-                    observaciones = prompt(`${msg}\n\nPor favor, ingrese sus OBSERVACIONES para este cambio de estado:`);
-                    if (observaciones === null) return; // User cancelled
-                } else {
-                    if (!confirm(msg)) return;
-                }
+                if (!confirm(msg)) return;
 
                 const formData = new FormData();
                 formData.append('status', newStatus);
                 if (newEncargado) formData.append('encargado', newEncargado);
-                if (observaciones) formData.append('observaciones', observaciones);
 
                 fetch(`/api/equipment/${id}/update_status`, { method: 'POST', body: formData })
                     .then(r => r.json())
@@ -740,17 +701,6 @@
                 document.getElementById('infoEncargado').innerText = item.encargado || 'Sin asignar';
                 document.getElementById('infoFecha').innerText = item.fecha_ingreso || 'N/A';
                 document.getElementById('infoReporte').innerText = item.reporte_cliente || 'Sin reporte';
-                // Since JSON might not have full fields if existing code limited it, check app.py
-                // existing code in app.py only exports limited fields in 'equipments_json'.
-                // I need to update app.py to include 'cliente', 'serie', 'accesorios', 'observaciones' in JSON first!
-                // Wait, I missed that step. 
-                // Workaround: I'll assume I update app.py next, or I do it now.
-                // For now, I'll populate what I have, and add placeholders.
-                // Actually, item is from equipments_json. I MUST update app.py to send this data.
-
-                // For now, let's assuming I'll fix app.py in next step.
-                // Using placeholder logic or accessing if exists
-                // (These fields need to be added to to_dict or manual json construction in app.py)
 
                 const myModal = new bootstrap.Modal(document.getElementById('detailedInfoModal'));
                 myModal.show();

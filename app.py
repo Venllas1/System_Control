@@ -293,13 +293,7 @@ def create_app(config_class=Config):
             'serie': eq.serie,
             'accesorios': eq.accesorios,
             'observaciones': eq.observaciones,
-            'reporte_cliente': eq.reporte_cliente,
-            'fecha_fin_diagnostico': eq.fecha_fin_diagnostico.strftime('%Y-%m-%d %H:%M') if eq.fecha_fin_diagnostico else None,
-            'observaciones_diagnostico': eq.observaciones_diagnostico,
-            'fecha_inicio_servicio': eq.fecha_inicio_servicio.strftime('%Y-%m-%d %H:%M') if eq.fecha_inicio_servicio else None,
-            'observaciones_inicio_servicio': eq.observaciones_inicio_servicio,
-            'fecha_fin_servicio': eq.fecha_fin_servicio.strftime('%Y-%m-%d %H:%M') if eq.fecha_fin_servicio else None,
-            'observaciones_fin_servicio': eq.observaciones_fin_servicio
+            'reporte_cliente': eq.reporte_cliente
         } for eq in equipments])
         
         return render_template('panel_estados.html', 
@@ -489,26 +483,9 @@ def create_app(config_class=Config):
         # Si es válido, aplicamos cambios
         equipment.estado = new_status
         
-        timestamp = datetime.now().strftime('%d/%m %H:%M')
-        
-        # LOGIC FOR NEW DATE/OBSERVATION FIELDS
-        if new_status.lower() in ['pendiente de aprobacion', 'pendiente aprobacion'] and 'diagnostico' in equipment.estado.lower():
-             equipment.fecha_fin_diagnostico = datetime.utcnow()
-             if observaciones:
-                 equipment.observaciones_diagnostico = f"[{timestamp} {current_user.username}]: {observaciones}"
-    
-        elif new_status.lower() == 'inicio de servicio':
-             equipment.fecha_inicio_servicio = datetime.utcnow()
-             if observaciones:
-                 equipment.observaciones_inicio_servicio = f"[{timestamp} {current_user.username}]: {observaciones}"
-                 
-        elif new_status.lower() == 'servicio culminado':
-             equipment.fecha_fin_servicio = datetime.utcnow()
-             if observaciones:
-                 equipment.observaciones_fin_servicio = f"[{timestamp} {current_user.username}]: {observaciones}"
-    
         if observaciones:
             # Append observaciones con timestamp
+            timestamp = datetime.now().strftime('%d/%m %H:%M')
             old_obs = equipment.observaciones or ''
             equipment.observaciones = f"{old_obs}\n[{timestamp} {current_user.username}]: {observaciones}".strip()
             
