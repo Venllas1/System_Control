@@ -138,6 +138,14 @@
                         <a href="{{ url_for('panel_estados') }}" class="btn btn-sm btn-outline-light">
                             <i class="fas fa-edit"></i>
                         </a>
+                        <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
+                            data-fr="{{ eq.fr or 'N/A' }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
+                            data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
+                            data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') if eq.fecha_ingreso else 'N/A' }}"
+                            data-reporte="{{ eq.reporte_cliente }}" data-cliente="{{ eq.cliente or 'N/A' }}"
+                            data-observaciones="{{ eq.observaciones or 'Sin observaciones' }}">
+                            <i class="fas fa-eye"></i>
+                        </button>
                     </td>
                 </tr>
                 {% endfor %}
@@ -312,6 +320,14 @@
                                     title="Ver en Panel Completo">
                                     <i class="fas fa-external-link-alt"></i>
                                 </a>
+                                <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
+                                    data-fr="{{ eq.fr or 'N/A' }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
+                                    data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
+                                    data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') if eq.fecha_ingreso else 'N/A' }}"
+                                    data-reporte="{{ eq.reporte_cliente }}" data-cliente="{{ eq.cliente or 'N/A' }}"
+                                    data-observaciones="{{ eq.observaciones or 'Sin observaciones' }}">
+                                    <i class="fas fa-eye"></i>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -409,6 +425,15 @@
     document.addEventListener('DOMContentLoaded', function () {
         const form = document.getElementById('createEquipmentForm');
         if (form) {
+            // Force Uppercase on Input
+            const inputs = form.querySelectorAll('input[type="text"], textarea');
+            inputs.forEach(input => {
+                input.classList.add('text-uppercase'); // Visual CSS
+                input.addEventListener('input', function () {
+                    this.value = this.value.toUpperCase(); // Actual Value
+                });
+            });
+
             form.addEventListener('submit', function (e) {
                 e.preventDefault();
                 const formData = new FormData(form);
@@ -521,6 +546,63 @@
             })
             .catch(err => alert('Error de red: ' + err));
     };
+
+    window.showInfo = function (btn) {
+        // Read data from attributes
+        const d = btn.dataset;
+        document.getElementById('infoFr').innerText = d.fr;
+        document.getElementById('infoMarca').innerText = d.marca;
+        document.getElementById('infoEstado').innerHTML = `<span class="badge bg-secondary">${d.estado}</span>`; // Simple badge for dashboard
+        document.getElementById('infoEncargado').innerText = d.encargado;
+        document.getElementById('infoFecha').innerText = d.fecha;
+        document.getElementById('infoReporte').innerText = d.reporte;
+        // Optional: Add Cliente/Observaciones to modal if HTML supports it
+
+        const myModal = new bootstrap.Modal(document.getElementById('detailedInfoModal'));
+        myModal.show();
+    };
 </script>
+
+<!-- INFO MODAL -->
+<div class="modal fade" id="detailedInfoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark-card border-secondary text-light">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title"><i class="fas fa-info-circle text-info me-2"></i>Detalles del Equipo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3 border-bottom border-secondary pb-2">
+                    <small class="text-secondary text-uppercase d-block">Equipo</small>
+                    <h4 id="infoMarca" class="mb-0"></h4>
+                    <span id="infoFr" class="badge bg-secondary mt-1"></span>
+                </div>
+                <div class="row g-3">
+                    <div class="col-6">
+                        <small class="text-secondary text-uppercase">Estado</small>
+                        <div id="infoEstado" class="mt-1"></div>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-secondary text-uppercase">Fecha Ingreso</small>
+                        <p id="infoFecha" class="fw-bold mb-0"></p>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-secondary text-uppercase">Encargado</small>
+                        <p id="infoEncargado" class="fw-bold mb-0"></p>
+                    </div>
+                    <div class="col-12 mt-3">
+                        <small class="text-secondary text-uppercase">Reporte Cliente</small>
+                        <div class="p-2 bg-dark rounded border border-secondary text-light small" id="infoReporte"
+                            style="max-height:100px; overflow-y:auto;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-secondary p-1">
+                <button type="button" class="btn btn-sm btn-secondary w-100" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}

@@ -288,7 +288,12 @@ def create_app(config_class=Config):
             'modelo': eq.modelo,
             'estado': eq.estado,
             'encargado': eq.encargado,
-            'fecha_ingreso': eq.fecha_ingreso.strftime('%Y-%m-%d') if eq.fecha_ingreso else None
+            'fecha_ingreso': eq.fecha_ingreso.strftime('%Y-%m-%d') if eq.fecha_ingreso else None,
+            'cliente': eq.cliente,
+            'serie': eq.serie,
+            'accesorios': eq.accesorios,
+            'observaciones': eq.observaciones,
+            'reporte_cliente': eq.reporte_cliente
         } for eq in equipments])
         
         return render_template('panel_estados.html', 
@@ -428,18 +433,18 @@ def create_app(config_class=Config):
                     pass # Fallback to now
 
             new_eq = Equipment(
-                fr=data.get('fr', ''), 
-                marca=marca,
-                modelo=modelo,
-                reporte_cliente=reporte,
-                observaciones=data.get('observaciones', ''),
+                fr=data.get('fr', '').upper(), 
+                marca=marca.upper(),
+                modelo=modelo.upper(),
+                reporte_cliente=reporte.upper(),
+                observaciones=data.get('observaciones', '').upper(),
                 condicion='Regular', # Default static since removed from UI
                 encargado='No asignado', # Fixed default per User Request
                 estado=Equipment.Status.ESPERA_DIAGNOSTICO, 
                 # New Fields
-                cliente=data.get('cliente', ''),
-                serie=data.get('serie', ''),
-                accesorios=data.get('accesorios', ''),
+                cliente=data.get('cliente', '').upper(),
+                serie=data.get('serie', '').upper(),
+                accesorios=data.get('accesorios', '').upper(),
                 fecha_ingreso=fecha_obj
             )
             
