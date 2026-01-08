@@ -322,6 +322,9 @@
         let userRole = JSON.parse(dataEl.dataset.userRole);
         if (userRole) userRole = userRole.toLowerCase();
 
+        // Helper to normalize strings (remove accents and lowercase)
+        const normalize = str => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
         // Helper functions
         function getStatusBadge(status) {
             let badgeClass = 'bg-secondary';
@@ -523,22 +526,6 @@
 
                 return render;
             }
-
-            // 1. Diagnostico
-            const tDiag = document.getElementById('tableDiagnostico');
-            let dataDiag = equipments.filter(item => {
-                const s = (item.estado || '').toLowerCase();
-                return (s.includes('diagnostico') && !s.includes('revision')) || s.includes('consumible') || (s.includes('repuesto') && !s.includes('repuestos'));
-            });
-            // Setup One-shot render for non-paginated (or treat as all sections paginated? User asked for Approved table pagination specifically, but keeping integrity)
-            // But actually, createRow now adds columns, so I must stick to the HTML.
-            // For now, I'll direct inject Diag as before but using createRow.
-            // Note: Diag table logic was simple list.
-            tDiag.innerHTML = dataDiag.map(i => createRow(i, true)).join('');
-            // Search logic... (Simpler to reuse the factory)
-
-            // Helper to normalize strings (remove accents and lowercase)
-            const normalize = str => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
             function createRenderLogic(filterFn, tableId, searchId, paginationIds = null) {
                 let sectionData = equipments.filter(item => filterFn(normalize(item.estado)));
