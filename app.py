@@ -293,6 +293,9 @@ def create_app(config_class=Config):
             'cliente': eq.cliente,
             'serie': eq.serie,
             'accesorios': eq.accesorios,
+            'serie': eq.serie,
+            'accesorios': eq.accesorios,
+            'numero_informe': eq.numero_informe,
             'observaciones': eq.observaciones,
             'reporte_cliente': eq.reporte_cliente
         } for eq in equipments])
@@ -392,6 +395,78 @@ def create_app(config_class=Config):
     # ============================================
     # RUTAS DE GESTIÓN DE EQUIPOS (NUEVAS)
     # ============================================
+
+    @app.route('/admin/import_informes', methods=['POST'])
+    @login_required
+    def import_informes():
+        if not current_user.is_admin:
+            flash('Acceso denegado', 'danger')
+            return redirect(url_for('dashboard'))
+
+        if 'file' not in request.files:
+            flash('No se seleccionó ningún archivo', 'danger')
+            return redirect(url_for('dashboard'))
+
+        file = request.files['file']
+        if file.filename == '':
+            flash('No se seleccionó ningún archivo', 'danger')
+            return redirect(url_for('dashboard'))
+
+        if file:
+            try:
+                # Check for CSV extension
+                if not file.filename.endswith('.csv'):
+                    flash('Solo se permiten archivos CSV', 'danger')
+                    return redirect(url_for('dashboard'))
+
+                # Read file stream with correct encoding
+                try:
+                    stream = file.read().decode('utf-8')
+                except UnicodeDecodeError:
+                    file.seek(0)
+                    stream = file.read().decode('latin-1')
+                
+                # Parse CSV
+                import csv
+                import io
+                
+                csv_input = io.StringIO(stream)
+                reader = csv.DictReader(csv_input, delimiter=';')
+                headers = reader.fieldnames
+                
+                # Find matching headers
+                map_fr = next((h for h in headers if h.lower().strip() == 'fr'), None)
+                map_diag = next((h for h in headers if 'no' in h.lower() and 'diag' in h.lower()), None)
+
+                if not map_fr or not map_diag:
+                    flash("Error: El archivo debe tener columnas 'FR' y 'No DIAG' (o similar)", "danger")
+                    return redirect(url_for('dashboard'))
+
+                updated_count = 0
+                not_found_count = 0
+
+                for row in reader:
+                    fr_val = row[map_fr].strip().upper()
+                    diag_val = row[map_diag].strip()
+                    
+                    if not fr_val: continue
+                    
+                    # Update existing ONLY
+                    equipment = Equipment.query.filter(Equipment.fr.ilike(fr_val)).first()
+                    if equipment:
+                        if equipment.numero_informe != diag_val:
+                            equipment.numero_informe = diag_val
+                            updated_count += 1
+                    else:
+                        not_found_count += 1
+                
+                db.session.commit()
+                flash(f"Importación completada: {updated_count} equipos actualizados. {not_found_count} FRs no encontrados.", "success")
+                
+            except Exception as e:
+                flash(f"Error al procesar el archivo: {str(e)}", "danger")
+
+        return redirect(url_for('dashboard'))
 
     @app.route('/api/equipment/create', methods=['POST'])
     @login_required
@@ -561,6 +636,11 @@ def initialize_on_first_request():
                     if 'accesorios' not in columns:
                         print("Migrating: Adding 'accesorios' column...")
                         conn.execute(text("ALTER TABLE equipment ADD COLUMN accesorios TEXT"))
+                        conn.commit()
+
+                    if 'numero_informe' not in columns:
+                        print("Migrating: Adding 'numero_informe' column...")
+                        conn.execute(text("ALTER TABLE equipment ADD COLUMN numero_informe VARCHAR(255)"))
                         conn.commit()
             except Exception as e:
                 print(f"Migration Logic Error: {e}")

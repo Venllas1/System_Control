@@ -50,6 +50,7 @@ class Equipment(db.Model):
     cliente = db.Column(db.String(255))
     serie = db.Column(db.String(255))
     accesorios = db.Column(db.Text)
+    numero_informe = db.Column(db.String(255))
 
     # Constantes de Estado
     class Status:
@@ -74,6 +75,7 @@ class Equipment(db.Model):
             'ESTADO': self.estado,
             'CONDICION': self.condicion,
             'ENCARGADO': self.encargado,
+            'NUMERO INFORME': self.numero_informe,
             'FECHA': self.fecha_ingreso.strftime('%Y-%m-%d') if self.fecha_ingreso else None
         }
 
