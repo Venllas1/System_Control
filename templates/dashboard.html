@@ -136,8 +136,9 @@
                         </span>
                     </td>
                     <td>
-                        <a href="{{ url_for('panel_estados') }}" class="btn btn-sm btn-outline-light">
-                            <i class="fas fa-edit"></i>
+                        <a href="{{ url_for('panel_estados') }}" class="btn btn-sm btn-outline-light"
+                            title="Ir al Panel de Estados">
+                            <i class="fas fa-expand"></i>
                         </a>
                         <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
                             data-fr="{{ eq.fr or 'N/A' }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
@@ -312,24 +313,14 @@
 
                         <td>
                             <div class="d-flex gap-1">
-                                {% if current_user.role|lower == UserRoles.RECEPCION|lower and 'pendiente' in
-                                eq.estado|default('')|lower %}
-                                <button class="btn btn-sm btn-success" onclick="updateStatus({{ eq.id }}, 'Aprobado')">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                                <button class="btn btn-sm btn-danger" onclick="updateStatus({{ eq.id }}, 'Rechazado')">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                                {% endif %}
                                 <a href="{{ url_for('panel_estados') }}" class="btn btn-sm btn-outline-primary"
                                     title="Ver en Panel Completo">
-                                    <i class="fas fa-external-link-alt"></i>
+                                    <i class="fas fa-expand"></i>
                                 </a>
                                 <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
                                     data-fr="{{ eq.fr or 'N/A' }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
                                     data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
                                     data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') if eq.fecha_ingreso else 'N/A' }}"
-                                    data-reporte="{{ eq.reporte_cliente | e }}"
                                     data-reporte="{{ eq.reporte_cliente | e }}"
                                     data-cliente="{{ eq.cliente | e or 'N/A' }}"
                                     data-observaciones="{{ eq.observaciones | e or 'Sin observaciones' }}"

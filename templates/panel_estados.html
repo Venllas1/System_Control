@@ -318,6 +318,10 @@
                             <small class="text-secondary text-uppercase">Accesorios</small>
                             <p id="infoAccesorios" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
                         </div>
+                        <div class="col-md-6">
+                            <small class="text-secondary text-uppercase text-info">No. Informe</small>
+                            <p id="infoInforme" class="fw-bold text-info mb-0 border-bottom border-dark pb-1"></p>
+                        </div>
                         <div class="col-12 mt-3">
                             <small class="text-secondary text-uppercase">Estado</small>
                             <div id="infoEstado" class="mt-1"></div>
@@ -732,6 +736,7 @@
             if (document.getElementById('infoSerie')) document.getElementById('infoSerie').innerText = item.serie || 'N/A';
             if (document.getElementById('infoCondicion')) document.getElementById('infoCondicion').innerText = item.condicion || 'Regular';
             if (document.getElementById('infoAccesorios')) document.getElementById('infoAccesorios').innerText = item.accesorios || 'Ninguno';
+            if (document.getElementById('infoInforme')) document.getElementById('infoInforme').innerText = item.numero_informe || 'N/A';
             if (document.getElementById('infoObservaciones')) document.getElementById('infoObservaciones').innerText = item.observaciones || 'Sin observaciones';
 
             const myModal = new bootstrap.Modal(document.getElementById('detailedInfoModal'));
