@@ -218,6 +218,33 @@ def create_app(config_class=Config):
                     # Recientes (Newest) - Last in list (reversed)
                     recent_pending = sorted(pending_list, key=lambda x: x.fecha_ingreso if x.fecha_ingreso else datetime(2000, 1, 1), reverse=True)[:5]
 
+                # HISTORIAL ENTREGADOS (Excepto Almacen)
+                equipos_entregados = []
+                entregados_json = '[]'
+                
+                if user_role_norm != UserRoles.ALMACEN.lower():
+                     equipos_entregados = Equipment.query.filter(
+                        Equipment.estado.ilike('%entregado%')
+                     ).order_by(Equipment.fecha_ingreso.desc()).all()
+                     
+                     import json
+                     entregados_json = json.dumps([{
+                        'fr': eq.fr,
+                        'marca': eq.marca,
+                        'modelo': eq.modelo,
+                        'estado': eq.estado,
+                        'cliente': eq.cliente,
+                        'fecha_ingreso': eq.fecha_ingreso.strftime('%d/%m/%Y') if eq.fecha_ingreso else 'N/A',
+                        'encargado': eq.encargado,
+                        'id': eq.id,
+                        'reporte_cliente': eq.reporte_cliente,
+                        'observaciones': eq.observaciones,
+                        'serie': eq.serie,
+                        'accesorios': eq.accesorios,
+                        'condicion': eq.condicion,
+                        'numero_informe': eq.numero_informe
+                    } for eq in equipos_entregados])
+
                 stats_user = {
                     'mis_tareas': len(equipos_relevantes),
                     'ultima_actualizacion': datetime.now().strftime('%d/%m/%Y %H:%M:%S'),
@@ -230,6 +257,8 @@ def create_app(config_class=Config):
                                      equipos_relevantes=equipos_relevantes,
                                      recent_pending=recent_pending,
                                      veteran_pending=veteran_pending,
+                                     equipos_entregados=equipos_entregados,
+                                     entregados_json=entregados_json,
                                      UserRoles=UserRoles,
                                      Status=Equipment.Status)
 
@@ -248,8 +277,9 @@ def create_app(config_class=Config):
         if current_user.role.lower() == UserRoles.VISUALIZADOR.lower():
             query = Equipment.query
         else:
-            # For others, hide Entregado to keep panel clean
-            query = Equipment.query.filter(~Equipment.estado.in_(['Entregado', 'ENTREGADO']))
+            # For others, we usually hide Entregado, BUT now we want to show it as history.
+            # So we remove the global exclude and handle it per role.
+            query = Equipment.query
 
         if current_user.role.lower() == UserRoles.OPERACIONES.lower():
             query = query.filter(or_(
@@ -259,14 +289,16 @@ def create_app(config_class=Config):
                 Equipment.estado == Equipment.Status.REPUESTO_ENTREGADO,
                 Equipment.estado.in_(['Aprobado', 'APROBADO']),
                 Equipment.estado == Equipment.Status.INICIO_SERVICIO,
-                Equipment.estado == Equipment.Status.EN_SERVICIO
+                Equipment.estado == Equipment.Status.EN_SERVICIO,
+                Equipment.estado.ilike('%entregado%') # New: History
             ))
         elif current_user.role.lower() == UserRoles.RECEPCION.lower():
             query = query.filter(or_(
                 Equipment.estado == Equipment.Status.ESPERA_DIAGNOSTICO,
                 Equipment.estado == Equipment.Status.PENDIENTE_APROBACION,
                 Equipment.estado.ilike('%pendiente%aprobacion%'), # Handle variations
-                Equipment.estado == Equipment.Status.SERVICIO_CULMINADO
+                Equipment.estado == Equipment.Status.SERVICIO_CULMINADO,
+                Equipment.estado.ilike('%entregado%') # New: History
             ))
         elif current_user.role.lower() == UserRoles.ALMACEN.lower():
             query = query.filter(Equipment.estado.in_([

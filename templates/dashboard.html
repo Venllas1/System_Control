@@ -427,7 +427,176 @@
 
                                         </td>
                                     </tr>
-                                    {% else %}
+
+    <!-- HISTORIAL ENTREGADOS (SHARED) -->
+    {% if current_user.role|lower != 'almacen' %}
+    <div class="row g-4 mt-4">
+        <div class="col-12">
+            <div class="card bg-dark border-secondary shadow-sm">
+                <div class="card-header border-secondary d-flex justify-content-between align-items-center">
+                    <div class="text-light">
+                        <i class="fas fa-history me-2"></i> Historial de Equipos Entregados
+                    </div>
+                    <div class="d-flex gap-2">
+                        <input type="text" id="searchEntregados" class="form-control form-control-sm bg-dark text-light border-secondary" placeholder="Buscar..." style="width: 200px;">
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle" id="tableEntregados">
+                            <thead>
+                                <tr>
+                                    <th>FR</th>
+                                    <th>Cliente</th>
+                                    <th>Equipo</th>
+                                    <th>Estado</th>
+                                    <th>Fecha Ingreso</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyEntregados">
+                                <!-- JS Rendered -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Pagination -->
+                    <div class="card-footer border-secondary d-flex justify-content-between align-items-center py-2">
+                        <small class="text-muted" id="infoEntregados">Mostrando 0-0 de 0</small>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0" id="paginationEntregados">
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Safe Parse
+        let entregadosData = [];
+        try {
+            entregadosData = JSON.parse('{{ entregados_json | safe }}');
+        } catch (e) {
+            console.error("Error parsing entregados JSON", e);
+        }
+
+        const itemsPerPage = 5;
+        let currentPage = 1;
+        let filteredData = entregadosData;
+
+        const tbody = document.getElementById('tbodyEntregados');
+        const searchInput = document.getElementById('searchEntregados');
+        const pagination = document.getElementById('paginationEntregados');
+        const info = document.getElementById('infoEntregados');
+
+        function renderTable(page) {
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            
+            const start = (page - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageData = filteredData.slice(start, end);
+
+            if (pageData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No hay registros</td></tr>';
+                return;
+            }
+
+            pageData.forEach(eq => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><span class="badge bg-secondary">${eq.fr || 'N/A'}</span></td>
+                    <td>${eq.cliente || 'N/A'}</td>
+                    <td>
+                        <span class="fw-bold">${eq.marca}</span>
+                        <small class="d-block text-muted">${eq.modelo}</small>
+                    </td>
+                    <td><span class="badge bg-success">${eq.estado}</span></td>
+                    <td>${eq.fecha_ingreso}</td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
+                            data-fr="${eq.fr}" 
+                            data-marca="${eq.marca} ${eq.modelo}"
+                            data-estado="${eq.estado}" 
+                            data-encargado="${eq.encargado}"
+                            data-fecha="${eq.fecha_ingreso}"
+                            data-reporte="${eq.reporte_cliente || ''}"
+                            data-cliente="${eq.cliente || ''}"
+                            data-observaciones="${eq.observaciones || ''}"
+                            data-serie="${eq.serie || ''}"
+                            data-informe="${eq.numero_informe || ''}"
+                            data-accesorios="${eq.accesorios || ''}"
+                            data-condicion="${eq.condicion || ''}">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            updatePagination();
+        }
+
+        function updatePagination() {
+            if (!pagination) return;
+            pagination.innerHTML = '';
+            
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            
+            // Info text
+            const start = (currentPage - 1) * itemsPerPage + 1;
+            const end = Math.min(currentPage * itemsPerPage, filteredData.length);
+            if (info) info.textContent = `Mostrando ${filteredData.length > 0 ? start : 0}-${end} de ${filteredData.length}`;
+
+            // Prev
+            const liPrev = document.createElement('li');
+            liPrev.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+            liPrev.innerHTML = `<a class="page-link bg-dark border-secondary text-light" href="#">&laquo;</a>`;
+            liPrev.onclick = (e) => { e.preventDefault(); if(currentPage > 1) { currentPage--; renderTable(currentPage); } };
+            pagination.appendChild(liPrev);
+
+            // Pages (Limit to 5 visible)
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                     const li = document.createElement('li');
+                     li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                     li.innerHTML = `<a class="page-link bg-dark border-secondary text-light" href="#">${i}</a>`;
+                     li.onclick = (e) => { e.preventDefault(); currentPage = i; renderTable(currentPage); };
+                     pagination.appendChild(li);
+                }
+            }
+
+            // Next
+            const liNext = document.createElement('li');
+            liNext.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+            liNext.innerHTML = `<a class="page-link bg-dark border-secondary text-light" href="#">&raquo;</a>`;
+            liNext.onclick = (e) => { e.preventDefault(); if(currentPage < totalPages) { currentPage++; renderTable(currentPage); } };
+            pagination.appendChild(liNext);
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                filteredData = entregadosData.filter(eq => 
+                    (eq.fr || '').toLowerCase().includes(term) ||
+                    (eq.cliente || '').toLowerCase().includes(term) ||
+                    (eq.marca || '').toLowerCase().includes(term) ||
+                    (eq.modelo || '').toLowerCase().includes(term)
+                );
+                currentPage = 1;
+                renderTable(currentPage);
+            });
+        }
+
+        // Initial Render
+        if (filteredData.length > 0) renderTable(currentPage);
+        else if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No hay equipos entregados</td></tr>';
+    });
+    </script>
+    {% endif %}
+                                        {% else %}
                                     <tr>
                                         <td colspan="8" class="text-center text-muted">No hay equipos terminados
                                             recientes
@@ -940,7 +1109,176 @@
                 </div>
             </div>
         </div>
-        {% endif %}
+
+    <!-- HISTORIAL ENTREGADOS (SHARED) -->
+    {% if current_user.role|lower != 'almacen' %}
+    <div class="row g-4 mt-4">
+        <div class="col-12">
+            <div class="card bg-dark border-secondary shadow-sm">
+                <div class="card-header border-secondary d-flex justify-content-between align-items-center">
+                    <div class="text-light">
+                        <i class="fas fa-history me-2"></i> Historial de Equipos Entregados
+                    </div>
+                    <div class="d-flex gap-2">
+                        <input type="text" id="searchEntregados" class="form-control form-control-sm bg-dark text-light border-secondary" placeholder="Buscar..." style="width: 200px;">
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle" id="tableEntregados">
+                            <thead>
+                                <tr>
+                                    <th>FR</th>
+                                    <th>Cliente</th>
+                                    <th>Equipo</th>
+                                    <th>Estado</th>
+                                    <th>Fecha Ingreso</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbodyEntregados">
+                                <!-- JS Rendered -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Pagination -->
+                    <div class="card-footer border-secondary d-flex justify-content-between align-items-center py-2">
+                        <small class="text-muted" id="infoEntregados">Mostrando 0-0 de 0</small>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0" id="paginationEntregados">
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Safe Parse
+        let entregadosData = [];
+        try {
+            entregadosData = JSON.parse('{{ entregados_json | safe }}');
+        } catch (e) {
+            console.error("Error parsing entregados JSON", e);
+        }
+
+        const itemsPerPage = 5;
+        let currentPage = 1;
+        let filteredData = entregadosData;
+
+        const tbody = document.getElementById('tbodyEntregados');
+        const searchInput = document.getElementById('searchEntregados');
+        const pagination = document.getElementById('paginationEntregados');
+        const info = document.getElementById('infoEntregados');
+
+        function renderTable(page) {
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            
+            const start = (page - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageData = filteredData.slice(start, end);
+
+            if (pageData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No hay registros</td></tr>';
+                return;
+            }
+
+            pageData.forEach(eq => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><span class="badge bg-secondary">${eq.fr || 'N/A'}</span></td>
+                    <td>${eq.cliente || 'N/A'}</td>
+                    <td>
+                        <span class="fw-bold">${eq.marca}</span>
+                        <small class="d-block text-muted">${eq.modelo}</small>
+                    </td>
+                    <td><span class="badge bg-success">${eq.estado}</span></td>
+                    <td>${eq.fecha_ingreso}</td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
+                            data-fr="${eq.fr}" 
+                            data-marca="${eq.marca} ${eq.modelo}"
+                            data-estado="${eq.estado}" 
+                            data-encargado="${eq.encargado}"
+                            data-fecha="${eq.fecha_ingreso}"
+                            data-reporte="${eq.reporte_cliente || ''}"
+                            data-cliente="${eq.cliente || ''}"
+                            data-observaciones="${eq.observaciones || ''}"
+                            data-serie="${eq.serie || ''}"
+                            data-informe="${eq.numero_informe || ''}"
+                            data-accesorios="${eq.accesorios || ''}"
+                            data-condicion="${eq.condicion || ''}">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            updatePagination();
+        }
+
+        function updatePagination() {
+            if (!pagination) return;
+            pagination.innerHTML = '';
+            
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            
+            // Info text
+            const start = (currentPage - 1) * itemsPerPage + 1;
+            const end = Math.min(currentPage * itemsPerPage, filteredData.length);
+            if (info) info.textContent = `Mostrando ${filteredData.length > 0 ? start : 0}-${end} de ${filteredData.length}`;
+
+            // Prev
+            const liPrev = document.createElement('li');
+            liPrev.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+            liPrev.innerHTML = `<a class="page-link bg-dark border-secondary text-light" href="#">&laquo;</a>`;
+            liPrev.onclick = (e) => { e.preventDefault(); if(currentPage > 1) { currentPage--; renderTable(currentPage); } };
+            pagination.appendChild(liPrev);
+
+            // Pages (Limit to 5 visible)
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                     const li = document.createElement('li');
+                     li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                     li.innerHTML = `<a class="page-link bg-dark border-secondary text-light" href="#">${i}</a>`;
+                     li.onclick = (e) => { e.preventDefault(); currentPage = i; renderTable(currentPage); };
+                     pagination.appendChild(li);
+                }
+            }
+
+            // Next
+            const liNext = document.createElement('li');
+            liNext.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+            liNext.innerHTML = `<a class="page-link bg-dark border-secondary text-light" href="#">&raquo;</a>`;
+            liNext.onclick = (e) => { e.preventDefault(); if(currentPage < totalPages) { currentPage++; renderTable(currentPage); } };
+            pagination.appendChild(liNext);
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                filteredData = entregadosData.filter(eq => 
+                    (eq.fr || '').toLowerCase().includes(term) ||
+                    (eq.cliente || '').toLowerCase().includes(term) ||
+                    (eq.marca || '').toLowerCase().includes(term) ||
+                    (eq.modelo || '').toLowerCase().includes(term)
+                );
+                currentPage = 1;
+                renderTable(currentPage);
+            });
+        }
+
+        // Initial Render
+        if (filteredData.length > 0) renderTable(currentPage);
+        else if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No hay equipos entregados</td></tr>';
+    });
+    </script>
+    {% endif %}
+            {% endif %}
 
     </div>
     {% endif %}
