@@ -256,7 +256,7 @@
     <!-- VISTA OPERATIVA (AGRUPADA) -->
     <div id="operationalView">
         <!-- LOGIC HANDLED BY JS: We create containers for all possibilities, and JS hides/shows based on Role -->
-        
+
         <!-- ROW 1: PENDIENTES (Rec/Ops) -->
         <div class="card bg-dark-card border-secondary shadow-sm mb-4" id="cardPendientesOp">
             <div class="card-header border-secondary text-warning">
@@ -772,7 +772,7 @@
         } else {
             // UNIFIED VIEW LOGIC (GROUPED)
             const isAlmacenRole = userRole === 'almacen';
-            
+
             // Toggle visibility of containers based on role
             if (isAlmacenRole) {
                 document.getElementById('cardPendientesOp').classList.add('d-none');
@@ -802,7 +802,7 @@
                         const s = (i.estado || '').toLowerCase();
                         return s.includes('diagnostico') || s.includes('consumible');
                     });
-                     // 2. Repuestos Serv
+                    // 2. Repuestos Serv
                     const d2 = data.filter(i => {
                         const s = (i.estado || '').toLowerCase();
                         return s.includes('servicio') && s.includes('repuesto');
@@ -838,8 +838,8 @@
             renderGrouped(equipments);
 
             // Search (Generic filtering across all visible tables)
-             const searchInput = document.getElementById('searchInput');
-             if (searchInput) {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
                 searchInput.addEventListener('input', (e) => {
                     const term = normalize(e.target.value);
                     const filtered = equipments.filter(item =>
@@ -849,8 +849,10 @@
                     );
                     renderGrouped(filtered);
                 });
-             }
+            }
 
+
+        }
 
         // Global Action wrappers
         window.startDiagnostics = function (id, status) {
