@@ -20,8 +20,146 @@
             <button class="btn btn-primary shadow-sm ms-2" data-bs-toggle="modal" data-bs-target="#importInformesModal">
                 <i class="fas fa-file-csv me-2"></i> Importar Informes
             </button>
+            <a href="{{ url_for('panel_estados') }}" class="btn btn-info shadow-sm ms-2" title="Ir a Gestión de Equipos">
+                <i class="fas fa-tasks me-2"></i> Gestión de Equipos
+            </a>
+        </div>
+        <div class="subtitle">Vista Completa del Sistema - Última actualización: {{ stats_admin.ultima_actualizacion }}
+        </div>
+    </div>
 
+    <!-- ESTADÍSTICAS GLOBALES -->
+    <div class="stats-container">
+        <div class="stat-card total">
+            <div class="stat-icon">
+                <i class="fas fa-laptop-medical" style="color: #8b5cf6;"></i>
+            </div>
+            <div class="stat-number">{{ stats_admin.total }}</div>
+            <div class="stat-label">Total Equipos</div>
+        </div>
 
+        <div class="stat-card diagnostico">
+            <div class="stat-icon">
+                <i class="fas fa-cog fa-spin" style="color: var(--primary);"></i>
+            </div>
+            <div class="stat-number">{{ stats_admin.activos }}</div>
+            <div class="stat-label">Equipos Activos</div>
+        </div>
+
+        <div class="stat-card pendiente">
+            <div class="stat-icon">
+                <i class="fas fa-exclamation-triangle" style="color: var(--warning);"></i>
+            </div>
+            <div class="stat-number">{{ stats_admin.atrasados }}</div>
+            <div class="stat-label">Atrasados (+5 días)</div>
+        </div>
+
+        <div class="stat-card aprobado">
+            <div class="stat-icon">
+                <i class="fas fa-clock" style="color: var(--success);"></i>
+            </div>
+            <div class="stat-number">{{ stats_admin.tiempo_promedio }}</div>
+            <div class="stat-label">Días Promedio</div>
+        </div>
+    </div>
+
+    <!-- EQUIPOS CRÍTICOS -->
+    {% if equipos_criticos %}
+    <div class="alert bg-dark border border-danger text-light mb-4 shadow-sm">
+        <h5><i class="fas fa-exclamation-circle"></i> Equipos Críticos (más de 7 días)</h5>
+        <div class="table-responsive">
+            <table class="table table-sm table-dark">
+                <thead>
+                    <tr>
+                        <th>FR</th>
+                        <th>Marca/Modelo</th>
+                        <th>Estado</th>
+                        <th>Días</th>
+                        <th>Fecha Ingreso</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for eq in equipos_criticos %}
+                    <tr>
+                        <td><span class="badge bg-danger">{{ eq.fr or 'N/A' }}</span></td>
+                        <td>{{ eq.marca }} {{ eq.modelo }}</td>
+                        <td><span class="badge bg-secondary">{{ eq.estado }}</span></td>
+                        <td><strong>{{ (now() - eq.fecha_ingreso).days }}</strong></td>
+                        <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') if eq.fecha_ingreso else 'N/A' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- VISTA ADMIN: TARJETAS APILADAS POR CATEGORIA -->
+    <div class="row g-4 mb-4">
+        
+        <!-- 1. PENDIENTES DE APROBACION -->
+        <div class="col-12">
+            <div class="card bg-dark border-secondary shadow-sm">
+                <div class="card-header border-secondary text-warning">
+                    <i class="fas fa-clock me-2"></i> Pendientes de Aprobación
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>FR</th>
+                                    <th>Cliente</th>
+                                    <th>Equipo</th>
+                                    <th>Estado</th>
+                                    <th>Encargado</th>
+                                    <th>Fecha</th>
+                                    <th>Días</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% set pendientes = [] %}
+                                {% for eq in todos_equipos if 'pendiente' in eq.estado|lower or 'espera' in eq.estado|lower and 'diagnostico' not in eq.estado|lower and 'repuesto' not in eq.estado|lower and 'servicio' not in eq.estado|lower %}
+                                <tr>
+                                    <td><span class="badge bg-warning text-dark">{{ eq.fr or 'N/A' }}</span></td>
+                                    <td>{{ eq.cliente or 'N/A' }}</td>
+                                    <td>
+                                        <span class="fw-bold">{{ eq.marca }}</span>
+                                        <small class="d-block text-muted">{{ eq.modelo }}</small>
+                                    </td>
+                                    <td><span class="badge bg-secondary">{{ eq.estado }}</span></td>
+                                    <td>{{ eq.encargado or 'N/A' }}</td>
+                                    <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        {% set dias = (now() - eq.fecha_ingreso).days %}
+                                        <span class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{ dias }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
+                                            data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
+                                            data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
+                                            data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
+                                            data-reporte="{{ eq.reporte_cliente | e }}"
+                                            data-cliente="{{ eq.cliente | e }}"
+                                            data-observaciones="{{ eq.observaciones | e }}"
+                                            data-serie="{{ eq.serie | e }}"
+                                            data-informe="{{ eq.numero_informe | e }}"
+                                            data-accesorios="{{ eq.accesorios | e }}"
+                                            data-condicion="{{ eq.condicion | e }}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="8" class="text-center text-muted">No hay equipos pendientes</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
 
             <!-- 2. EN DIAGNOSTICO / REVISION -->
             <div class="col-12">
