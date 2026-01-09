@@ -428,6 +428,21 @@
                                         </td>
                                     </tr>
 
+                                        {% else %}
+                                    <tr>
+                                        <td colspan="8" class="text-center text-muted">No hay equipos terminados
+                                            recientes
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     <!-- HISTORIAL ENTREGADOS (SHARED) -->
     {% if current_user.role|lower != 'almacen' %}
     <div class="row g-4 mt-4">
@@ -596,21 +611,6 @@
     });
     </script>
     {% endif %}
-                                        {% else %}
-                                    <tr>
-                                        <td colspan="8" class="text-center text-muted">No hay equipos terminados
-                                            recientes
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
         {% else %}
         <!-- ============================================ -->
         <!-- VISTA USUARIO - Mis Tareas -->

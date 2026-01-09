@@ -244,6 +244,8 @@ def create_app(config_class=Config):
                         'condicion': eq.condicion,
                         'numero_informe': eq.numero_informe
                     } for eq in equipos_entregados])
+                    
+                    print(f"DEBUG: Found {len(equipos_entregados)} delivered items.")
 
                 stats_user = {
                     'mis_tareas': len(equipos_relevantes),
