@@ -92,73 +92,363 @@
     </div>
     {% endif %}
 
-    <!-- TODOS LOS EQUIPOS ACTIVOS -->
-    <div class="section-header">
-        <div class="section-title">
-            <i class="fas fa-list"></i>
-            <span>Todos los Equipos Activos</span>
+    <!-- VISTA ADMIN: TARJETAS APILADAS POR CATEGORIA -->
+    <div class="row g-4 mb-4">
+
+        <!-- 1. PENDIENTES DE APROBACION -->
+        <div class="col-12">
+            <div class="card bg-dark border-secondary shadow-sm">
+                <div class="card-header border-secondary text-warning">
+                    <i class="fas fa-clock me-2"></i> Pendientes de Aprobación
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>FR</th>
+                                    <th>Cliente</th>
+                                    <th>Equipo</th>
+                                    <th>Estado</th>
+                                    <th>Encargado</th>
+                                    <th>Fecha</th>
+                                    <th>Días</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% set pendientes = [] %}
+                                {% for eq in todos_equipos if 'pendiente' in eq.estado|lower or 'espera' in
+                                eq.estado|lower and 'diagnostico' not in eq.estado|lower and 'repuesto' not in
+                                eq.estado|lower and 'servicio' not in eq.estado|lower %}
+                                <tr>
+                                    <td><span class="badge bg-warning text-dark">{{ eq.fr or 'N/A' }}</span></td>
+                                    <td>{{ eq.cliente or 'N/A' }}</td>
+                                    <td>
+                                        <span class="fw-bold">{{ eq.marca }}</span>
+                                        <small class="d-block text-muted">{{ eq.modelo }}</small>
+                                    </td>
+                                    <td><span class="badge bg-secondary">{{ eq.estado }}</span></td>
+                                    <td>{{ eq.encargado or 'N/A' }}</td>
+                                    <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        {% set dias = (now() - eq.fecha_ingreso).days %}
+                                        <span
+                                            class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{
+                                            dias }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
+                                            data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
+                                            data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
+                                            data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
+                                            data-reporte="{{ eq.reporte_cliente | e }}"
+                                            data-cliente="{{ eq.cliente | e }}"
+                                            data-observaciones="{{ eq.observaciones | e }}"
+                                            data-serie="{{ eq.serie | e }}" data-informe="{{ eq.numero_informe | e }}"
+                                            data-accesorios="{{ eq.accesorios | e }}"
+                                            data-condicion="{{ eq.condicion | e }}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <a href="{{ url_for('panel_estados') }}"
+                                            class="btn btn-sm btn-outline-light ms-1"><i
+                                                class="fas fa-external-link-alt"></i></a>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted">No hay equipos pendientes</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
-        <span class="badge-count" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">{{ todos_equipos|length
-            }}</span>
-    </div>
 
-    <div class="table-responsive">
-        <table class="table table-dark table-hover bg-transparent align-middle" style="width:100%">
-            <thead>
-                <tr>
-                    <th>FR</th>
-                    <th>Marca/Modelo</th>
-                    <th>Estado</th>
-                    <th>Encargado</th>
-                    <th>Fecha Ingreso</th>
-                    <th>Días</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for eq in todos_equipos %}
-                <tr>
-                    <td><span class="fw-bold text-info">{{ eq.fr or 'N/A' }}</span></td>
-                    <td>
-                        <div class="fw-bold">{{ eq.marca }}</div>
-                        <small class="text-muted">{{ eq.modelo }}</small>
-                    </td>
-                    <td>
-                        <span class="badge bg-secondary">{{ eq.estado }}</span>
-                    </td>
-                    <td>{{ eq.encargado }}</td>
-                    <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') if eq.fecha_ingreso else '' }}</td>
-                    <td>
-                        {% set dias = (now() - eq.fecha_ingreso).days %}
-                        <span
-                            class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">
-                            {{ dias }}
-                        </span>
-                    </td>
-                    <td>
-                        <a href="{{ url_for('panel_estados') }}" class="btn btn-sm btn-outline-light"
-                            title="Ir al Panel de Estados">
-                            <i class="fas fa-expand"></i>
-                        </a>
-                        <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
-                            data-fr="{{ eq.fr or 'N/A' }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
-                            data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
-                            data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') if eq.fecha_ingreso else 'N/A' }}"
-                            data-reporte="{{ eq.reporte_cliente | e }}" data-cliente="{{ eq.cliente | e or 'N/A' }}"
-                            data-observaciones="{{ eq.observaciones | e or 'Sin observaciones' }}"
-                            data-serie="{{ eq.serie | e or 'N/A' }}"
-                            data-accesorios="{{ eq.accesorios | e or 'Ninguno' }}"
-                            data-informe="{{ eq.numero_informe | e or 'N/A' }}"
-                            data-condicion="{{ eq.condicion | e or 'Regular' }}">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+        <!-- 2. EN DIAGNOSTICO / REVISION -->
+        <div class="col-12">
+            <div class="card bg-dark border-secondary shadow-sm">
+                <div class="card-header border-secondary text-info">
+                    <i class="fas fa-microscope me-2"></i> En Diagnóstico / Revisión
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>FR</th>
+                                    <th>Cliente</th>
+                                    <th>Equipo</th>
+                                    <th>Estado</th>
+                                    <th>Encargado</th>
+                                    <th>Fecha</th>
+                                    <th>Días</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for eq in todos_equipos if 'diagnostico' in eq.estado|lower or 'revision' in
+                                eq.estado|lower %}
+                                <tr>
+                                    <td><span class="badge bg-info text-dark">{{ eq.fr or 'N/A' }}</span></td>
+                                    <td>{{ eq.cliente or 'N/A' }}</td>
+                                    <td>
+                                        <span class="fw-bold">{{ eq.marca }}</span>
+                                        <small class="d-block text-muted">{{ eq.modelo }}</small>
+                                    </td>
+                                    <td><span class="badge bg-secondary">{{ eq.estado }}</span></td>
+                                    <td>{{ eq.encargado or 'N/A' }}</td>
+                                    <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        {% set dias = (now() - eq.fecha_ingreso).days %}
+                                        <span
+                                            class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{
+                                            dias }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
+                                            data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
+                                            data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
+                                            data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
+                                            data-reporte="{{ eq.reporte_cliente | e }}"
+                                            data-cliente="{{ eq.cliente | e }}"
+                                            data-observaciones="{{ eq.observaciones | e }}"
+                                            data-serie="{{ eq.serie | e }}" data-informe="{{ eq.numero_informe | e }}"
+                                            data-accesorios="{{ eq.accesorios | e }}"
+                                            data-condicion="{{ eq.condicion | e }}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <a href="{{ url_for('panel_estados') }}"
+                                            class="btn btn-sm btn-outline-light ms-1"><i
+                                                class="fas fa-external-link-alt"></i></a>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted">No hay equipos en diagnóstico</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        <!-- 3. ESPERA DE REPUESTOS -->
+        <div class="col-12">
+            <div class="card bg-dark border-secondary shadow-sm">
+                <div class="card-header border-secondary text-warning">
+                    <i class="fas fa-boxes me-2"></i> Espera de Repuestos / Consumibles
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>FR</th>
+                                    <th>Cliente</th>
+                                    <th>Equipo</th>
+                                    <th>Estado</th>
+                                    <th>Encargado</th>
+                                    <th>Fecha</th>
+                                    <th>Días</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for eq in todos_equipos if 'repuesto' in eq.estado|lower or 'consumible' in
+                                eq.estado|lower %}
+                                <tr>
+                                    <td><span class="badge bg-warning text-dark">{{ eq.fr or 'N/A' }}</span></td>
+                                    <td>{{ eq.cliente or 'N/A' }}</td>
+                                    <td>
+                                        <span class="fw-bold">{{ eq.marca }}</span>
+                                        <small class="d-block text-muted">{{ eq.modelo }}</small>
+                                    </td>
+                                    <td><span class="badge bg-secondary">{{ eq.estado }}</span></td>
+                                    <td>{{ eq.encargado or 'N/A' }}</td>
+                                    <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        {% set dias = (now() - eq.fecha_ingreso).days %}
+                                        <span
+                                            class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{
+                                            dias }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
+                                            data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
+                                            data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
+                                            data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
+                                            data-reporte="{{ eq.reporte_cliente | e }}"
+                                            data-cliente="{{ eq.cliente | e }}"
+                                            data-observaciones="{{ eq.observaciones | e }}"
+                                            data-serie="{{ eq.serie | e }}" data-informe="{{ eq.numero_informe | e }}"
+                                            data-accesorios="{{ eq.accesorios | e }}"
+                                            data-condicion="{{ eq.condicion | e }}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <a href="{{ url_for('panel_estados') }}"
+                                            class="btn btn-sm btn-outline-light ms-1"><i
+                                                class="fas fa-external-link-alt"></i></a>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted">No hay equipos en espera de repuestos
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. APROBADOS / EN SERVICIO -->
+        <div class="col-12">
+            <div class="card bg-dark border-secondary shadow-sm">
+                <div class="card-header border-secondary text-success">
+                    <i class="fas fa-tools me-2"></i> Aprobados / En Servicio
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>FR</th>
+                                    <th>Cliente</th>
+                                    <th>Equipo</th>
+                                    <th>Estado</th>
+                                    <th>Encargado</th>
+                                    <th>Fecha</th>
+                                    <th>Días</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for eq in todos_equipos if ('aprobado' in eq.estado|lower or 'servicio' in
+                                eq.estado|lower) and 'repuesto' not in eq.estado|lower and 'culminado' not in
+                                eq.estado|lower %}
+                                <tr>
+                                    <td><span class="badge bg-success">{{ eq.fr or 'N/A' }}</span></td>
+                                    <td>{{ eq.cliente or 'N/A' }}</td>
+                                    <td>
+                                        <span class="fw-bold">{{ eq.marca }}</span>
+                                        <small class="d-block text-muted">{{ eq.modelo }}</small>
+                                    </td>
+                                    <td><span class="badge bg-secondary">{{ eq.estado }}</span></td>
+                                    <td>{{ eq.encargado or 'N/A' }}</td>
+                                    <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        {% set dias = (now() - eq.fecha_ingreso).days %}
+                                        <span
+                                            class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{
+                                            dias }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
+                                            data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
+                                            data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
+                                            data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
+                                            data-reporte="{{ eq.reporte_cliente | e }}"
+                                            data-cliente="{{ eq.cliente | e }}"
+                                            data-observaciones="{{ eq.observaciones | e }}"
+                                            data-serie="{{ eq.serie | e }}" data-informe="{{ eq.numero_informe | e }}"
+                                            data-accesorios="{{ eq.accesorios | e }}"
+                                            data-condicion="{{ eq.condicion | e }}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <a href="{{ url_for('panel_estados') }}"
+                                            class="btn btn-sm btn-outline-light ms-1"><i
+                                                class="fas fa-external-link-alt"></i></a>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted">No hay equipos en servicio</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. TERMINADOS / LISTOS -->
+        <div class="col-12">
+            <div class="card bg-dark border-secondary shadow-sm">
+                <div class="card-header border-secondary text-light">
+                    <i class="fas fa-check-double me-2"></i> Terminados / Listos para Entrega
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>FR</th>
+                                    <th>Cliente</th>
+                                    <th>Equipo</th>
+                                    <th>Estado</th>
+                                    <th>Encargado</th>
+                                    <th>Fecha</th>
+                                    <th>Días</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for eq in todos_equipos if 'culminado' in eq.estado|lower or 'entregado' in
+                                eq.estado|lower %}
+                                <tr>
+                                    <td><span class="badge bg-secondary">{{ eq.fr or 'N/A' }}</span></td>
+                                    <td>{{ eq.cliente or 'N/A' }}</td>
+                                    <td>
+                                        <span class="fw-bold">{{ eq.marca }}</span>
+                                        <small class="d-block text-muted">{{ eq.modelo }}</small>
+                                    </td>
+                                    <td><span class="badge bg-success">{{ eq.estado }}</span></td>
+                                    <td>{{ eq.encargado or 'N/A' }}</td>
+                                    <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        {% set dias = (now() - eq.fecha_ingreso).days %}
+                                        <span class="badge bg-success">{{ dias }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
+                                            data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
+                                            data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
+                                            data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
+                                            data-reporte="{{ eq.reporte_cliente | e }}"
+                                            data-cliente="{{ eq.cliente | e }}"
+                                            data-observaciones="{{ eq.observaciones | e }}"
+                                            data-serie="{{ eq.serie | e }}" data-informe="{{ eq.numero_informe | e }}"
+                                            data-accesorios="{{ eq.accesorios | e }}"
+                                            data-condicion="{{ eq.condicion | e }}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <a href="{{ url_for('panel_estados') }}"
+                                            class="btn btn-sm btn-outline-light ms-1"><i
+                                                class="fas fa-external-link-alt"></i></a>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted">No hay equipos terminados recientes
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
     {% else %}
     <!-- ============================================ -->
     <!-- VISTA USUARIO - Mis Tareas -->
@@ -245,7 +535,7 @@
     <!-- 3. CATEGORIZED LISTS (REPLACES MAIN TABLE) -->
     <div class="row mb-3 align-items-center">
         <div class="col">
-             <h5 class="mb-0 text-white"><i class="fas fa-list me-2"></i> Gestionar Tareas</h5>
+            <h5 class="mb-0 text-white"><i class="fas fa-list me-2"></i> Gestionar Tareas</h5>
         </div>
         <div class="col-auto d-flex gap-2">
             {% if current_user.role in [UserRoles.RECEPCION, UserRoles.ADMIN] %}
@@ -261,367 +551,392 @@
 
     <!-- ALMACEN LOGIC -->
     {% if current_user.role|lower == UserRoles.ALMACEN|lower %}
-        <div class="row g-4">
-            <!-- Repuestos Diagnóstico -->
-            <div class="col-12">
-                <div class="card bg-dark border-secondary">
-                    <div class="card-header border-secondary text-warning">
-                        <i class="fas fa-boxes me-2"></i> Repuestos para Diagnóstico
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-dark table-hover mb-0 align-middle">
-                                <thead>
-                                    <tr>
-                                        <th>FR</th>
-                                        <th>Cliente</th>
-                                        <th>Equipo</th>
-                                        <th>Estado</th>
-                                        <th>Fecha</th>
-                                        <th>Días</th>
-                                        <th class="text-end">Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for eq in equipos_relevantes if 'diagnostico' in eq.estado|lower or 'consumible' in eq.estado|lower %}
-                                    <tr>
-                                        <td><span class="badge bg-secondary">{{ eq.fr or 'N/A' }}</span></td>
-                                        <td>{{ eq.cliente or 'N/A' }}</td>
-                                        <td>
-                                            <div class="fw-bold">{{ eq.marca }}</div>
-                                            <small class="text-muted">{{ eq.modelo }}</small>
-                                        </td>
-                                        <td><span class="badge bg-dark border border-warning text-warning">{{ eq.estado }}</span></td>
-                                        <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
-                                        <td>
-                                            {% set dias = (now() - eq.fecha_ingreso).days %}
-                                            <span class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{ dias }}</span>
-                                        </td>
-                                        <td class="text-end">
-                                             <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
-                                                data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
-                                                data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
-                                                data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
-                                                data-reporte="{{ eq.reporte_cliente | e }}"
-                                                data-cliente="{{ eq.cliente | e }}"
-                                                data-observaciones="{{ eq.observaciones | e }}"
-                                                data-serie="{{ eq.serie | e }}"
-                                                data-informe="{{ eq.numero_informe | e }}"
-                                                data-accesorios="{{ eq.accesorios | e }}"
-                                                data-condicion="{{ eq.condicion | e }}">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    {% else %}
-                                    <tr><td colspan="7" class="text-center text-muted">Sin pendientes</td></tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+    <div class="row g-4">
+        <!-- Repuestos Diagnóstico -->
+        <div class="col-12">
+            <div class="card bg-dark border-secondary">
+                <div class="card-header border-secondary text-warning">
+                    <i class="fas fa-boxes me-2"></i> Repuestos para Diagnóstico
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>FR</th>
+                                    <th>Cliente</th>
+                                    <th>Equipo</th>
+                                    <th>Estado</th>
+                                    <th>Fecha</th>
+                                    <th>Días</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for eq in equipos_relevantes if 'diagnostico' in eq.estado|lower or 'consumible' in
+                                eq.estado|lower %}
+                                <tr>
+                                    <td><span class="badge bg-secondary">{{ eq.fr or 'N/A' }}</span></td>
+                                    <td>{{ eq.cliente or 'N/A' }}</td>
+                                    <td>
+                                        <div class="fw-bold">{{ eq.marca }}</div>
+                                        <small class="text-muted">{{ eq.modelo }}</small>
+                                    </td>
+                                    <td><span class="badge bg-dark border border-warning text-warning">{{ eq.estado
+                                            }}</span></td>
+                                    <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        {% set dias = (now() - eq.fecha_ingreso).days %}
+                                        <span
+                                            class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{
+                                            dias }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
+                                            data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
+                                            data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
+                                            data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
+                                            data-reporte="{{ eq.reporte_cliente | e }}"
+                                            data-cliente="{{ eq.cliente | e }}"
+                                            data-observaciones="{{ eq.observaciones | e }}"
+                                            data-serie="{{ eq.serie | e }}" data-informe="{{ eq.numero_informe | e }}"
+                                            data-accesorios="{{ eq.accesorios | e }}"
+                                            data-condicion="{{ eq.condicion | e }}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted">Sin pendientes</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-            <!-- Repuestos Servicio -->
-            <div class="col-12">
-                <div class="card bg-dark border-secondary">
-                    <div class="card-header border-secondary text-info">
-                        <i class="fas fa-cogs me-2"></i> Repuestos para Servicio
+        </div>
+        <!-- Repuestos Servicio -->
+        <div class="col-12">
+            <div class="card bg-dark border-secondary">
+                <div class="card-header border-secondary text-info">
+                    <i class="fas fa-cogs me-2"></i> Repuestos para Servicio
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>FR</th>
+                                    <th>Cliente</th>
+                                    <th>Equipo</th>
+                                    <th>Estado</th>
+                                    <th>Fecha</th>
+                                    <th>Días</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for eq in equipos_relevantes if 'servicio' in eq.estado|lower and 'repuesto' in
+                                eq.estado|lower %}
+                                <tr>
+                                    <td><span class="badge bg-secondary">{{ eq.fr or 'N/A' }}</span></td>
+                                    <td>{{ eq.cliente or 'N/A' }}</td>
+                                    <td>
+                                        <div class="fw-bold">{{ eq.marca }}</div>
+                                        <small class="text-muted">{{ eq.modelo }}</small>
+                                    </td>
+                                    <td><span class="badge bg-dark border border-info text-info">{{ eq.estado }}</span>
+                                    </td>
+                                    <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        {% set dias = (now() - eq.fecha_ingreso).days %}
+                                        <span
+                                            class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{
+                                            dias }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
+                                            data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
+                                            data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
+                                            data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
+                                            data-reporte="{{ eq.reporte_cliente | e }}"
+                                            data-cliente="{{ eq.cliente | e }}"
+                                            data-observaciones="{{ eq.observaciones | e }}"
+                                            data-serie="{{ eq.serie | e }}" data-informe="{{ eq.numero_informe | e }}"
+                                            data-accesorios="{{ eq.accesorios | e }}"
+                                            data-condicion="{{ eq.condicion | e }}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted">Sin pendientes</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-dark table-hover mb-0 align-middle">
-                                <thead>
-                                    <tr>
-                                        <th>FR</th>
-                                        <th>Cliente</th>
-                                        <th>Equipo</th>
-                                        <th>Estado</th>
-                                        <th>Fecha</th>
-                                        <th>Días</th>
-                                        <th class="text-end">Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for eq in equipos_relevantes if 'servicio' in eq.estado|lower and 'repuesto' in eq.estado|lower %}
-                                    <tr>
-                                        <td><span class="badge bg-secondary">{{ eq.fr or 'N/A' }}</span></td>
-                                        <td>{{ eq.cliente or 'N/A' }}</td>
-                                        <td>
-                                            <div class="fw-bold">{{ eq.marca }}</div>
-                                            <small class="text-muted">{{ eq.modelo }}</small>
-                                        </td>
-                                        <td><span class="badge bg-dark border border-info text-info">{{ eq.estado }}</span></td>
-                                        <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
-                                        <td>
-                                            {% set dias = (now() - eq.fecha_ingreso).days %}
-                                            <span class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{ dias }}</span>
-                                        </td>
-                                        <td class="text-end">
-                                             <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
-                                                data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
-                                                data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
-                                                data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
-                                                data-reporte="{{ eq.reporte_cliente | e }}"
-                                                data-cliente="{{ eq.cliente | e }}"
-                                                data-observaciones="{{ eq.observaciones | e }}"
-                                                data-serie="{{ eq.serie | e }}"
-                                                data-informe="{{ eq.numero_informe | e }}"
-                                                data-accesorios="{{ eq.accesorios | e }}"
-                                                data-condicion="{{ eq.condicion | e }}">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    {% else %}
-                                    <tr><td colspan="7" class="text-center text-muted">Sin pendientes</td></tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- RECEPCION (VENTAS) / OPERACIONES LOGIC -->
+    <div class="row g-4">
+        <!-- LOOP OVER CATEGORIES -->
+        <!-- We define categories manualy to ensure order: Pendiente, Diag, Aprobado -->
+
+        <!-- Col 1: Pendientes de Aprobación -->
+        <div class="col-12">
+            <div class="card bg-dark border-secondary">
+                <div class="card-header border-secondary text-warning">
+                    <i class="fas fa-clock me-2"></i> Pendientes de Aprobación
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>FR</th>
+                                    <!-- Recepcion sees Client -->
+                                    {% if current_user.role|lower == UserRoles.RECEPCION|lower %}
+                                    <th>Cliente</th>
+                                    {% endif %}
+                                    <th>Equipo</th>
+                                    <th>Estado</th>
+                                    <!-- Operaciones sees Encargado -->
+                                    {% if current_user.role|lower == UserRoles.OPERACIONES|lower %}
+                                    <th>Encargado</th>
+                                    {% endif %}
+                                    <th>Fecha</th>
+                                    <th>Días</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for eq in equipos_relevantes if 'pendiente' in eq.estado|lower and 'aprobacion' in
+                                eq.estado|lower %}
+                                <tr>
+                                    <td><span class="badge bg-warning text-dark">{{ eq.fr or 'N/A' }}</span></td>
+
+                                    {% if current_user.role|lower == UserRoles.RECEPCION|lower %}
+                                    <td>{{ eq.cliente or 'N/A' }}</td>
+                                    {% endif %}
+
+                                    <td>
+                                        <div class="fw-bold">{{ eq.marca }}</div>
+                                        <small class="text-muted">{{ eq.modelo }}</small>
+                                    </td>
+                                    <td><span class="badge bg-dark border border-warning text-warning">{{ eq.estado
+                                            }}</span></td>
+
+                                    {% if current_user.role|lower == UserRoles.OPERACIONES|lower %}
+                                    <td>{{ eq.encargado or 'N/A' }}</td>
+                                    {% endif %}
+
+                                    <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        {% set dias = (now() - eq.fecha_ingreso).days %}
+                                        <span
+                                            class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{
+                                            dias }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
+                                            data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
+                                            data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
+                                            data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
+                                            data-reporte="{{ eq.reporte_cliente | e }}"
+                                            data-cliente="{{ eq.cliente | e }}"
+                                            data-observaciones="{{ eq.observaciones | e }}"
+                                            data-serie="{{ eq.serie | e }}" data-informe="{{ eq.numero_informe | e }}"
+                                            data-accesorios="{{ eq.accesorios | e }}"
+                                            data-condicion="{{ eq.condicion | e }}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <!-- Colspan dynamic based on role -->
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted">Sin equipos</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
 
-    {% else %}
-        <!-- RECEPCION (VENTAS) / OPERACIONES LOGIC -->
-         <div class="row g-4">
-            <!-- LOOP OVER CATEGORIES -->
-            <!-- We define categories manualy to ensure order: Pendiente, Diag, Aprobado -->
-            
-            <!-- Col 1: Pendientes de Aprobación -->
-            <div class="col-12">
-                <div class="card bg-dark border-secondary">
-                    <div class="card-header border-secondary text-warning">
-                        <i class="fas fa-clock me-2"></i> Pendientes de Aprobación
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-dark table-hover mb-0 align-middle">
-                                <thead>
-                                    <tr>
-                                        <th>FR</th>
-                                        <!-- Recepcion sees Client -->
-                                        {% if current_user.role|lower == UserRoles.RECEPCION|lower %}
-                                        <th>Cliente</th>
-                                        {% endif %}
-                                        <th>Equipo</th>
-                                        <th>Estado</th>
-                                        <!-- Operaciones sees Encargado -->
-                                        {% if current_user.role|lower == UserRoles.OPERACIONES|lower %}
-                                        <th>Encargado</th>
-                                        {% endif %}
-                                        <th>Fecha</th>
-                                        <th>Días</th>
-                                        <th class="text-end">Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for eq in equipos_relevantes if 'pendiente' in eq.estado|lower and 'aprobacion' in eq.estado|lower %}
-                                    <tr>
-                                        <td><span class="badge bg-warning text-dark">{{ eq.fr or 'N/A' }}</span></td>
-                                        
-                                        {% if current_user.role|lower == UserRoles.RECEPCION|lower %}
-                                        <td>{{ eq.cliente or 'N/A' }}</td>
-                                        {% endif %}
-                                        
-                                        <td>
-                                            <div class="fw-bold">{{ eq.marca }}</div>
-                                            <small class="text-muted">{{ eq.modelo }}</small>
-                                        </td>
-                                        <td><span class="badge bg-dark border border-warning text-warning">{{ eq.estado }}</span></td>
-                                        
-                                        {% if current_user.role|lower == UserRoles.OPERACIONES|lower %}
-                                        <td>{{ eq.encargado or 'N/A' }}</td>
-                                        {% endif %}
+        <!-- Col 2: En Diagnóstico -->
+        <div class="col-12">
+            <div class="card bg-dark border-secondary">
+                <div class="card-header border-secondary text-info">
+                    <i class="fas fa-microscope me-2"></i> En Diagnóstico
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>FR</th>
+                                    <!-- Recepcion sees Client -->
+                                    {% if current_user.role|lower == UserRoles.RECEPCION|lower %}
+                                    <th>Cliente</th>
+                                    {% endif %}
+                                    <th>Equipo</th>
+                                    <th>Estado</th>
+                                    <!-- Operaciones sees Encargado -->
+                                    {% if current_user.role|lower == UserRoles.OPERACIONES|lower %}
+                                    <th>Encargado</th>
+                                    {% endif %}
+                                    <th>Fecha</th>
+                                    <th>Días</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for eq in equipos_relevantes if 'diagnostico' in eq.estado|lower or 'consumible' in
+                                eq.estado|lower or 'repuesto entregado' in eq.estado|lower %}
+                                <tr>
+                                    <td><span class="badge bg-info text-dark">{{ eq.fr or 'N/A' }}</span></td>
 
-                                        <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
-                                        <td>
-                                            {% set dias = (now() - eq.fecha_ingreso).days %}
-                                            <span class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{ dias }}</span>
-                                        </td>
-                                        <td class="text-end">
-                                             <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
-                                                data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
-                                                data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
-                                                data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
-                                                data-reporte="{{ eq.reporte_cliente | e }}"
-                                                data-cliente="{{ eq.cliente | e }}"
-                                                data-observaciones="{{ eq.observaciones | e }}"
-                                                data-serie="{{ eq.serie | e }}"
-                                                data-informe="{{ eq.numero_informe | e }}"
-                                                data-accesorios="{{ eq.accesorios | e }}"
-                                                data-condicion="{{ eq.condicion | e }}">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    {% else %}
-                                    <!-- Colspan dynamic based on role -->
-                                    <tr><td colspan="8" class="text-center text-muted">Sin equipos</td></tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+                                    {% if current_user.role|lower == UserRoles.RECEPCION|lower %}
+                                    <td>{{ eq.cliente or 'N/A' }}</td>
+                                    {% endif %}
+
+                                    <td>
+                                        <div class="fw-bold">{{ eq.marca }}</div>
+                                        <small class="text-muted">{{ eq.modelo }}</small>
+                                    </td>
+                                    <td><span class="badge bg-dark border border-info text-info">{{ eq.estado }}</span>
+                                    </td>
+
+                                    {% if current_user.role|lower == UserRoles.OPERACIONES|lower %}
+                                    <td>{{ eq.encargado or 'N/A' }}</td>
+                                    {% endif %}
+
+                                    <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        {% set dias = (now() - eq.fecha_ingreso).days %}
+                                        <span
+                                            class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{
+                                            dias }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
+                                            data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
+                                            data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
+                                            data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
+                                            data-reporte="{{ eq.reporte_cliente | e }}"
+                                            data-cliente="{{ eq.cliente | e }}"
+                                            data-observaciones="{{ eq.observaciones | e }}"
+                                            data-serie="{{ eq.serie | e }}" data-informe="{{ eq.numero_informe | e }}"
+                                            data-accesorios="{{ eq.accesorios | e }}"
+                                            data-condicion="{{ eq.condicion | e }}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted">Sin equipos</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Col 2: En Diagnóstico -->
-            <div class="col-12">
-                <div class="card bg-dark border-secondary">
-                    <div class="card-header border-secondary text-info">
-                        <i class="fas fa-microscope me-2"></i> En Diagnóstico
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-dark table-hover mb-0 align-middle">
-                                <thead>
-                                    <tr>
-                                        <th>FR</th>
-                                        <!-- Recepcion sees Client -->
-                                        {% if current_user.role|lower == UserRoles.RECEPCION|lower %}
-                                        <th>Cliente</th>
-                                        {% endif %}
-                                        <th>Equipo</th>
-                                        <th>Estado</th>
-                                        <!-- Operaciones sees Encargado -->
-                                        {% if current_user.role|lower == UserRoles.OPERACIONES|lower %}
-                                        <th>Encargado</th>
-                                        {% endif %}
-                                        <th>Fecha</th>
-                                        <th>Días</th>
-                                        <th class="text-end">Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for eq in equipos_relevantes if 'diagnostico' in eq.estado|lower or 'consumible' in eq.estado|lower or 'repuesto entregado' in eq.estado|lower %}
-                                    <tr>
-                                        <td><span class="badge bg-info text-dark">{{ eq.fr or 'N/A' }}</span></td>
-                                        
-                                        {% if current_user.role|lower == UserRoles.RECEPCION|lower %}
-                                        <td>{{ eq.cliente or 'N/A' }}</td>
-                                        {% endif %}
-                                        
-                                        <td>
-                                            <div class="fw-bold">{{ eq.marca }}</div>
-                                            <small class="text-muted">{{ eq.modelo }}</small>
-                                        </td>
-                                        <td><span class="badge bg-dark border border-info text-info">{{ eq.estado }}</span></td>
-                                        
-                                        {% if current_user.role|lower == UserRoles.OPERACIONES|lower %}
-                                        <td>{{ eq.encargado or 'N/A' }}</td>
-                                        {% endif %}
+        <!-- Col 3: Aprobados / Servicio -->
+        <div class="col-12">
+            <div class="card bg-dark border-secondary">
+                <div class="card-header border-secondary text-success">
+                    <i class="fas fa-check-circle me-2"></i> Aprobados / Servicio
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>FR</th>
+                                    <!-- Recepcion sees Client -->
+                                    {% if current_user.role|lower == UserRoles.RECEPCION|lower %}
+                                    <th>Cliente</th>
+                                    {% endif %}
+                                    <th>Equipo</th>
+                                    <th>Estado</th>
+                                    <!-- Operaciones sees Encargado -->
+                                    {% if current_user.role|lower == UserRoles.OPERACIONES|lower %}
+                                    <th>Encargado</th>
+                                    {% endif %}
+                                    <th>Fecha</th>
+                                    <th>Días</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for eq in equipos_relevantes if 'aprobado' in eq.estado|lower or 'servicio' in
+                                eq.estado|lower or 'entregado' in eq.estado|lower %}
+                                <tr>
+                                    <td><span class="badge bg-success">{{ eq.fr or 'N/A' }}</span></td>
 
-                                        <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
-                                        <td>
-                                            {% set dias = (now() - eq.fecha_ingreso).days %}
-                                            <span class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{ dias }}</span>
-                                        </td>
-                                        <td class="text-end">
-                                             <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
-                                                data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
-                                                data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
-                                                data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
-                                                data-reporte="{{ eq.reporte_cliente | e }}"
-                                                data-cliente="{{ eq.cliente | e }}"
-                                                data-observaciones="{{ eq.observaciones | e }}"
-                                                data-serie="{{ eq.serie | e }}"
-                                                data-informe="{{ eq.numero_informe | e }}"
-                                                data-accesorios="{{ eq.accesorios | e }}"
-                                                data-condicion="{{ eq.condicion | e }}">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    {% else %}
-                                    <tr><td colspan="8" class="text-center text-muted">Sin equipos</td></tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+                                    {% if current_user.role|lower == UserRoles.RECEPCION|lower %}
+                                    <td>{{ eq.cliente or 'N/A' }}</td>
+                                    {% endif %}
+
+                                    <td>
+                                        <div class="fw-bold">{{ eq.marca }}</div>
+                                        <small class="text-muted">{{ eq.modelo }}</small>
+                                    </td>
+                                    <td><span class="badge bg-dark border border-success text-success">{{ eq.estado
+                                            }}</span></td>
+
+                                    {% if current_user.role|lower == UserRoles.OPERACIONES|lower %}
+                                    <td>{{ eq.encargado or 'N/A' }}</td>
+                                    {% endif %}
+
+                                    <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        {% set dias = (now() - eq.fecha_ingreso).days %}
+                                        <span
+                                            class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{
+                                            dias }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
+                                            data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
+                                            data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
+                                            data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
+                                            data-reporte="{{ eq.reporte_cliente | e }}"
+                                            data-cliente="{{ eq.cliente | e }}"
+                                            data-observaciones="{{ eq.observaciones | e }}"
+                                            data-serie="{{ eq.serie | e }}" data-informe="{{ eq.numero_informe | e }}"
+                                            data-accesorios="{{ eq.accesorios | e }}"
+                                            data-condicion="{{ eq.condicion | e }}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted">Sin equipos</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-
-            <!-- Col 3: Aprobados / Servicio -->
-            <div class="col-12">
-                <div class="card bg-dark border-secondary">
-                    <div class="card-header border-secondary text-success">
-                        <i class="fas fa-check-circle me-2"></i> Aprobados / Servicio
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-dark table-hover mb-0 align-middle">
-                                <thead>
-                                    <tr>
-                                        <th>FR</th>
-                                        <!-- Recepcion sees Client -->
-                                        {% if current_user.role|lower == UserRoles.RECEPCION|lower %}
-                                        <th>Cliente</th>
-                                        {% endif %}
-                                        <th>Equipo</th>
-                                        <th>Estado</th>
-                                        <!-- Operaciones sees Encargado -->
-                                        {% if current_user.role|lower == UserRoles.OPERACIONES|lower %}
-                                        <th>Encargado</th>
-                                        {% endif %}
-                                        <th>Fecha</th>
-                                        <th>Días</th>
-                                        <th class="text-end">Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for eq in equipos_relevantes if 'aprobado' in eq.estado|lower or 'servicio' in eq.estado|lower or 'entregado' in eq.estado|lower %}
-                                    <tr>
-                                        <td><span class="badge bg-success">{{ eq.fr or 'N/A' }}</span></td>
-                                        
-                                        {% if current_user.role|lower == UserRoles.RECEPCION|lower %}
-                                        <td>{{ eq.cliente or 'N/A' }}</td>
-                                        {% endif %}
-                                        
-                                        <td>
-                                            <div class="fw-bold">{{ eq.marca }}</div>
-                                            <small class="text-muted">{{ eq.modelo }}</small>
-                                        </td>
-                                        <td><span class="badge bg-dark border border-success text-success">{{ eq.estado }}</span></td>
-                                        
-                                        {% if current_user.role|lower == UserRoles.OPERACIONES|lower %}
-                                        <td>{{ eq.encargado or 'N/A' }}</td>
-                                        {% endif %}
-
-                                        <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
-                                        <td>
-                                            {% set dias = (now() - eq.fecha_ingreso).days %}
-                                            <span class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{ dias }}</span>
-                                        </td>
-                                        <td class="text-end">
-                                             <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
-                                                data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
-                                                data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
-                                                data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
-                                                data-reporte="{{ eq.reporte_cliente | e }}"
-                                                data-cliente="{{ eq.cliente | e }}"
-                                                data-observaciones="{{ eq.observaciones | e }}"
-                                                data-serie="{{ eq.serie | e }}"
-                                                data-informe="{{ eq.numero_informe | e }}"
-                                                data-accesorios="{{ eq.accesorios | e }}"
-                                                data-condicion="{{ eq.condicion | e }}">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    {% else %}
-                                    <tr><td colspan="8" class="text-center text-muted">Sin equipos</td></tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-         </div>
+        </div>
+    </div>
     {% endif %}
 
 </div>
