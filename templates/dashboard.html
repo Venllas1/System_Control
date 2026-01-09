@@ -17,6 +17,9 @@
             <a href="{{ url_for('backup_db') }}" class="btn btn-primary shadow-sm">
                 <i class="fas fa-download me-2"></i> Backup DB
             </a>
+            <button class="btn btn-primary shadow-sm ms-2" data-bs-toggle="modal" data-bs-target="#importInformesModal">
+                <i class="fas fa-file-csv me-2"></i> Importar Informes
+            </button>
 
         </div>
         <div class="subtitle">Vista Completa del Sistema - Última actualización: {{ stats_admin.ultima_actualizacion }}
@@ -144,6 +147,7 @@
                             data-observaciones="{{ eq.observaciones | e or 'Sin observaciones' }}"
                             data-serie="{{ eq.serie | e or 'N/A' }}"
                             data-accesorios="{{ eq.accesorios | e or 'Ninguno' }}"
+                            data-informe="{{ eq.numero_informe | e or 'N/A' }}"
                             data-condicion="{{ eq.condicion | e or 'Regular' }}">
                             <i class="fas fa-eye"></i>
                         </button>
@@ -330,6 +334,7 @@
                                     data-cliente="{{ eq.cliente | e or 'N/A' }}"
                                     data-observaciones="{{ eq.observaciones | e or 'Sin observaciones' }}"
                                     data-serie="{{ eq.serie | e or 'N/A' }}"
+                                    data-informe="{{ eq.numero_informe | e or 'N/A' }}"
                                     data-accesorios="{{ eq.accesorios | e or 'Ninguno' }}"
                                     data-condicion="{{ eq.condicion | e or 'Regular' }}">
                                     <i class="fas fa-eye"></i>
@@ -545,6 +550,7 @@
         document.getElementById('infoSerie').innerText = d.serie;
         document.getElementById('infoCondicion').innerText = d.condicion;
         document.getElementById('infoAccesorios').innerText = d.accesorios;
+        document.getElementById('infoInforme').innerText = d.informe;
         document.getElementById('infoObservaciones').innerText = d.observaciones;
 
         // New Lifecycle Fields
@@ -609,6 +615,10 @@
                             <small class="text-secondary text-uppercase">Accesorios</small>
                             <p id="infoAccesorios" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
                         </div>
+                        <div class="col-md-6">
+                            <small class="text-secondary text-uppercase text-info">No. Informe</small>
+                            <p id="infoInforme" class="fw-bold text-info mb-0 border-bottom border-dark pb-1"></p>
+                        </div>
 
                         <div class="col-12 mt-3">
                             <small class="text-secondary text-uppercase text-info"><i class="fas fa-file-alt me-1"></i>
@@ -628,6 +638,41 @@
                 <div class="modal-footer border-secondary p-1">
                     <button type="button" class="btn btn-sm btn-secondary w-100" data-bs-dismiss="modal">Cerrar</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Importar Informes -->
+    <div class="modal fade" id="importInformesModal" tabindex="-1" aria-labelledby="importInformesModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark text-light border-secondary">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title" id="importInformesModalLabel"><i class="fas fa-file-csv me-2"></i>Importar
+                        Números de Informe</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <form action="{{ url_for('import_informes') }}" method="POST" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Sube un archivo CSV con las columnas <strong>FR</strong> y <strong>No DIAG</strong> (o
+                            similar).
+                            <br>
+                            Solo se actualizará el campo "Número de Informe" para los equipos existentes.
+                        </div>
+                        <div class="mb-3">
+                            <label for="file" class="form-label">Archivo CSV</label>
+                            <input class="form-control bg-dark text-light border-secondary" type="file" id="file"
+                                name="file" accept=".csv" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-secondary">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Importar</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
