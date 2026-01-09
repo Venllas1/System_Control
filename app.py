@@ -223,12 +223,12 @@ def create_app(config_class=Config):
                 entregados_json = '[]'
                 
                 if user_role_norm != UserRoles.ALMACEN.lower():
-                     equipos_entregados = Equipment.query.filter(
+                    equipos_entregados = Equipment.query.filter(
                         Equipment.estado.ilike('%entregado%')
-                     ).order_by(Equipment.fecha_ingreso.desc()).all()
-                     
-                     import json
-                     entregados_json = json.dumps([{
+                    ).order_by(Equipment.fecha_ingreso.desc()).all()
+                    
+                    import json
+                    entregados_json = json.dumps([{
                         'fr': eq.fr,
                         'marca': eq.marca,
                         'modelo': eq.modelo,
