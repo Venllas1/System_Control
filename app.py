@@ -123,6 +123,17 @@ def create_app(config_class=Config):
                 Equipment.estado.ilike('%entregado%')
             ).order_by(Equipment.fecha_ingreso.desc()).all()
             
+            # DEBUG: Log entregados count
+            print(f"\n{'='*60}")
+            print(f"DEBUG ADMIN: Found {len(equipos_entregados_admin)} equipos entregados")
+            if equipos_entregados_admin:
+                print(f"Sample estados: {[eq.estado for eq in equipos_entregados_admin[:5]]}")
+            else:
+                print("⚠️ NO ENTREGADOS FOUND - Checking all estados in DB:")
+                all_estados = db.session.query(Equipment.estado).distinct().all()
+                print(f"All unique estados: {[e[0] for e in all_estados]}")
+            print(f"{'='*60}\n")
+            
             import json
             entregados_json = json.dumps([{
                 'fr': eq.fr,
@@ -140,6 +151,8 @@ def create_app(config_class=Config):
                 'condicion': eq.condicion,
                 'numero_informe': eq.numero_informe
             } for eq in equipos_entregados_admin])
+            
+            print(f"DEBUG: entregados_json length: {len(entregados_json)} characters")
             
             return render_template('dashboard.html',
                                  is_admin_view=True,
@@ -253,6 +266,17 @@ def create_app(config_class=Config):
                         Equipment.estado.ilike('%entregado%')
                     ).order_by(Equipment.fecha_ingreso.desc()).all()
                     
+                    # DEBUG: Log entregados count for non-admin
+                    print(f"\n{'='*60}")
+                    print(f"DEBUG USER ({current_user.role}): Found {len(equipos_entregados)} equipos entregados")
+                    if equipos_entregados:
+                        print(f"Sample estados: {[eq.estado for eq in equipos_entregados[:5]]}")
+                    else:
+                        print("⚠️ NO ENTREGADOS FOUND - Checking all estados in DB:")
+                        all_estados = db.session.query(Equipment.estado).distinct().all()
+                        print(f"All unique estados: {[e[0] for e in all_estados]}")
+                    print(f"{'='*60}\n")
+                    
                     import json
                     entregados_json = json.dumps([{
                         'fr': eq.fr,
@@ -272,6 +296,8 @@ def create_app(config_class=Config):
                     } for eq in equipos_entregados])
                     
                     print(f"DEBUG: Found {len(equipos_entregados)} delivered items.")
+                    print(f"DEBUG: entregados_json length: {len(entregados_json)} characters\n")
+
 
                 stats_user = {
                     'mis_tareas': len(equipos_relevantes),
