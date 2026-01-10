@@ -1436,44 +1436,56 @@
 
 <script>
     // Global Action for Dashboard Buttons
-    // Global Action for Dashboard Buttons
-    window.updateStatus = func, Status, newEncargado = null) {
-        msg = `¿Cambiar estado a: ${newStatus}?               if (newEncargado) msg += `\nAsignando a: ${ newEncargado } `;
+    window.updateStatus = function (id, newStatus, newEncargado = null) {
+        let msg = `¿Cambiar estado a: ${newStatus}?`;
+        if (newEncargado) msg += `\nAsignando a: ${newEncargado}`;
 
-               (!confirm(msg)) return;
+        if (!confirm(msg)) return;
 
-        const formDat            FormData();
+        const formData = new FormData();
         formData.append('status', newStatus);
-               (newEncargado) formData.app            argado', newEncargado);
+        if (newEncargado) formData.append('encargado', newEncargado);
 
-                    api/equipment/${id}/update_status`, { 'POST', body: formData })
+        fetch(`/api/equipment/${id}/update_status`, { method: 'POST', body: formData })
             .then(r => r.json())
             .then(data => {
                 if (data.success) location.reload();
-                ert('Error: ' + data.                        })
-        r => alert('Error de red: ' + err));
-        ow.showInfo = function (btn) {
-                     ata                utes
-            const d = btn.dataset;
-            do nt.g        ementById('infoFr').innerText = d.f               document.getElementById('i            ').innerText = d.marca; document.getElementById('infoEstado').innerHTML = `            ass="badge bg-secondary">${d.estado}</span>`;
-        docu            ElementById('infoEncargado').innerText = d.encargado || 'No Asignado';
-            document.getElementById('i            ').innerText = d.fecha;
-            document.getElementById('infoReporte').innerText = e;
+                else alert('Error: ' + (data.error || 'Unknown error'));
+            })
+            .catch(err => alert('Error de red: ' + err));
+    };
 
-            // New Fields
-            document.getElementById(ente').innerText = d.cliente;
-        document.getElementById('            e').innerText             e;
-            document.getElementById('infoCondicion').innerText             icion;
-            document.getElementById('infoAccesorios').i = d.accesorios;
-            document.getElementById('infoInforme').in = d.informe;
-            document.getElementById('infoObservaciones').in = d.observaciones;
+    window.showInfo = function (btn) {
+        const d = btn.dataset;
 
-            // New Lifecycle Fields
-
-
-            Modal = new bootstrap.Modal(document.getElementById('detailedInfoModal'));
-            myModal.show();
+        // Helper to safely set text content
+        const setIfExists = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = val || '';
         };
+
+        setIfExists('infoFr', d.fr);
+        setIfExists('infoMarca', d.marca);
+
+        const infoEstado = document.getElementById('infoEstado');
+        if (infoEstado) infoEstado.innerHTML = `<span class="badge bg-secondary">${d.estado || ''}</span>`;
+
+        setIfExists('infoEncargado', d.encargado || 'No Asignado');
+        setIfExists('infoFecha', d.fecha);
+        setIfExists('infoReporte', d.reporte);
+        setIfExists('infoCliente', d.cliente);
+        setIfExists('infoObservaciones', d.observaciones);
+        setIfExists('infoSerie', d.serie);
+        setIfExists('infoCondicion', d.condicion);
+        setIfExists('infoAccesorios', d.accesorios);
+        setIfExists('infoInforme', d.informe);
+
+        const modalEl = document.getElementById('detailedInfoModal');
+        if (modalEl) {
+            const myModal = new bootstrap.Modal(modalEl);
+            myModal.show();
+        }
+    };
 </script>
 
 <!-- INFO MODAL -->
