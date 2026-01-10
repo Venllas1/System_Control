@@ -116,12 +116,37 @@ def create_app(config_class=Config):
                 'por_estado': dict(equipos_por_estado),
                 'ultima_actualizacion': datetime.now().strftime('%d/%m/%Y %H:%M:%S')
             }
+
+            # Historial Entregados for Admin
+            equipos_entregados_admin = Equipment.query.filter(
+                Equipment.estado.in_(['Entregado', 'ENTREGADO'])
+            ).order_by(Equipment.fecha_ingreso.desc()).all()
+            
+            import json
+            entregados_json = json.dumps([{
+                'fr': eq.fr,
+                'marca': eq.marca,
+                'modelo': eq.modelo,
+                'estado': eq.estado,
+                'cliente': eq.cliente,
+                'fecha_ingreso': eq.fecha_ingreso.strftime('%d/%m/%Y') if eq.fecha_ingreso else 'N/A',
+                'encargado': eq.encargado,
+                'id': eq.id,
+                'reporte_cliente': eq.reporte_cliente,
+                'observaciones': eq.observaciones,
+                'serie': eq.serie,
+                'accesorios': eq.accesorios,
+                'condicion': eq.condicion,
+                'numero_informe': eq.numero_informe
+            } for eq in equipos_entregados_admin])
             
             return render_template('dashboard.html',
                                  is_admin_view=True,
                                  stats_admin=stats_admin,
                                  equipos_criticos=equipos_criticos,
                                  todos_equipos=todos_equipos,
+                                 equipos_entregados=equipos_entregados_admin,
+                                 entregados_json=entregados_json,
                                  UserRoles=UserRoles,
                                  Status=Equipment.Status)
         

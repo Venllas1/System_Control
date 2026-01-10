@@ -20,7 +20,8 @@
             <button class="btn btn-primary shadow-sm ms-2" data-bs-toggle="modal" data-bs-target="#importInformesModal">
                 <i class="fas fa-file-csv me-2"></i> Importar Informes
             </button>
-            <a href="{{ url_for('panel_estados') }}" class="btn btn-info shadow-sm ms-2" title="Ir a Gestión de Equipos">
+            <a href="{{ url_for('panel_estados') }}" class="btn btn-info shadow-sm ms-2"
+                title="Ir a Gestión de Equipos">
                 <i class="fas fa-tasks me-2"></i> Gestión de Equipos
             </a>
         </div>
@@ -96,7 +97,7 @@
 
     <!-- VISTA ADMIN: TARJETAS APILADAS POR CATEGORIA -->
     <div class="row g-4 mb-4">
-        
+
         <!-- 1. PENDIENTES DE APROBACION -->
         <div class="col-12">
             <div class="card bg-dark border-secondary shadow-sm">
@@ -120,7 +121,9 @@
                             </thead>
                             <tbody>
                                 {% set pendientes = [] %}
-                                {% for eq in todos_equipos if 'pendiente' in eq.estado|lower or 'espera' in eq.estado|lower and 'diagnostico' not in eq.estado|lower and 'repuesto' not in eq.estado|lower and 'servicio' not in eq.estado|lower %}
+                                {% for eq in todos_equipos if 'pendiente' in eq.estado|lower or 'espera' in
+                                eq.estado|lower and 'diagnostico' not in eq.estado|lower and 'repuesto' not in
+                                eq.estado|lower and 'servicio' not in eq.estado|lower %}
                                 <tr>
                                     <td><span class="badge bg-warning text-dark">{{ eq.fr or 'N/A' }}</span></td>
                                     <td>{{ eq.cliente or 'N/A' }}</td>
@@ -133,7 +136,9 @@
                                     <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
                                     <td>
                                         {% set dias = (now() - eq.fecha_ingreso).days %}
-                                        <span class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{ dias }}</span>
+                                        <span
+                                            class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{
+                                            dias }}</span>
                                     </td>
                                     <td class="text-end">
                                         <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
@@ -143,8 +148,7 @@
                                             data-reporte="{{ eq.reporte_cliente | e }}"
                                             data-cliente="{{ eq.cliente | e }}"
                                             data-observaciones="{{ eq.observaciones | e }}"
-                                            data-serie="{{ eq.serie | e }}"
-                                            data-informe="{{ eq.numero_informe | e }}"
+                                            data-serie="{{ eq.serie | e }}" data-informe="{{ eq.numero_informe | e }}"
                                             data-accesorios="{{ eq.accesorios | e }}"
                                             data-condicion="{{ eq.condicion | e }}">
                                             <i class="fas fa-eye"></i>
@@ -152,7 +156,9 @@
                                     </td>
                                 </tr>
                                 {% else %}
-                                <tr><td colspan="8" class="text-center text-muted">No hay equipos pendientes</td></tr>
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted">No hay equipos pendientes</td>
+                                </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -161,288 +167,284 @@
             </div>
         </div>
 
-            <!-- 2. EN DIAGNOSTICO / REVISION -->
-            <div class="col-12">
-                <div class="card bg-dark border-secondary shadow-sm">
-                    <div class="card-header border-secondary text-info">
-                        <i class="fas fa-microscope me-2"></i> En Diagnóstico / Revisión
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-dark table-hover mb-0 align-middle">
-                                <thead>
-                                    <tr>
-                                        <th>FR</th>
-                                        <th>Cliente</th>
-                                        <th>Equipo</th>
-                                        <th>Estado</th>
-                                        <th>Encargado</th>
-                                        <th>Fecha</th>
-                                        <th>Días</th>
-                                        <th class="text-end">Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for eq in todos_equipos if 'diagnostico' in eq.estado|lower or 'revision' in
-                                    eq.estado|lower %}
-                                    <tr>
-                                        <td><span class="badge bg-info text-dark">{{ eq.fr or 'N/A' }}</span></td>
-                                        <td>{{ eq.cliente or 'N/A' }}</td>
-                                        <td>
-                                            <span class="fw-bold">{{ eq.marca }}</span>
-                                            <small class="d-block text-muted">{{ eq.modelo }}</small>
-                                        </td>
-                                        <td><span class="badge bg-secondary">{{ eq.estado }}</span></td>
-                                        <td>{{ eq.encargado or 'N/A' }}</td>
-                                        <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
-                                        <td>
-                                            {% set dias = (now() - eq.fecha_ingreso).days %}
-                                            <span
-                                                class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{
-                                                dias }}</span>
-                                        </td>
-                                        <td class="text-end">
-                                            <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
-                                                data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
-                                                data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
-                                                data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
-                                                data-reporte="{{ eq.reporte_cliente | e }}"
-                                                data-cliente="{{ eq.cliente | e }}"
-                                                data-observaciones="{{ eq.observaciones | e }}"
-                                                data-serie="{{ eq.serie | e }}"
-                                                data-informe="{{ eq.numero_informe | e }}"
-                                                data-accesorios="{{ eq.accesorios | e }}"
-                                                data-condicion="{{ eq.condicion | e }}">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
+        <!-- 2. EN DIAGNOSTICO / REVISION -->
+        <div class="col-12">
+            <div class="card bg-dark border-secondary shadow-sm">
+                <div class="card-header border-secondary text-info">
+                    <i class="fas fa-microscope me-2"></i> En Diagnóstico / Revisión
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>FR</th>
+                                    <th>Cliente</th>
+                                    <th>Equipo</th>
+                                    <th>Estado</th>
+                                    <th>Encargado</th>
+                                    <th>Fecha</th>
+                                    <th>Días</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for eq in todos_equipos if 'diagnostico' in eq.estado|lower or 'revision' in
+                                eq.estado|lower %}
+                                <tr>
+                                    <td><span class="badge bg-info text-dark">{{ eq.fr or 'N/A' }}</span></td>
+                                    <td>{{ eq.cliente or 'N/A' }}</td>
+                                    <td>
+                                        <span class="fw-bold">{{ eq.marca }}</span>
+                                        <small class="d-block text-muted">{{ eq.modelo }}</small>
+                                    </td>
+                                    <td><span class="badge bg-secondary">{{ eq.estado }}</span></td>
+                                    <td>{{ eq.encargado or 'N/A' }}</td>
+                                    <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        {% set dias = (now() - eq.fecha_ingreso).days %}
+                                        <span
+                                            class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{
+                                            dias }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
+                                            data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
+                                            data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
+                                            data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
+                                            data-reporte="{{ eq.reporte_cliente | e }}"
+                                            data-cliente="{{ eq.cliente | e }}"
+                                            data-observaciones="{{ eq.observaciones | e }}"
+                                            data-serie="{{ eq.serie | e }}" data-informe="{{ eq.numero_informe | e }}"
+                                            data-accesorios="{{ eq.accesorios | e }}"
+                                            data-condicion="{{ eq.condicion | e }}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
 
-                                        </td>
-                                    </tr>
-                                    {% else %}
-                                    <tr>
-                                        <td colspan="8" class="text-center text-muted">No hay equipos en diagnóstico
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted">No hay equipos en diagnóstico
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-
-            <!-- 3. ESPERA DE REPUESTOS -->
-            <div class="col-12">
-                <div class="card bg-dark border-secondary shadow-sm">
-                    <div class="card-header border-secondary text-warning">
-                        <i class="fas fa-boxes me-2"></i> Espera de Repuestos / Consumibles
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-dark table-hover mb-0 align-middle">
-                                <thead>
-                                    <tr>
-                                        <th>FR</th>
-                                        <th>Cliente</th>
-                                        <th>Equipo</th>
-                                        <th>Estado</th>
-                                        <th>Encargado</th>
-                                        <th>Fecha</th>
-                                        <th>Días</th>
-                                        <th class="text-end">Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for eq in todos_equipos if 'repuesto' in eq.estado|lower or 'consumible' in
-                                    eq.estado|lower %}
-                                    <tr>
-                                        <td><span class="badge bg-warning text-dark">{{ eq.fr or 'N/A' }}</span></td>
-                                        <td>{{ eq.cliente or 'N/A' }}</td>
-                                        <td>
-                                            <span class="fw-bold">{{ eq.marca }}</span>
-                                            <small class="d-block text-muted">{{ eq.modelo }}</small>
-                                        </td>
-                                        <td><span class="badge bg-secondary">{{ eq.estado }}</span></td>
-                                        <td>{{ eq.encargado or 'N/A' }}</td>
-                                        <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
-                                        <td>
-                                            {% set dias = (now() - eq.fecha_ingreso).days %}
-                                            <span
-                                                class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{
-                                                dias }}</span>
-                                        </td>
-                                        <td class="text-end">
-                                            <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
-                                                data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
-                                                data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
-                                                data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
-                                                data-reporte="{{ eq.reporte_cliente | e }}"
-                                                data-cliente="{{ eq.cliente | e }}"
-                                                data-observaciones="{{ eq.observaciones | e }}"
-                                                data-serie="{{ eq.serie | e }}"
-                                                data-informe="{{ eq.numero_informe | e }}"
-                                                data-accesorios="{{ eq.accesorios | e }}"
-                                                data-condicion="{{ eq.condicion | e }}">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-
-                                        </td>
-                                    </tr>
-                                    {% else %}
-                                    <tr>
-                                        <td colspan="8" class="text-center text-muted">No hay equipos en espera de
-                                            repuestos
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 4. APROBADOS / EN SERVICIO -->
-            <div class="col-12">
-                <div class="card bg-dark border-secondary shadow-sm">
-                    <div class="card-header border-secondary text-success">
-                        <i class="fas fa-tools me-2"></i> Aprobados / En Servicio
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-dark table-hover mb-0 align-middle">
-                                <thead>
-                                    <tr>
-                                        <th>FR</th>
-                                        <th>Cliente</th>
-                                        <th>Equipo</th>
-                                        <th>Estado</th>
-                                        <th>Encargado</th>
-                                        <th>Fecha</th>
-                                        <th>Días</th>
-                                        <th class="text-end">Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for eq in todos_equipos if ('aprobado' in eq.estado|lower or 'servicio' in
-                                    eq.estado|lower) and 'repuesto' not in eq.estado|lower and 'culminado' not in
-                                    eq.estado|lower %}
-                                    <tr>
-                                        <td><span class="badge bg-success">{{ eq.fr or 'N/A' }}</span></td>
-                                        <td>{{ eq.cliente or 'N/A' }}</td>
-                                        <td>
-                                            <span class="fw-bold">{{ eq.marca }}</span>
-                                            <small class="d-block text-muted">{{ eq.modelo }}</small>
-                                        </td>
-                                        <td><span class="badge bg-secondary">{{ eq.estado }}</span></td>
-                                        <td>{{ eq.encargado or 'N/A' }}</td>
-                                        <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
-                                        <td>
-                                            {% set dias = (now() - eq.fecha_ingreso).days %}
-                                            <span
-                                                class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{
-                                                dias }}</span>
-                                        </td>
-                                        <td class="text-end">
-                                            <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
-                                                data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
-                                                data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
-                                                data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
-                                                data-reporte="{{ eq.reporte_cliente | e }}"
-                                                data-cliente="{{ eq.cliente | e }}"
-                                                data-observaciones="{{ eq.observaciones | e }}"
-                                                data-serie="{{ eq.serie | e }}"
-                                                data-informe="{{ eq.numero_informe | e }}"
-                                                data-accesorios="{{ eq.accesorios | e }}"
-                                                data-condicion="{{ eq.condicion | e }}">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-
-                                        </td>
-                                    </tr>
-                                    {% else %}
-                                    <tr>
-                                        <td colspan="8" class="text-center text-muted">No hay equipos en servicio</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 5. TERMINADOS / LISTOS -->
-            <div class="col-12">
-                <div class="card bg-dark border-secondary shadow-sm">
-                    <div class="card-header border-secondary text-light">
-                        <i class="fas fa-check-double me-2"></i> Terminados / Listos para Entrega
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-dark table-hover mb-0 align-middle">
-                                <thead>
-                                    <tr>
-                                        <th>FR</th>
-                                        <th>Cliente</th>
-                                        <th>Equipo</th>
-                                        <th>Estado</th>
-                                        <th>Encargado</th>
-                                        <th>Fecha</th>
-                                        <th>Días</th>
-                                        <th class="text-end">Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for eq in todos_equipos if 'culminado' in eq.estado|lower or 'entregado' in
-                                    eq.estado|lower %}
-                                    <tr>
-                                        <td><span class="badge bg-secondary">{{ eq.fr or 'N/A' }}</span></td>
-                                        <td>{{ eq.cliente or 'N/A' }}</td>
-                                        <td>
-                                            <span class="fw-bold">{{ eq.marca }}</span>
-                                            <small class="d-block text-muted">{{ eq.modelo }}</small>
-                                        </td>
-                                        <td><span class="badge bg-success">{{ eq.estado }}</span></td>
-                                        <td>{{ eq.encargado or 'N/A' }}</td>
-                                        <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
-                                        <td>
-                                            {% set dias = (now() - eq.fecha_ingreso).days %}
-                                            <span class="badge bg-success">{{ dias }}</span>
-                                        </td>
-                                        <td class="text-end">
-                                            <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
-                                                data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
-                                                data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
-                                                data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
-                                                data-reporte="{{ eq.reporte_cliente | e }}"
-                                                data-cliente="{{ eq.cliente | e }}"
-                                                data-observaciones="{{ eq.observaciones | e }}"
-                                                data-serie="{{ eq.serie | e }}"
-                                                data-informe="{{ eq.numero_informe | e }}"
-                                                data-accesorios="{{ eq.accesorios | e }}"
-                                                data-condicion="{{ eq.condicion | e }}">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-
-                                        </td>
-                                    </tr>
-
-                                        {% else %}
-                                    <tr>
-                                        <td colspan="8" class="text-center text-muted">No hay equipos terminados
-                                            recientes
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         </div>
+
+        <!-- 3. ESPERA DE REPUESTOS -->
+        <div class="col-12">
+            <div class="card bg-dark border-secondary shadow-sm">
+                <div class="card-header border-secondary text-warning">
+                    <i class="fas fa-boxes me-2"></i> Espera de Repuestos / Consumibles
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>FR</th>
+                                    <th>Cliente</th>
+                                    <th>Equipo</th>
+                                    <th>Estado</th>
+                                    <th>Encargado</th>
+                                    <th>Fecha</th>
+                                    <th>Días</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for eq in todos_equipos if 'repuesto' in eq.estado|lower or 'consumible' in
+                                eq.estado|lower %}
+                                <tr>
+                                    <td><span class="badge bg-warning text-dark">{{ eq.fr or 'N/A' }}</span></td>
+                                    <td>{{ eq.cliente or 'N/A' }}</td>
+                                    <td>
+                                        <span class="fw-bold">{{ eq.marca }}</span>
+                                        <small class="d-block text-muted">{{ eq.modelo }}</small>
+                                    </td>
+                                    <td><span class="badge bg-secondary">{{ eq.estado }}</span></td>
+                                    <td>{{ eq.encargado or 'N/A' }}</td>
+                                    <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        {% set dias = (now() - eq.fecha_ingreso).days %}
+                                        <span
+                                            class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{
+                                            dias }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
+                                            data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
+                                            data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
+                                            data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
+                                            data-reporte="{{ eq.reporte_cliente | e }}"
+                                            data-cliente="{{ eq.cliente | e }}"
+                                            data-observaciones="{{ eq.observaciones | e }}"
+                                            data-serie="{{ eq.serie | e }}" data-informe="{{ eq.numero_informe | e }}"
+                                            data-accesorios="{{ eq.accesorios | e }}"
+                                            data-condicion="{{ eq.condicion | e }}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted">No hay equipos en espera de
+                                        repuestos
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. APROBADOS / EN SERVICIO -->
+        <div class="col-12">
+            <div class="card bg-dark border-secondary shadow-sm">
+                <div class="card-header border-secondary text-success">
+                    <i class="fas fa-tools me-2"></i> Aprobados / En Servicio
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>FR</th>
+                                    <th>Cliente</th>
+                                    <th>Equipo</th>
+                                    <th>Estado</th>
+                                    <th>Encargado</th>
+                                    <th>Fecha</th>
+                                    <th>Días</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for eq in todos_equipos if ('aprobado' in eq.estado|lower or 'servicio' in
+                                eq.estado|lower) and 'repuesto' not in eq.estado|lower and 'culminado' not in
+                                eq.estado|lower %}
+                                <tr>
+                                    <td><span class="badge bg-success">{{ eq.fr or 'N/A' }}</span></td>
+                                    <td>{{ eq.cliente or 'N/A' }}</td>
+                                    <td>
+                                        <span class="fw-bold">{{ eq.marca }}</span>
+                                        <small class="d-block text-muted">{{ eq.modelo }}</small>
+                                    </td>
+                                    <td><span class="badge bg-secondary">{{ eq.estado }}</span></td>
+                                    <td>{{ eq.encargado or 'N/A' }}</td>
+                                    <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        {% set dias = (now() - eq.fecha_ingreso).days %}
+                                        <span
+                                            class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{
+                                            dias }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
+                                            data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
+                                            data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
+                                            data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
+                                            data-reporte="{{ eq.reporte_cliente | e }}"
+                                            data-cliente="{{ eq.cliente | e }}"
+                                            data-observaciones="{{ eq.observaciones | e }}"
+                                            data-serie="{{ eq.serie | e }}" data-informe="{{ eq.numero_informe | e }}"
+                                            data-accesorios="{{ eq.accesorios | e }}"
+                                            data-condicion="{{ eq.condicion | e }}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted">No hay equipos en servicio</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. TERMINADOS / LISTOS -->
+        <div class="col-12">
+            <div class="card bg-dark border-secondary shadow-sm">
+                <div class="card-header border-secondary text-light">
+                    <i class="fas fa-check-double me-2"></i> Terminados / Listos para Entrega
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>FR</th>
+                                    <th>Cliente</th>
+                                    <th>Equipo</th>
+                                    <th>Estado</th>
+                                    <th>Encargado</th>
+                                    <th>Fecha</th>
+                                    <th>Días</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for eq in todos_equipos if 'culminado' in eq.estado|lower or 'entregado' in
+                                eq.estado|lower %}
+                                <tr>
+                                    <td><span class="badge bg-secondary">{{ eq.fr or 'N/A' }}</span></td>
+                                    <td>{{ eq.cliente or 'N/A' }}</td>
+                                    <td>
+                                        <span class="fw-bold">{{ eq.marca }}</span>
+                                        <small class="d-block text-muted">{{ eq.modelo }}</small>
+                                    </td>
+                                    <td><span class="badge bg-success">{{ eq.estado }}</span></td>
+                                    <td>{{ eq.encargado or 'N/A' }}</td>
+                                    <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        {% set dias = (now() - eq.fecha_ingreso).days %}
+                                        <span class="badge bg-success">{{ dias }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
+                                            data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
+                                            data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
+                                            data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
+                                            data-reporte="{{ eq.reporte_cliente | e }}"
+                                            data-cliente="{{ eq.cliente | e }}"
+                                            data-observaciones="{{ eq.observaciones | e }}"
+                                            data-serie="{{ eq.serie | e }}" data-informe="{{ eq.numero_informe | e }}"
+                                            data-accesorios="{{ eq.accesorios | e }}"
+                                            data-condicion="{{ eq.condicion | e }}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+
+                                    </td>
+                                </tr>
+
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted">No hay equipos terminados
+                                        recientes
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
     <!-- HISTORIAL ENTREGADOS (SHARED) -->
     {% if current_user.role|lower != 'almacen' %}
     <div class="row g-4 mt-4">
@@ -453,7 +455,9 @@
                         <i class="fas fa-history me-2"></i> Historial de Equipos Entregados
                     </div>
                     <div class="d-flex gap-2">
-                        <input type="text" id="searchEntregados" class="form-control form-control-sm bg-dark text-light border-secondary" placeholder="Buscar..." style="width: 200px;">
+                        <input type="text" id="searchEntregados"
+                            class="form-control form-control-sm bg-dark text-light border-secondary"
+                            placeholder="Buscar..." style="width: 200px;">
                     </div>
                 </div>
                 <div class="card-body p-0">
@@ -486,42 +490,42 @@
             </div>
         </div>
     </div>
-    
+
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Safe Parse
-        let entregadosData = [];
-        try {
-            entregadosData = JSON.parse('{{ entregados_json | safe }}');
-        } catch (e) {
-            console.error("Error parsing entregados JSON", e);
-        }
-
-        const itemsPerPage = 5;
-        let currentPage = 1;
-        let filteredData = entregadosData;
-
-        const tbody = document.getElementById('tbodyEntregados');
-        const searchInput = document.getElementById('searchEntregados');
-        const pagination = document.getElementById('paginationEntregados');
-        const info = document.getElementById('infoEntregados');
-
-        function renderTable(page) {
-            if (!tbody) return;
-            tbody.innerHTML = '';
-            
-            const start = (page - 1) * itemsPerPage;
-            const end = start + itemsPerPage;
-            const pageData = filteredData.slice(start, end);
-
-            if (pageData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No hay registros</td></tr>';
-                return;
+        document.addEventListener('DOMContentLoaded', function () {
+            // Safe Parse
+            let entregadosData = [];
+            try {
+                entregadosData = JSON.parse('{{ entregados_json | safe }}');
+            } catch (e) {
+                console.error("Error parsing entregados JSON", e);
             }
 
-            pageData.forEach(eq => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
+            const itemsPerPage = 5;
+            let currentPage = 1;
+            let filteredData = entregadosData;
+
+            const tbody = document.getElementById('tbodyEntregados');
+            const searchInput = document.getElementById('searchEntregados');
+            const pagination = document.getElementById('paginationEntregados');
+            const info = document.getElementById('infoEntregados');
+
+            function renderTable(page) {
+                if (!tbody) return;
+                tbody.innerHTML = '';
+
+                const start = (page - 1) * itemsPerPage;
+                const end = start + itemsPerPage;
+                const pageData = filteredData.slice(start, end);
+
+                if (pageData.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No hay registros</td></tr>';
+                    return;
+                }
+
+                pageData.forEach(eq => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
                     <td><span class="badge bg-secondary">${eq.fr || 'N/A'}</span></td>
                     <td>${eq.cliente || 'N/A'}</td>
                     <td>
@@ -548,567 +552,562 @@
                         </button>
                     </td>
                 `;
-                tbody.appendChild(tr);
-            });
+                    tbody.appendChild(tr);
+                });
 
-            updatePagination();
-        }
-
-        function updatePagination() {
-            if (!pagination) return;
-            pagination.innerHTML = '';
-            
-            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-            
-            // Info text
-            const start = (currentPage - 1) * itemsPerPage + 1;
-            const end = Math.min(currentPage * itemsPerPage, filteredData.length);
-            if (info) info.textContent = `Mostrando ${filteredData.length > 0 ? start : 0}-${end} de ${filteredData.length}`;
-
-            // Prev
-            const liPrev = document.createElement('li');
-            liPrev.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
-            liPrev.innerHTML = `<a class="page-link bg-dark border-secondary text-light" href="#">&laquo;</a>`;
-            liPrev.onclick = (e) => { e.preventDefault(); if(currentPage > 1) { currentPage--; renderTable(currentPage); } };
-            pagination.appendChild(liPrev);
-
-            // Pages (Limit to 5 visible)
-            for (let i = 1; i <= totalPages; i++) {
-                if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
-                     const li = document.createElement('li');
-                     li.className = `page-item ${i === currentPage ? 'active' : ''}`;
-                     li.innerHTML = `<a class="page-link bg-dark border-secondary text-light" href="#">${i}</a>`;
-                     li.onclick = (e) => { e.preventDefault(); currentPage = i; renderTable(currentPage); };
-                     pagination.appendChild(li);
-                }
+                updatePagination();
             }
 
-            // Next
-            const liNext = document.createElement('li');
-            liNext.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
-            liNext.innerHTML = `<a class="page-link bg-dark border-secondary text-light" href="#">&raquo;</a>`;
-            liNext.onclick = (e) => { e.preventDefault(); if(currentPage < totalPages) { currentPage++; renderTable(currentPage); } };
-            pagination.appendChild(liNext);
-        }
+            function updatePagination() {
+                if (!pagination) return;
+                pagination.innerHTML = '';
 
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                const term = e.target.value.toLowerCase();
-                filteredData = entregadosData.filter(eq => 
-                    (eq.fr || '').toLowerCase().includes(term) ||
-                    (eq.cliente || '').toLowerCase().includes(term) ||
-                    (eq.marca || '').toLowerCase().includes(term) ||
-                    (eq.modelo || '').toLowerCase().includes(term)
-                );
-                currentPage = 1;
-                renderTable(currentPage);
-            });
-        }
+                const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
-        // Initial Render
-        if (filteredData.length > 0) renderTable(currentPage);
-        else if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No hay equipos entregados</td></tr>';
-    });
+                // Info text
+                const start = (currentPage - 1) * itemsPerPage + 1;
+                const end = Math.min(currentPage * itemsPerPage, filteredData.length);
+                if (info) info.textContent = `Mostrando ${filteredData.length > 0 ? start : 0}-${end} de ${filteredData.length}`;
+
+                // Prev
+                const liPrev = document.createElement('li');
+                liPrev.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+                liPrev.innerHTML = `<a class="page-link bg-dark border-secondary text-light" href="#">&laquo;</a>`;
+                liPrev.onclick = (e) => { e.preventDefault(); if (currentPage > 1) { currentPage--; renderTable(currentPage); } };
+                pagination.appendChild(liPrev);
+
+                // Pages (Limit to 5 visible)
+                for (let i = 1; i <= totalPages; i++) {
+                    if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                        const li = document.createElement('li');
+                        li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                        li.innerHTML = `<a class="page-link bg-dark border-secondary text-light" href="#">${i}</a>`;
+                        li.onclick = (e) => { e.preventDefault(); currentPage = i; renderTable(currentPage); };
+                        pagination.appendChild(li);
+                    }
+                }
+
+                // Next
+                const liNext = document.createElement('li');
+                liNext.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+                liNext.innerHTML = `<a class="page-link bg-dark border-secondary text-light" href="#">&raquo;</a>`;
+                liNext.onclick = (e) => { e.preventDefault(); if (currentPage < totalPages) { currentPage++; renderTable(currentPage); } };
+                pagination.appendChild(liNext);
+            }
+
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    const term = e.target.value.toLowerCase();
+                    filteredData = entregadosData.filter(eq =>
+                        (eq.fr || '').toLowerCase().includes(term) ||
+                        (eq.cliente || '').toLowerCase().includes(term) ||
+                        (eq.marca || '').toLowerCase().includes(term) ||
+                        (eq.modelo || '').toLowerCase().includes(term)
+                    );
+                    currentPage = 1;
+                    renderTable(currentPage);
+                });
+            }
+
+            // Initial Render
+            if (filteredData.length > 0) renderTable(currentPage);
+            else if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No hay equipos entregados</td></tr>';
+        });
     </script>
     {% endif %}
-        {% else %}
-        <!-- ============================================ -->
-        <!-- VISTA USUARIO - Mis Tareas -->
-        <!-- ============================================ -->
-        <div class="header">
-            <h1>
-                <i class="fas fa-tasks"></i> Mis Tareas - {{ current_user.role|title }}
-            </h1>
-            <div class="subtitle">Equipos que requieren tu atención - Última actualización: {{
-                stats_user.ultima_actualizacion }}</div>
-        </div>
+    {% else %}
+    <!-- ============================================ -->
+    <!-- VISTA USUARIO - Mis Tareas -->
+    <!-- ============================================ -->
+    <div class="header">
+        <h1>
+            <i class="fas fa-tasks"></i> Mis Tareas - {{ current_user.role|title }}
+        </h1>
+        <div class="subtitle">Equipos que requieren tu atención - Última actualización: {{
+            stats_user.ultima_actualizacion }}</div>
+    </div>
 
-        <!-- ESTADÍSTICA SIMPLE -->
-        <!-- ============================================ -->
-        <!-- NUEVA VISTA DE RESUMEN Y TABLAS -->
-        <!-- ============================================ -->
+    <!-- ESTADÍSTICA SIMPLE -->
+    <!-- ============================================ -->
+    <!-- NUEVA VISTA DE RESUMEN Y TABLAS -->
+    <!-- ============================================ -->
 
-        <!-- 1. STATUS SUMMARY (BADGES) -->
-        <div class="row mb-4">
-            {% for status, count in stats_user.counts.items() %}
-            {% if count > 0 %}
-            <div class="col-auto">
-                <span class="badge rounded-pill bg-dark border border-secondary p-2 px-3">
-                    <span class="text-uppercase text-light small">{{ status }}</span>
-                    <span class="badge bg-primary ms-2">{{ count }}</span>
-                </span>
-            </div>
-            {% endif %}
-            {% endfor %}
-        </div>
-
-        <!-- 2. SECTION PRIORITARIA RECEPCION (Recientes vs Veteranos) -->
-        {% if current_user.role|lower == UserRoles.RECEPCION|lower and (recent_pending or veteran_pending) %}
-        <div class="row g-4 mb-5">
-            <div class="col-md-6">
-                <div class="card bg-dark bg-opacity-50 border-danger h-100">
-                    <div class="card-header border-danger text-danger fw-bold">
-                        <i class="fas fa-hourglass-end me-2"></i> PENDIENTES MÁS ANTIGUOS
-                    </div>
-                    <div class="card-body p-0">
-                        <ul class="list-group list-group-flush">
-                            {% for eq in veteran_pending %}
-                            <li
-                                class="list-group-item bg-transparent text-light border-secondary d-flex justify-content-between align-items-center">
-                                <div>
-                                    <span class="badge bg-danger me-2">{{ eq.fr }}</span>
-                                    <small>{{ eq.marca }} {{ eq.modelo }}</small>
-                                </div>
-                                <small class="text-muted">
-                                    {{ eq.fecha_ingreso.strftime('%d/%m') if eq.fecha_ingreso else 'N/A' }}
-                                </small>
-                            </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card bg-dark bg-opacity-50 border-success h-100">
-                    <div class="card-header border-success text-success fw-bold">
-                        <i class="fas fa-star me-2"></i> RECIÉN LLEGADOS APROBACIÓN
-                    </div>
-                    <div class="card-body p-0">
-                        <ul class="list-group list-group-flush">
-                            {% for eq in recent_pending %}
-                            <li
-                                class="list-group-item bg-transparent text-light border-secondary d-flex justify-content-between align-items-center">
-                                <div>
-                                    <span class="badge bg-success me-2">{{ eq.fr }}</span>
-                                    <small>{{ eq.marca }} {{ eq.modelo }}</small>
-                                </div>
-                                <small class="text-muted">
-                                    {{ eq.fecha_ingreso.strftime('%d/%m') if eq.fecha_ingreso else 'N/A' }}
-                                </small>
-                            </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                </div>
-            </div>
+    <!-- 1. STATUS SUMMARY (BADGES) -->
+    <div class="row mb-4">
+        {% for status, count in stats_user.counts.items() %}
+        {% if count > 0 %}
+        <div class="col-auto">
+            <span class="badge rounded-pill bg-dark border border-secondary p-2 px-3">
+                <span class="text-uppercase text-light small">{{ status }}</span>
+                <span class="badge bg-primary ms-2">{{ count }}</span>
+            </span>
         </div>
         {% endif %}
+        {% endfor %}
+    </div>
 
-        <!-- 3. CATEGORIZED LISTS (REPLACES MAIN TABLE) -->
-        <div class="row mb-3 align-items-center">
-            <div class="col">
-                <h5 class="mb-0 text-white"><i class="fas fa-list me-2"></i> Gestionar Tareas</h5>
-            </div>
-            <div class="col-auto d-flex gap-2">
-                {% if current_user.role in [UserRoles.RECEPCION, UserRoles.ADMIN] %}
-                <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#createEquipmentModal">
-                    <i class="fas fa-plus-circle"></i> Nuevo Equipo
-                </button>
-                {% endif %}
-                <a href="{{ url_for('panel_estados') }}" class="btn btn-sm btn-primary" title="Ir al Panel Completo">
-                    <i class="fas fa-expand"></i> Pantalla Completa
-                </a>
-            </div>
-        </div>
-
-        <!-- ALMACEN LOGIC -->
-        {% if current_user.role|lower == UserRoles.ALMACEN|lower %}
-        <div class="row g-4">
-            <!-- Repuestos Diagnóstico -->
-            <div class="col-12">
-                <div class="card bg-dark border-secondary">
-                    <div class="card-header border-secondary text-warning">
-                        <i class="fas fa-boxes me-2"></i> Repuestos para Diagnóstico
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-dark table-hover mb-0 align-middle">
-                                <thead>
-                                    <tr>
-                                        <th>FR</th>
-                                        <th>Cliente</th>
-                                        <th>Equipo</th>
-                                        <th>Estado</th>
-                                        <th>Fecha</th>
-                                        <th>Días</th>
-                                        <th class="text-end">Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for eq in equipos_relevantes if 'diagnostico' in eq.estado|lower or 'consumible'
-                                    in
-                                    eq.estado|lower %}
-                                    <tr>
-                                        <td><span class="badge bg-secondary">{{ eq.fr or 'N/A' }}</span></td>
-                                        <td>{{ eq.cliente or 'N/A' }}</td>
-                                        <td>
-                                            <div class="fw-bold">{{ eq.marca }}</div>
-                                            <small class="text-muted">{{ eq.modelo }}</small>
-                                        </td>
-                                        <td><span class="badge bg-dark border border-warning text-warning">{{ eq.estado
-                                                }}</span></td>
-                                        <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
-                                        <td>
-                                            {% set dias = (now() - eq.fecha_ingreso).days %}
-                                            <span
-                                                class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{
-                                                dias }}</span>
-                                        </td>
-                                        <td class="text-end">
-                                            <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
-                                                data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
-                                                data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
-                                                data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
-                                                data-reporte="{{ eq.reporte_cliente | e }}"
-                                                data-cliente="{{ eq.cliente | e }}"
-                                                data-observaciones="{{ eq.observaciones | e }}"
-                                                data-serie="{{ eq.serie | e }}"
-                                                data-informe="{{ eq.numero_informe | e }}"
-                                                data-accesorios="{{ eq.accesorios | e }}"
-                                                data-condicion="{{ eq.condicion | e }}">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    {% else %}
-                                    <tr>
-                                        <td colspan="7" class="text-center text-muted">Sin pendientes</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+    <!-- 2. SECTION PRIORITARIA RECEPCION (Recientes vs Veteranos) -->
+    {% if current_user.role|lower == UserRoles.RECEPCION|lower and (recent_pending or veteran_pending) %}
+    <div class="row g-4 mb-5">
+        <div class="col-md-6">
+            <div class="card bg-dark bg-opacity-50 border-danger h-100">
+                <div class="card-header border-danger text-danger fw-bold">
+                    <i class="fas fa-hourglass-end me-2"></i> PENDIENTES MÁS ANTIGUOS
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for eq in veteran_pending %}
+                        <li
+                            class="list-group-item bg-transparent text-light border-secondary d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="badge bg-danger me-2">{{ eq.fr }}</span>
+                                <small>{{ eq.marca }} {{ eq.modelo }}</small>
+                            </div>
+                            <small class="text-muted">
+                                {{ eq.fecha_ingreso.strftime('%d/%m') if eq.fecha_ingreso else 'N/A' }}
+                            </small>
+                        </li>
+                        {% endfor %}
+                    </ul>
                 </div>
             </div>
-            <!-- Repuestos Servicio -->
-            <div class="col-12">
-                <div class="card bg-dark border-secondary">
-                    <div class="card-header border-secondary text-info">
-                        <i class="fas fa-cogs me-2"></i> Repuestos para Servicio
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-dark table-hover mb-0 align-middle">
-                                <thead>
-                                    <tr>
-                                        <th>FR</th>
-                                        <th>Cliente</th>
-                                        <th>Equipo</th>
-                                        <th>Estado</th>
-                                        <th>Fecha</th>
-                                        <th>Días</th>
-                                        <th class="text-end">Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for eq in equipos_relevantes if 'servicio' in eq.estado|lower and 'repuesto' in
-                                    eq.estado|lower %}
-                                    <tr>
-                                        <td><span class="badge bg-secondary">{{ eq.fr or 'N/A' }}</span></td>
-                                        <td>{{ eq.cliente or 'N/A' }}</td>
-                                        <td>
-                                            <div class="fw-bold">{{ eq.marca }}</div>
-                                            <small class="text-muted">{{ eq.modelo }}</small>
-                                        </td>
-                                        <td><span class="badge bg-dark border border-info text-info">{{ eq.estado
-                                                }}</span>
-                                        </td>
-                                        <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
-                                        <td>
-                                            {% set dias = (now() - eq.fecha_ingreso).days %}
-                                            <span
-                                                class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{
-                                                dias }}</span>
-                                        </td>
-                                        <td class="text-end">
-                                            <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
-                                                data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
-                                                data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
-                                                data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
-                                                data-reporte="{{ eq.reporte_cliente | e }}"
-                                                data-cliente="{{ eq.cliente | e }}"
-                                                data-observaciones="{{ eq.observaciones | e }}"
-                                                data-serie="{{ eq.serie | e }}"
-                                                data-informe="{{ eq.numero_informe | e }}"
-                                                data-accesorios="{{ eq.accesorios | e }}"
-                                                data-condicion="{{ eq.condicion | e }}">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    {% else %}
-                                    <tr>
-                                        <td colspan="7" class="text-center text-muted">Sin pendientes</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card bg-dark bg-opacity-50 border-success h-100">
+                <div class="card-header border-success text-success fw-bold">
+                    <i class="fas fa-star me-2"></i> RECIÉN LLEGADOS APROBACIÓN
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for eq in recent_pending %}
+                        <li
+                            class="list-group-item bg-transparent text-light border-secondary d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="badge bg-success me-2">{{ eq.fr }}</span>
+                                <small>{{ eq.marca }} {{ eq.modelo }}</small>
+                            </div>
+                            <small class="text-muted">
+                                {{ eq.fecha_ingreso.strftime('%d/%m') if eq.fecha_ingreso else 'N/A' }}
+                            </small>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- 3. CATEGORIZED LISTS (REPLACES MAIN TABLE) -->
+    <div class="row mb-3 align-items-center">
+        <div class="col">
+            <h5 class="mb-0 text-white"><i class="fas fa-list me-2"></i> Gestionar Tareas</h5>
+        </div>
+        <div class="col-auto d-flex gap-2">
+            {% if current_user.role in [UserRoles.RECEPCION, UserRoles.ADMIN] %}
+            <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#createEquipmentModal">
+                <i class="fas fa-plus-circle"></i> Nuevo Equipo
+            </button>
+            {% endif %}
+            <a href="{{ url_for('panel_estados') }}" class="btn btn-sm btn-primary" title="Ir al Panel Completo">
+                <i class="fas fa-expand"></i> Pantalla Completa
+            </a>
+        </div>
+    </div>
+
+    <!-- ALMACEN LOGIC -->
+    {% if current_user.role|lower == UserRoles.ALMACEN|lower %}
+    <div class="row g-4">
+        <!-- Repuestos Diagnóstico -->
+        <div class="col-12">
+            <div class="card bg-dark border-secondary">
+                <div class="card-header border-secondary text-warning">
+                    <i class="fas fa-boxes me-2"></i> Repuestos para Diagnóstico
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>FR</th>
+                                    <th>Cliente</th>
+                                    <th>Equipo</th>
+                                    <th>Estado</th>
+                                    <th>Fecha</th>
+                                    <th>Días</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for eq in equipos_relevantes if 'diagnostico' in eq.estado|lower or 'consumible'
+                                in
+                                eq.estado|lower %}
+                                <tr>
+                                    <td><span class="badge bg-secondary">{{ eq.fr or 'N/A' }}</span></td>
+                                    <td>{{ eq.cliente or 'N/A' }}</td>
+                                    <td>
+                                        <div class="fw-bold">{{ eq.marca }}</div>
+                                        <small class="text-muted">{{ eq.modelo }}</small>
+                                    </td>
+                                    <td><span class="badge bg-dark border border-warning text-warning">{{ eq.estado
+                                            }}</span></td>
+                                    <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        {% set dias = (now() - eq.fecha_ingreso).days %}
+                                        <span
+                                            class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{
+                                            dias }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
+                                            data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
+                                            data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
+                                            data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
+                                            data-reporte="{{ eq.reporte_cliente | e }}"
+                                            data-cliente="{{ eq.cliente | e }}"
+                                            data-observaciones="{{ eq.observaciones | e }}"
+                                            data-serie="{{ eq.serie | e }}" data-informe="{{ eq.numero_informe | e }}"
+                                            data-accesorios="{{ eq.accesorios | e }}"
+                                            data-condicion="{{ eq.condicion | e }}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted">Sin pendientes</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
-
-        {% else %}
-        <!-- RECEPCION (VENTAS) / OPERACIONES LOGIC -->
-        <div class="row g-4">
-            <!-- LOOP OVER CATEGORIES -->
-            <!-- We define categories manualy to ensure order: Pendiente, Diag, Aprobado -->
-
-            <!-- Col 1: Pendientes de Aprobación -->
-            <div class="col-12">
-                <div class="card bg-dark border-secondary">
-                    <div class="card-header border-secondary text-warning">
-                        <i class="fas fa-clock me-2"></i> Pendientes de Aprobación
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-dark table-hover mb-0 align-middle">
-                                <thead>
-                                    <tr>
-                                        <th>FR</th>
-                                        <!-- Recepcion sees Client -->
-                                        {% if current_user.role|lower == UserRoles.RECEPCION|lower %}
-                                        <th>Cliente</th>
-                                        {% endif %}
-                                        <th>Equipo</th>
-                                        <th>Estado</th>
-                                        <!-- Operaciones sees Encargado -->
-                                        {% if current_user.role|lower == UserRoles.OPERACIONES|lower %}
-                                        <th>Encargado</th>
-                                        {% endif %}
-                                        <th>Fecha</th>
-                                        <th>Días</th>
-                                        <th class="text-end">Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for eq in equipos_relevantes if 'pendiente' in eq.estado|lower and 'aprobacion'
-                                    in
-                                    eq.estado|lower %}
-                                    <tr>
-                                        <td><span class="badge bg-warning text-dark">{{ eq.fr or 'N/A' }}</span></td>
-
-                                        {% if current_user.role|lower == UserRoles.RECEPCION|lower %}
-                                        <td>{{ eq.cliente or 'N/A' }}</td>
-                                        {% endif %}
-
-                                        <td>
-                                            <div class="fw-bold">{{ eq.marca }}</div>
-                                            <small class="text-muted">{{ eq.modelo }}</small>
-                                        </td>
-                                        <td><span class="badge bg-dark border border-warning text-warning">{{ eq.estado
-                                                }}</span></td>
-
-                                        {% if current_user.role|lower == UserRoles.OPERACIONES|lower %}
-                                        <td>{{ eq.encargado or 'N/A' }}</td>
-                                        {% endif %}
-
-                                        <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
-                                        <td>
-                                            {% set dias = (now() - eq.fecha_ingreso).days %}
-                                            <span
-                                                class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{
-                                                dias }}</span>
-                                        </td>
-                                        <td class="text-end">
-                                            <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
-                                                data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
-                                                data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
-                                                data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
-                                                data-reporte="{{ eq.reporte_cliente | e }}"
-                                                data-cliente="{{ eq.cliente | e }}"
-                                                data-observaciones="{{ eq.observaciones | e }}"
-                                                data-serie="{{ eq.serie | e }}"
-                                                data-informe="{{ eq.numero_informe | e }}"
-                                                data-accesorios="{{ eq.accesorios | e }}"
-                                                data-condicion="{{ eq.condicion | e }}">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    {% else %}
-                                    <!-- Colspan dynamic based on role -->
-                                    <tr>
-                                        <td colspan="8" class="text-center text-muted">Sin equipos</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+        <!-- Repuestos Servicio -->
+        <div class="col-12">
+            <div class="card bg-dark border-secondary">
+                <div class="card-header border-secondary text-info">
+                    <i class="fas fa-cogs me-2"></i> Repuestos para Servicio
                 </div>
-            </div>
-
-            <!-- Col 2: En Diagnóstico -->
-            <div class="col-12">
-                <div class="card bg-dark border-secondary">
-                    <div class="card-header border-secondary text-info">
-                        <i class="fas fa-microscope me-2"></i> En Diagnóstico
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-dark table-hover mb-0 align-middle">
-                                <thead>
-                                    <tr>
-                                        <th>FR</th>
-                                        <!-- Recepcion sees Client -->
-                                        {% if current_user.role|lower == UserRoles.RECEPCION|lower %}
-                                        <th>Cliente</th>
-                                        {% endif %}
-                                        <th>Equipo</th>
-                                        <th>Estado</th>
-                                        <!-- Operaciones sees Encargado -->
-                                        {% if current_user.role|lower == UserRoles.OPERACIONES|lower %}
-                                        <th>Encargado</th>
-                                        {% endif %}
-                                        <th>Fecha</th>
-                                        <th>Días</th>
-                                        <th class="text-end">Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for eq in equipos_relevantes if 'diagnostico' in eq.estado|lower or 'consumible'
-                                    in
-                                    eq.estado|lower or 'repuesto entregado' in eq.estado|lower %}
-                                    <tr>
-                                        <td><span class="badge bg-info text-dark">{{ eq.fr or 'N/A' }}</span></td>
-
-                                        {% if current_user.role|lower == UserRoles.RECEPCION|lower %}
-                                        <td>{{ eq.cliente or 'N/A' }}</td>
-                                        {% endif %}
-
-                                        <td>
-                                            <div class="fw-bold">{{ eq.marca }}</div>
-                                            <small class="text-muted">{{ eq.modelo }}</small>
-                                        </td>
-                                        <td><span class="badge bg-dark border border-info text-info">{{ eq.estado
-                                                }}</span>
-                                        </td>
-
-                                        {% if current_user.role|lower == UserRoles.OPERACIONES|lower %}
-                                        <td>{{ eq.encargado or 'N/A' }}</td>
-                                        {% endif %}
-
-                                        <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
-                                        <td>
-                                            {% set dias = (now() - eq.fecha_ingreso).days %}
-                                            <span
-                                                class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{
-                                                dias }}</span>
-                                        </td>
-                                        <td class="text-end">
-                                            <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
-                                                data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
-                                                data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
-                                                data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
-                                                data-reporte="{{ eq.reporte_cliente | e }}"
-                                                data-cliente="{{ eq.cliente | e }}"
-                                                data-observaciones="{{ eq.observaciones | e }}"
-                                                data-serie="{{ eq.serie | e }}"
-                                                data-informe="{{ eq.numero_informe | e }}"
-                                                data-accesorios="{{ eq.accesorios | e }}"
-                                                data-condicion="{{ eq.condicion | e }}">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    {% else %}
-                                    <tr>
-                                        <td colspan="8" class="text-center text-muted">Sin equipos</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Col 3: Aprobados / Servicio -->
-            <div class="col-12">
-                <div class="card bg-dark border-secondary">
-                    <div class="card-header border-secondary text-success">
-                        <i class="fas fa-check-circle me-2"></i> Aprobados / Servicio
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-dark table-hover mb-0 align-middle">
-                                <thead>
-                                    <tr>
-                                        <th>FR</th>
-                                        <!-- Recepcion sees Client -->
-                                        {% if current_user.role|lower == UserRoles.RECEPCION|lower %}
-                                        <th>Cliente</th>
-                                        {% endif %}
-                                        <th>Equipo</th>
-                                        <th>Estado</th>
-                                        <!-- Operaciones sees Encargado -->
-                                        {% if current_user.role|lower == UserRoles.OPERACIONES|lower %}
-                                        <th>Encargado</th>
-                                        {% endif %}
-                                        <th>Fecha</th>
-                                        <th>Días</th>
-                                        <th class="text-end">Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for eq in equipos_relevantes if 'aprobado' in eq.estado|lower or 'servicio' in
-                                    eq.estado|lower or 'entregado' in eq.estado|lower %}
-                                    <tr>
-                                        <td><span class="badge bg-success">{{ eq.fr or 'N/A' }}</span></td>
-
-                                        {% if current_user.role|lower == UserRoles.RECEPCION|lower %}
-                                        <td>{{ eq.cliente or 'N/A' }}</td>
-                                        {% endif %}
-
-                                        <td>
-                                            <div class="fw-bold">{{ eq.marca }}</div>
-                                            <small class="text-muted">{{ eq.modelo }}</small>
-                                        </td>
-                                        <td><span class="badge bg-dark border border-success text-success">{{ eq.estado
-                                                }}</span></td>
-
-                                        {% if current_user.role|lower == UserRoles.OPERACIONES|lower %}
-                                        <td>{{ eq.encargado or 'N/A' }}</td>
-                                        {% endif %}
-
-                                        <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
-                                        <td>
-                                            {% set dias = (now() - eq.fecha_ingreso).days %}
-                                            <span
-                                                class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{
-                                                dias }}</span>
-                                        </td>
-                                        <td class="text-end">
-                                            <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
-                                                data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
-                                                data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
-                                                data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
-                                                data-reporte="{{ eq.reporte_cliente | e }}"
-                                                data-cliente="{{ eq.cliente | e }}"
-                                                data-observaciones="{{ eq.observaciones | e }}"
-                                                data-serie="{{ eq.serie | e }}"
-                                                data-informe="{{ eq.numero_informe | e }}"
-                                                data-accesorios="{{ eq.accesorios | e }}"
-                                                data-condicion="{{ eq.condicion | e }}">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    {% else %}
-                                    <tr>
-                                        <td colspan="8" class="text-center text-muted">Sin equipos</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>FR</th>
+                                    <th>Cliente</th>
+                                    <th>Equipo</th>
+                                    <th>Estado</th>
+                                    <th>Fecha</th>
+                                    <th>Días</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for eq in equipos_relevantes if 'servicio' in eq.estado|lower and 'repuesto' in
+                                eq.estado|lower %}
+                                <tr>
+                                    <td><span class="badge bg-secondary">{{ eq.fr or 'N/A' }}</span></td>
+                                    <td>{{ eq.cliente or 'N/A' }}</td>
+                                    <td>
+                                        <div class="fw-bold">{{ eq.marca }}</div>
+                                        <small class="text-muted">{{ eq.modelo }}</small>
+                                    </td>
+                                    <td><span class="badge bg-dark border border-info text-info">{{ eq.estado
+                                            }}</span>
+                                    </td>
+                                    <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        {% set dias = (now() - eq.fecha_ingreso).days %}
+                                        <span
+                                            class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{
+                                            dias }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
+                                            data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
+                                            data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
+                                            data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
+                                            data-reporte="{{ eq.reporte_cliente | e }}"
+                                            data-cliente="{{ eq.cliente | e }}"
+                                            data-observaciones="{{ eq.observaciones | e }}"
+                                            data-serie="{{ eq.serie | e }}" data-informe="{{ eq.numero_informe | e }}"
+                                            data-accesorios="{{ eq.accesorios | e }}"
+                                            data-condicion="{{ eq.condicion | e }}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted">Sin pendientes</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+
+    {% else %}
+    <!-- RECEPCION (VENTAS) / OPERACIONES LOGIC -->
+    <div class="row g-4">
+        <!-- LOOP OVER CATEGORIES -->
+        <!-- We define categories manualy to ensure order: Pendiente, Diag, Aprobado -->
+
+        <!-- Col 1: Pendientes de Aprobación -->
+        <div class="col-12">
+            <div class="card bg-dark border-secondary">
+                <div class="card-header border-secondary text-warning">
+                    <i class="fas fa-clock me-2"></i> Pendientes de Aprobación
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>FR</th>
+                                    <!-- Recepcion sees Client -->
+                                    {% if current_user.role|lower == UserRoles.RECEPCION|lower %}
+                                    <th>Cliente</th>
+                                    {% endif %}
+                                    <th>Equipo</th>
+                                    <th>Estado</th>
+                                    <!-- Operaciones sees Encargado -->
+                                    {% if current_user.role|lower == UserRoles.OPERACIONES|lower %}
+                                    <th>Encargado</th>
+                                    {% endif %}
+                                    <th>Fecha</th>
+                                    <th>Días</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for eq in equipos_relevantes if 'pendiente' in eq.estado|lower and 'aprobacion'
+                                in
+                                eq.estado|lower %}
+                                <tr>
+                                    <td><span class="badge bg-warning text-dark">{{ eq.fr or 'N/A' }}</span></td>
+
+                                    {% if current_user.role|lower == UserRoles.RECEPCION|lower %}
+                                    <td>{{ eq.cliente or 'N/A' }}</td>
+                                    {% endif %}
+
+                                    <td>
+                                        <div class="fw-bold">{{ eq.marca }}</div>
+                                        <small class="text-muted">{{ eq.modelo }}</small>
+                                    </td>
+                                    <td><span class="badge bg-dark border border-warning text-warning">{{ eq.estado
+                                            }}</span></td>
+
+                                    {% if current_user.role|lower == UserRoles.OPERACIONES|lower %}
+                                    <td>{{ eq.encargado or 'N/A' }}</td>
+                                    {% endif %}
+
+                                    <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        {% set dias = (now() - eq.fecha_ingreso).days %}
+                                        <span
+                                            class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{
+                                            dias }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
+                                            data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
+                                            data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
+                                            data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
+                                            data-reporte="{{ eq.reporte_cliente | e }}"
+                                            data-cliente="{{ eq.cliente | e }}"
+                                            data-observaciones="{{ eq.observaciones | e }}"
+                                            data-serie="{{ eq.serie | e }}" data-informe="{{ eq.numero_informe | e }}"
+                                            data-accesorios="{{ eq.accesorios | e }}"
+                                            data-condicion="{{ eq.condicion | e }}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <!-- Colspan dynamic based on role -->
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted">Sin equipos</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Col 2: En Diagnóstico -->
+        <div class="col-12">
+            <div class="card bg-dark border-secondary">
+                <div class="card-header border-secondary text-info">
+                    <i class="fas fa-microscope me-2"></i> En Diagnóstico
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>FR</th>
+                                    <!-- Recepcion sees Client -->
+                                    {% if current_user.role|lower == UserRoles.RECEPCION|lower %}
+                                    <th>Cliente</th>
+                                    {% endif %}
+                                    <th>Equipo</th>
+                                    <th>Estado</th>
+                                    <!-- Operaciones sees Encargado -->
+                                    {% if current_user.role|lower == UserRoles.OPERACIONES|lower %}
+                                    <th>Encargado</th>
+                                    {% endif %}
+                                    <th>Fecha</th>
+                                    <th>Días</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for eq in equipos_relevantes if 'diagnostico' in eq.estado|lower or 'consumible'
+                                in
+                                eq.estado|lower or 'repuesto entregado' in eq.estado|lower %}
+                                <tr>
+                                    <td><span class="badge bg-info text-dark">{{ eq.fr or 'N/A' }}</span></td>
+
+                                    {% if current_user.role|lower == UserRoles.RECEPCION|lower %}
+                                    <td>{{ eq.cliente or 'N/A' }}</td>
+                                    {% endif %}
+
+                                    <td>
+                                        <div class="fw-bold">{{ eq.marca }}</div>
+                                        <small class="text-muted">{{ eq.modelo }}</small>
+                                    </td>
+                                    <td><span class="badge bg-dark border border-info text-info">{{ eq.estado
+                                            }}</span>
+                                    </td>
+
+                                    {% if current_user.role|lower == UserRoles.OPERACIONES|lower %}
+                                    <td>{{ eq.encargado or 'N/A' }}</td>
+                                    {% endif %}
+
+                                    <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        {% set dias = (now() - eq.fecha_ingreso).days %}
+                                        <span
+                                            class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{
+                                            dias }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
+                                            data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
+                                            data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
+                                            data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
+                                            data-reporte="{{ eq.reporte_cliente | e }}"
+                                            data-cliente="{{ eq.cliente | e }}"
+                                            data-observaciones="{{ eq.observaciones | e }}"
+                                            data-serie="{{ eq.serie | e }}" data-informe="{{ eq.numero_informe | e }}"
+                                            data-accesorios="{{ eq.accesorios | e }}"
+                                            data-condicion="{{ eq.condicion | e }}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted">Sin equipos</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Col 3: Aprobados / Servicio -->
+        <div class="col-12">
+            <div class="card bg-dark border-secondary">
+                <div class="card-header border-secondary text-success">
+                    <i class="fas fa-check-circle me-2"></i> Aprobados / Servicio
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th>FR</th>
+                                    <!-- Recepcion sees Client -->
+                                    {% if current_user.role|lower == UserRoles.RECEPCION|lower %}
+                                    <th>Cliente</th>
+                                    {% endif %}
+                                    <th>Equipo</th>
+                                    <th>Estado</th>
+                                    <!-- Operaciones sees Encargado -->
+                                    {% if current_user.role|lower == UserRoles.OPERACIONES|lower %}
+                                    <th>Encargado</th>
+                                    {% endif %}
+                                    <th>Fecha</th>
+                                    <th>Días</th>
+                                    <th class="text-end">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for eq in equipos_relevantes if 'aprobado' in eq.estado|lower or 'servicio' in
+                                eq.estado|lower or 'entregado' in eq.estado|lower %}
+                                <tr>
+                                    <td><span class="badge bg-success">{{ eq.fr or 'N/A' }}</span></td>
+
+                                    {% if current_user.role|lower == UserRoles.RECEPCION|lower %}
+                                    <td>{{ eq.cliente or 'N/A' }}</td>
+                                    {% endif %}
+
+                                    <td>
+                                        <div class="fw-bold">{{ eq.marca }}</div>
+                                        <small class="text-muted">{{ eq.modelo }}</small>
+                                    </td>
+                                    <td><span class="badge bg-dark border border-success text-success">{{ eq.estado
+                                            }}</span></td>
+
+                                    {% if current_user.role|lower == UserRoles.OPERACIONES|lower %}
+                                    <td>{{ eq.encargado or 'N/A' }}</td>
+                                    {% endif %}
+
+                                    <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        {% set dias = (now() - eq.fecha_ingreso).days %}
+                                        <span
+                                            class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">{{
+                                            dias }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-info" onclick="showInfo(this)"
+                                            data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
+                                            data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado }}"
+                                            data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') }}"
+                                            data-reporte="{{ eq.reporte_cliente | e }}"
+                                            data-cliente="{{ eq.cliente | e }}"
+                                            data-observaciones="{{ eq.observaciones | e }}"
+                                            data-serie="{{ eq.serie | e }}" data-informe="{{ eq.numero_informe | e }}"
+                                            data-accesorios="{{ eq.accesorios | e }}"
+                                            data-condicion="{{ eq.condicion | e }}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted">Sin equipos</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- HISTORIAL ENTREGADOS (SHARED) -->
     {% if current_user.role|lower != 'almacen' %}
@@ -1120,7 +1119,9 @@
                         <i class="fas fa-history me-2"></i> Historial de Equipos Entregados
                     </div>
                     <div class="d-flex gap-2">
-                        <input type="text" id="searchEntregados" class="form-control form-control-sm bg-dark text-light border-secondary" placeholder="Buscar..." style="width: 200px;">
+                        <input type="text" id="searchEntregados"
+                            class="form-control form-control-sm bg-dark text-light border-secondary"
+                            placeholder="Buscar..." style="width: 200px;">
                     </div>
                 </div>
                 <div class="card-body p-0">
@@ -1153,42 +1154,42 @@
             </div>
         </div>
     </div>
-    
+
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Safe Parse
-        let entregadosData = [];
-        try {
-            entregadosData = JSON.parse('{{ entregados_json | safe }}');
-        } catch (e) {
-            console.error("Error parsing entregados JSON", e);
-        }
-
-        const itemsPerPage = 5;
-        let currentPage = 1;
-        let filteredData = entregadosData;
-
-        const tbody = document.getElementById('tbodyEntregados');
-        const searchInput = document.getElementById('searchEntregados');
-        const pagination = document.getElementById('paginationEntregados');
-        const info = document.getElementById('infoEntregados');
-
-        function renderTable(page) {
-            if (!tbody) return;
-            tbody.innerHTML = '';
-            
-            const start = (page - 1) * itemsPerPage;
-            const end = start + itemsPerPage;
-            const pageData = filteredData.slice(start, end);
-
-            if (pageData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No hay registros</td></tr>';
-                return;
+        document.addEventListener('DOMContentLoaded', function () {
+            // Safe Parse
+            let entregadosData = [];
+            try {
+                entregadosData = JSON.parse('{{ entregados_json | safe }}');
+            } catch (e) {
+                console.error("Error parsing entregados JSON", e);
             }
 
-            pageData.forEach(eq => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
+            const itemsPerPage = 5;
+            let currentPage = 1;
+            let filteredData = entregadosData;
+
+            const tbody = document.getElementById('tbodyEntregados');
+            const searchInput = document.getElementById('searchEntregados');
+            const pagination = document.getElementById('paginationEntregados');
+            const info = document.getElementById('infoEntregados');
+
+            function renderTable(page) {
+                if (!tbody) return;
+                tbody.innerHTML = '';
+
+                const start = (page - 1) * itemsPerPage;
+                const end = start + itemsPerPage;
+                const pageData = filteredData.slice(start, end);
+
+                if (pageData.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No hay registros</td></tr>';
+                    return;
+                }
+
+                pageData.forEach(eq => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
                     <td><span class="badge bg-secondary">${eq.fr || 'N/A'}</span></td>
                     <td>${eq.cliente || 'N/A'}</td>
                     <td>
@@ -1215,215 +1216,229 @@
                         </button>
                     </td>
                 `;
-                tbody.appendChild(tr);
-            });
+                    tbody.appendChild(tr);
+                });
 
-            updatePagination();
-        }
-
-        function updatePagination() {
-            if (!pagination) return;
-            pagination.innerHTML = '';
-            
-            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-            
-            // Info text
-            const start = (currentPage - 1) * itemsPerPage + 1;
-            const end = Math.min(currentPage * itemsPerPage, filteredData.length);
-            if (info) info.textContent = `Mostrando ${filteredData.length > 0 ? start : 0}-${end} de ${filteredData.length}`;
-
-            // Prev
-            const liPrev = document.createElement('li');
-            liPrev.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
-            liPrev.innerHTML = `<a class="page-link bg-dark border-secondary text-light" href="#">&laquo;</a>`;
-            liPrev.onclick = (e) => { e.preventDefault(); if(currentPage > 1) { currentPage--; renderTable(currentPage); } };
-            pagination.appendChild(liPrev);
-
-            // Pages (Limit to 5 visible)
-            for (let i = 1; i <= totalPages; i++) {
-                if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
-                     const li = document.createElement('li');
-                     li.className = `page-item ${i === currentPage ? 'active' : ''}`;
-                     li.innerHTML = `<a class="page-link bg-dark border-secondary text-light" href="#">${i}</a>`;
-                     li.onclick = (e) => { e.preventDefault(); currentPage = i; renderTable(currentPage); };
-                     pagination.appendChild(li);
-                }
+                updatePagination();
             }
 
-            // Next
-            const liNext = document.createElement('li');
-            liNext.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
-            liNext.innerHTML = `<a class="page-link bg-dark border-secondary text-light" href="#">&raquo;</a>`;
-            liNext.onclick = (e) => { e.preventDefault(); if(currentPage < totalPages) { currentPage++; renderTable(currentPage); } };
-            pagination.appendChild(liNext);
-        }
+            function updatePagination() {
+                if (!pagination) return;
+                pagination.innerHTML = '';
 
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                const term = e.target.value.toLowerCase();
-                filteredData = entregadosData.filter(eq => 
-                    (eq.fr || '').toLowerCase().includes(term) ||
-                    (eq.cliente || '').toLowerCase().includes(term) ||
-                    (eq.marca || '').toLowerCase().includes(term) ||
-                    (eq.modelo || '').toLowerCase().includes(term)
-                );
-                currentPage = 1;
-                renderTable(currentPage);
-            });
-        }
+                const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
-        // Initial Render
-        if (filteredData.length > 0) renderTable(currentPage);
-        else if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No hay equipos entregados</td></tr>';
-    });
+                // Info text
+                const start = (currentPage - 1) * itemsPerPage + 1;
+                const end = Math.min(currentPage * itemsPerPage, filteredData.length);
+                if (info) info.textContent = `Mostrando ${filteredData.length > 0 ? start : 0}-${end} de ${filteredData.length}`;
+
+                // Prev
+                const liPrev = document.createElement('li');
+                liPrev.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+                liPrev.innerHTML = `<a class="page-link bg-dark border-secondary text-light" href="#">&laquo;</a>`;
+                liPrev.onclick = (e) => { e.preventDefault(); if (currentPage > 1) { currentPage--; renderTable(currentPage); } };
+                pagination.appendChild(liPrev);
+
+                // Pages (Limit to 5 visible)
+                for (let i = 1; i <= totalPages; i++) {
+                    if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                        const li = document.createElement('li');
+                        li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                        li.innerHTML = `<a class="page-link bg-dark border-secondary text-light" href="#">${i}</a>`;
+                        li.onclick = (e) => { e.preventDefault(); currentPage = i; renderTable(currentPage); };
+                        pagination.appendChild(li);
+                    }
+                }
+
+                // Next
+                const liNext = document.createElement('li');
+                liNext.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+                liNext.innerHTML = `<a class="page-link bg-dark border-secondary text-light" href="#">&raquo;</a>`;
+                liNext.onclick = (e) => { e.preventDefault(); if (currentPage < totalPages) { currentPage++; renderTable(currentPage); } };
+                pagination.appendChild(liNext);
+            }
+
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    const term = e.target.value.toLowerCase();
+                    filteredData = entregadosData.filter(eq =>
+                        (eq.fr || '').toLowerCase().includes(term) ||
+                        (eq.cliente || '').toLowerCase().includes(term) ||
+                        (eq.marca || '').toLowerCase().includes(term) ||
+                        (eq.modelo || '').toLowerCase().includes(term)
+                    );
+                    currentPage = 1;
+                    renderTable(currentPage);
+                });
+            }
+
+            // Initial Render
+            if (filteredData.length > 0) renderTable(currentPage);
+            else if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No hay equipos entregados</td></tr>';
+        });
     </script>
     {% endif %}
-            {% endif %}
-
-    </div>
     {% endif %}
 
-    <!-- MODAL REGISTRO DE EQUIPO -->
-    <div class="modal fade" id="createEquipmentModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content bg-dark text-light border-secondary">
-                <div class="modal-header border-secondary">
-                    <h5 class="modal-title"><i class="fas fa-file-medical me-2"></i> Registrar Nuevo Equipo</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <form id="createEquipmentForm">
-                    <div class="modal-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Número de FR <span class="text-danger">*</span></label>
-                                <input type="text" name="fr" class="form-control bg-dark text-light border-secondary"
-                                    placeholder="Ej: 100-1">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Cliente <span class="text-danger">*</span></label>
-                                <input type="text" name="cliente"
-                                    class="form-control bg-dark text-light border-secondary" required
-                                    placeholder="Nombre del Cliente">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Fecha de Ingreso</label>
-                                <input type="date" name="fecha_ingreso"
-                                    class="form-control bg-dark text-light border-secondary">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Marca <span class="text-danger">*</span></label>
-                                <input type="text" name="marca" class="form-control bg-dark text-light border-secondary"
-                                    required>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Modelo <span class="text-danger">*</span></label>
-                                <input type="text" name="modelo"
-                                    class="form-control bg-dark text-light border-secondary" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Número de Serie</label>
-                                <input type="text" name="serie" class="form-control bg-dark text-light border-secondary"
-                                    placeholder="S/N">
-                            </div>
-                            <!-- Removed Condition Select per User Request -->
+</div>
+{% endif %}
 
-                            <div class="col-12">
-                                <label class="form-label">Accesorios</label>
-                                <textarea name="accesorios" class="form-control bg-dark text-light border-secondary"
-                                    rows="2" placeholder="Cargador, Funda, etc."></textarea>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Reporte del Cliente <span class="text-danger">*</span></label>
-                                <textarea name="reporte_cliente"
-                                    class="form-control bg-dark text-light border-secondary" rows="3"
-                                    required></textarea>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Observaciones</label>
-                                <textarea name="observaciones" class="form-control bg-dark text-light border-secondary"
-                                    rows="2" placeholder="Notas adicionales"></textarea>
-                            </div>
+<!-- MODAL REGISTRO DE EQUIPO -->
+<div class="modal fade" id="createEquipmentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark text-light border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title"><i class="fas fa-file-medical me-2"></i> Registrar Nuevo Equipo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="createEquipmentForm">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Número de FR <span class="text-danger">*</span></label>
+                            <input type="text" name="fr" class="form-control bg-dark text-light border-secondary"
+                                placeholder="Ej: 100-1">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Cliente <span class="text-danger">*</span></label>
+                            <input type="text" name="cliente" class="form-control bg-dark text-light border-secondary"
+                                required placeholder="Nombre del Cliente">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha de Ingreso</label>
+                            <input type="date" name="fecha_ingreso"
+                                class="form-control bg-dark text-light border-secondary">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Marca <span class="text-danger">*</span></label>
+                            <input type="text" name="marca" class="form-control bg-dark text-light border-secondary"
+                                required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Modelo <span class="text-danger">*</span></label>
+                            <input type="text" name="modelo" class="form-control bg-dark text-light border-secondary"
+                                required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Número de Serie</label>
+                            <input type="text" name="serie" class="form-control bg-dark text-light border-secondary"
+                                placeholder="S/N">
+                        </div>
+                        <!-- Removed Condition Select per User Request -->
+
+                        <div class="col-12">
+                            <label class="form-label">Accesorios</label>
+                            <textarea name="accesorios" class="form-control bg-dark text-light border-secondary"
+                                rows="2" placeholder="Cargador, Funda, etc."></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Reporte del Cliente <span class="text-danger">*</span></label>
+                            <textarea name="reporte_cliente" class="form-control bg-dark text-light border-secondary"
+                                rows="3" required></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Observaciones</label>
+                            <textarea name="observaciones" class="form-control bg-dark text-light border-secondary"
+                                rows="2" placeholder="Notas adicionales"></textarea>
                         </div>
                     </div>
-                    <div class="modal-footer border-secondary">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-success">
-                            <i class="fas fa-save me-1"></i> Guardar Equipo
-                        </button>
-                    </div>
-                </form>
-            </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save me-1"></i> Guardar Equipo
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
-    <script>
+<script>
     document.addEventListener('DOMContentLoaded', function () {
-        const form = document.getElementById('createEquim                if (form) {
+        const form = document.getElementById('createEquipmentForm');
+        if (form) {
             // Force Uppercase on Input
-                const inputs = form.querySelectorAll('input[type="text"],            a');
-                       forEach(input => {
-                         .classList.add('text-uppercase'); // Visual CSS
-                input.                ener('input', function ()                           this.value = this.value.toUpperCase(); // Actua                            });
+            const inputs = form.querySelectorAll('input[type="text"], textarea');
+            inputs.forEach(input => {
+                input.classList.add('text-uppercase'); // Visual CSS
+                input.addEventListener('input', function () {
+                    this.value = this.value.toUpperCase(); // Actual Value
+                });
             });
 
-            form.                        bmit', function (e) {
-                e.preventDefault(                       c                a = n                form);
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const formData = new FormData(form);
 
-                fetch('/api/equipment/c                                  method                                  body: formData
-                                           .then(response => r                                                                                                   cce                                      alert('Equipo registr                        
-                                           load();
-                                                                 alert('Error: ' + dat                                      }
-                                               .                                             console.error('Err                                                      cur                        strar el equipo');                            
+                fetch('/api/equipment/create', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Equipo registrado correctamente');
+                            location.reload();
+                        } else {
+                            alert('Error: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Ocurrió un error al registrar el equipo');
+                    });
             });
         }
-                                     });
-    </script>
+    });
+</script>
 
-    <style>
-        .hover-lift {
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
+<style>
+    .hover-lift {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
 
-        .hover-lift:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3) !important;
-        }
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3) !important;
+    }
 
-        .bg-dark-card {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-        }
+    .bg-dark-card {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    }
 
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 2rem 0 1rem 0;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid rgba(139, 92, 246, 0.3);
-        }
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 2rem 0 1rem 0;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid rgba(139, 92, 246, 0.3);
+    }
 
-        .section-title {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #fff;
-        }
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #fff;
+    }
 
-        .badge-count {
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 1rem;
-            font-weight: 600;
-        }
-    </style>
+    .badge-count {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+</style>
 
-    <script>
+<script>
     // Global Action for Dashboard Buttons
     // Global Action for Dashboard Buttons
-    window.updateStatus = func,        Status, newEncargado = null) {
-                msg = `¿Cambiar estado a: ${newStatus}?               if (newEncargado) msg += `\nAsignando a: ${newEncargado}`;
+    window.updateStatus = func, Status, newEncargado = null) {
+        msg = `¿Cambiar estado a: ${newStatus}?               if (newEncargado) msg += `\nAsignando a: ${ newEncargado } `;
 
                (!confirm(msg)) return;
 
@@ -1431,156 +1446,153 @@
         formData.append('status', newStatus);
                (newEncargado) formData.app            argado', newEncargado);
 
-                    api/equipment/${id}/update_status`, {             'POST', body: formData })
+                    api/equipment/${id}/update_status`, { 'POST', body: formData })
             .then(r => r.json())
-                .then(data => {
+            .then(data => {
                 if (data.success) location.reload();
-                           ert('Error: ' + data.                        })
-                         r => alert('Error de red: ' + err));
-                    ow.showInfo = function (btn) {
+                ert('Error: ' + data.                        })
+        r => alert('Error de red: ' + err));
+        ow.showInfo = function (btn) {
                      ata                utes
-        const d = btn.dataset;
-        do        nt.g        ementById('infoFr').innerText = d.f               document.getElementById('i            ').innerText = d.marca;             document.getElementById('infoEstado').innerHTML = `            ass="badge bg-secondary">${d.estado}</span>`;
+            const d = btn.dataset;
+            do nt.g        ementById('infoFr').innerText = d.f               document.getElementById('i            ').innerText = d.marca; document.getElementById('infoEstado').innerHTML = `            ass="badge bg-secondary">${d.estado}</span>`;
         docu            ElementById('infoEncargado').innerText = d.encargado || 'No Asignado';
-        document.getElementById('i            ').innerText = d.fecha;
-        document.getElementById('infoReporte').innerText =             e;
+            document.getElementById('i            ').innerText = d.fecha;
+            document.getElementById('infoReporte').innerText = e;
 
-        // New Fields
-        document.getElementById(            ente').innerText = d.cliente;
+            // New Fields
+            document.getElementById(ente').innerText = d.cliente;
         document.getElementById('            e').innerText             e;
-        document.getElementById('infoCondicion').innerText             icion;
-        document.getElementById('infoAccesorios').i             = d.accesorios;
-        document.getElementById('infoInforme').in            = d.informe;
-        document.getElementById('infoObservaciones').in            = d.observaciones;
+            document.getElementById('infoCondicion').innerText             icion;
+            document.getElementById('infoAccesorios').i = d.accesorios;
+            document.getElementById('infoInforme').in = d.informe;
+            document.getElementById('infoObservaciones').in = d.observaciones;
 
-        // New Lifecycle Fields
+            // New Lifecycle Fields
 
 
-                    Modal = new bootstrap.Modal(document.getElementById('detailedInfoModal'));
-        myModal.show();
-    };
-    </script>
+            Modal = new bootstrap.Modal(document.getElementById('detailedInfoModal'));
+            myModal.show();
+        };
+</script>
 
-    <!-- INFO MODAL -->
-    <div class="modal fade" id="detailedInfoModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content bg-dark-card border-secondary text-light">
+<!-- INFO MODAL -->
+<div class="modal fade" id="detailedInfoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark-card border-secondary text-light">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title"><i class="fas fa-info-circle text-info me-2"></i>Detalles del Equipo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-body">
+                    <!-- Header Info -->
+                    <div class="mb-3 border-bottom border-secondary pb-2">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <small class="text-secondary text-uppercase d-block">Equipo</small>
+                                <h4 id="infoMarca" class="mb-0 text-white"></h4>
+                                <span id="infoFr" class="badge bg-info mt-1"></span>
+                            </div>
+                            <div class="text-end">
+                                <small class="text-secondary text-uppercase d-block">Estado</small>
+                                <div id="infoEstado" class="mt-1"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Grid Details -->
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <small class="text-secondary text-uppercase">Cliente</small>
+                            <p id="infoCliente" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-secondary text-uppercase">Serie</small>
+                            <p id="infoSerie" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
+                        </div>
+
+                        <div class="col-md-6">
+                            <small class="text-secondary text-uppercase">Fecha Ingreso</small>
+                            <p id="infoFecha" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-secondary text-uppercase">Condición</small>
+                            <p id="infoCondicion" class="fw-bold text-light mb-0 border-bottom border-dark pb-1">
+                            </p>
+                        </div>
+
+                        <div class="col-md-6">
+                            <small class="text-secondary text-uppercase">Encargado Mantenimiento</small>
+                            <p id="infoEncargado" class="fw-bold text-light mb-0 border-bottom border-dark pb-1">
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-secondary text-uppercase">Accesorios</small>
+                            <p id="infoAccesorios" class="fw-bold text-light mb-0 border-bottom border-dark pb-1">
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-secondary text-uppercase text-info">No. Informe</small>
+                            <p id="infoInforme" class="fw-bold text-info mb-0 border-bottom border-dark pb-1"></p>
+                        </div>
+
+                        <div class="col-12 mt-3">
+                            <small class="text-secondary text-uppercase text-info"><i class="fas fa-file-alt me-1"></i>
+                                Reporte Cliente</small>
+                            <div class="p-2 bg-dark rounded border border-secondary text-light small mt-1"
+                                id="infoReporte" style="max-height:100px; overflow-y:auto;"></div>
+                        </div>
+
+                        <div class="col-12 mt-2">
+                            <small class="text-secondary text-uppercase text-warning"><i
+                                    class="fas fa-sticky-note me-1"></i> Observaciones</small>
+                            <div class="p-2 bg-dark rounded border border-secondary text-light small mt-1"
+                                id="infoObservaciones" style="max-height:100px; overflow-y:auto;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary p-1">
+                    <button type="button" class="btn btn-sm btn-secondary w-100" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Importar Informes -->
+    <div class="modal fade" id="importInformesModal" tabindex="-1" aria-labelledby="importInformesModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark text-light border-secondary">
                 <div class="modal-header border-secondary">
-                    <h5 class="modal-title"><i class="fas fa-info-circle text-info me-2"></i>Detalles del Equipo</h5>
+                    <h5 class="modal-title" id="importInformesModalLabel"><i class="fas fa-file-csv me-2"></i>Importar
+                        Números de Informe</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+                <form action="{{ url_for('import_informes') }}" method="POST" enctype="multipart/form-data">
                     <div class="modal-body">
-                        <!-- Header Info -->
-                        <div class="mb-3 border-bottom border-secondary pb-2">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <small class="text-secondary text-uppercase d-block">Equipo</small>
-                                    <h4 id="infoMarca" class="mb-0 text-white"></h4>
-                                    <span id="infoFr" class="badge bg-info mt-1"></span>
-                                </div>
-                                <div class="text-end">
-                                    <small class="text-secondary text-uppercase d-block">Estado</small>
-                                    <div id="infoEstado" class="mt-1"></div>
-                                </div>
-                            </div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Sube un archivo CSV con las columnas <strong>FR</strong> y <strong>No DIAG</strong> (o
+                            similar).
+                            <br>
+                            Solo se actualizará el campo "Número de Informe" para los equipos existentes.
                         </div>
-
-                        <!-- Grid Details -->
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <small class="text-secondary text-uppercase">Cliente</small>
-                                <p id="infoCliente" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
-                            </div>
-                            <div class="col-md-6">
-                                <small class="text-secondary text-uppercase">Serie</small>
-                                <p id="infoSerie" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
-                            </div>
-
-                            <div class="col-md-6">
-                                <small class="text-secondary text-uppercase">Fecha Ingreso</small>
-                                <p id="infoFecha" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
-                            </div>
-                            <div class="col-md-6">
-                                <small class="text-secondary text-uppercase">Condición</small>
-                                <p id="infoCondicion" class="fw-bold text-light mb-0 border-bottom border-dark pb-1">
-                                </p>
-                            </div>
-
-                            <div class="col-md-6">
-                                <small class="text-secondary text-uppercase">Encargado Mantenimiento</small>
-                                <p id="infoEncargado" class="fw-bold text-light mb-0 border-bottom border-dark pb-1">
-                                </p>
-                            </div>
-                            <div class="col-md-6">
-                                <small class="text-secondary text-uppercase">Accesorios</small>
-                                <p id="infoAccesorios" class="fw-bold text-light mb-0 border-bottom border-dark pb-1">
-                                </p>
-                            </div>
-                            <div class="col-md-6">
-                                <small class="text-secondary text-uppercase text-info">No. Informe</small>
-                                <p id="infoInforme" class="fw-bold text-info mb-0 border-bottom border-dark pb-1"></p>
-                            </div>
-
-                            <div class="col-12 mt-3">
-                                <small class="text-secondary text-uppercase text-info"><i
-                                        class="fas fa-file-alt me-1"></i>
-                                    Reporte Cliente</small>
-                                <div class="p-2 bg-dark rounded border border-secondary text-light small mt-1"
-                                    id="infoReporte" style="max-height:100px; overflow-y:auto;"></div>
-                            </div>
-
-                            <div class="col-12 mt-2">
-                                <small class="text-secondary text-uppercase text-warning"><i
-                                        class="fas fa-sticky-note me-1"></i> Observaciones</small>
-                                <div class="p-2 bg-dark rounded border border-secondary text-light small mt-1"
-                                    id="infoObservaciones" style="max-height:100px; overflow-y:auto;"></div>
-                            </div>
+                        <div class="mb-3">
+                            <label for="file" class="form-label">Archivo CSV</label>
+                            <input class="form-control bg-dark text-light border-secondary" type="file" id="file"
+                                name="file" accept=".csv" required>
                         </div>
                     </div>
-                    <div class="modal-footer border-secondary p-1">
-                        <button type="button" class="btn btn-sm btn-secondary w-100"
-                            data-bs-dismiss="modal">Cerrar</button>
+                    <div class="modal-footer border-secondary">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Importar</button>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
+    </div>
 
-        <!-- Modal Importar Informes -->
-        <div class="modal fade" id="importInformesModal" tabindex="-1" aria-labelledby="importInformesModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content bg-dark text-light border-secondary">
-                    <div class="modal-header border-secondary">
-                        <h5 class="modal-title" id="importInformesModalLabel"><i
-                                class="fas fa-file-csv me-2"></i>Importar
-                            Números de Informe</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
-                    </div>
-                    <form action="{{ url_for('import_informes') }}" method="POST" enctype="multipart/form-data">
-                        <div class="modal-body">
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle me-2"></i>
-                                Sube un archivo CSV con las columnas <strong>FR</strong> y <strong>No DIAG</strong> (o
-                                similar).
-                                <br>
-                                Solo se actualizará el campo "Número de Informe" para los equipos existentes.
-                            </div>
-                            <div class="mb-3">
-                                <label for="file" class="form-label">Archivo CSV</label>
-                                <input class="form-control bg-dark text-light border-secondary" type="file" id="file"
-                                    name="file" accept=".csv" required>
-                            </div>
-                        </div>
-                        <div class="modal-footer border-secondary">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-primary">Importar</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        {% endblock %}
+    {% endblock %}
