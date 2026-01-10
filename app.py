@@ -66,8 +66,9 @@ def create_app(config_class=Config):
         if current_user.role.lower() == 'admin':
             # Estadísticas completas
             total_equipos = Equipment.query.count()
+            # Equipos activos (No Entregados)
             equipos_activos = Equipment.query.filter(
-                ~Equipment.estado.in_(['Entregado', 'ENTREGADO'])
+                ~Equipment.estado.ilike('%entregado%')
             ).count()
             
             # Equipos por estado
@@ -79,14 +80,14 @@ def create_app(config_class=Config):
             # Calcular equipos atrasados (más de 5 días sin cambio de estado)
             fecha_limite = datetime.now() - timedelta(days=5)
             equipos_atrasados = Equipment.query.filter(
-                ~Equipment.estado.in_(['Entregado', 'ENTREGADO']),
+                ~Equipment.estado.ilike('%entregado%'),
                 Equipment.fecha_ingreso < fecha_limite
             ).count()
             
             # Tiempo promedio de servicio (equipos entregados en últimos 30 días)
             fecha_30_dias = datetime.now() - timedelta(days=30)
             equipos_recientes = Equipment.query.filter(
-                Equipment.estado.in_(['Entregado', 'ENTREGADO']),
+                Equipment.estado.ilike('%entregado%'),
                 Equipment.fecha_ingreso >= fecha_30_dias
             ).all()
             
@@ -99,13 +100,13 @@ def create_app(config_class=Config):
             # Equipos críticos (más de 7 días)
             fecha_critica = datetime.now() - timedelta(days=7)
             equipos_criticos = Equipment.query.filter(
-                ~Equipment.estado.in_(['Entregado', 'ENTREGADO']),
+                ~Equipment.estado.ilike('%entregado%'),
                 Equipment.fecha_ingreso < fecha_critica
             ).order_by(Equipment.fecha_ingreso.asc()).limit(5).all()
             
             # Todos los equipos para vista completa
             todos_equipos = Equipment.query.filter(
-                ~Equipment.estado.in_(['Entregado', 'ENTREGADO'])
+                ~Equipment.estado.ilike('%entregado%')
             ).order_by(Equipment.fecha_ingreso.desc()).all()
             
             stats_admin = {
@@ -119,7 +120,7 @@ def create_app(config_class=Config):
 
             # Historial Entregados for Admin
             equipos_entregados_admin = Equipment.query.filter(
-                Equipment.estado.in_(['Entregado', 'ENTREGADO'])
+                Equipment.estado.ilike('%entregado%')
             ).order_by(Equipment.fecha_ingreso.desc()).all()
             
             import json
