@@ -458,41 +458,47 @@
 
 <!-- DATA -->
 <div id="equipmentsData" data-equipments='{{ equipments_json|safe }}' data-user-role='{{ current_role|tojson }}'
+    style="display:none;"></div>
 
-        <!-- CARD: HISTORIAL ENTREGADOS (PAGINATED) -->
-        <div class="col-12 mt-4" id="cardEntregados">
-            <div class="card bg-dark border-secondary shadow-sm h-100">
-                <div class="card-header border-secondary d-flex justify-content-between align-items-center">
-                    <div class="text-white fw-bold"><i class="fas fa-history me-2"></i> HISTORIAL DE ENTREGADOS</div>
-                    <input type="text" id="searchEntregadosGrouped" class="form-control form-control-sm bg-dark text-light border-secondary" placeholder="Buscar..." style="width: 150px;">
-                </div>
-                <div class="card-body p-0 table-responsive">
-                    <table class="table table-dark table-hover mb-0 align-middle">
-                        <thead>
-                            <tr class="text-secondary text-xs text-uppercase">
-                                <th class="ps-4">Equipo</th>
-                                <th>Estado</th>
-                                <th>Encargado</th>
-                                <th>Fecha</th>
-                                <th>Tiempo</th>
-                                <th class="text-end pe-4">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableEntregadosGrouped">
-                            <!-- JS Rendered -->
-                        </tbody>
-                    </table>
-                </div>
-                <div class="card-footer border-secondary d-flex justify-content-between align-items-center py-2">
-                    <small class="text-muted" id="infoEntregadosGrouped">0-0/0</small>
-                    <div class="btn-group btn-group-sm">
-                        <button class="btn btn-outline-secondary" id="btnPrevEntregadosGrouped" disabled><i class="fas fa-chevron-left"></i></button>
-                        <button class="btn btn-outline-secondary" id="btnNextEntregadosGrouped" disabled><i class="fas fa-chevron-right"></i></button>
-                    </div>
+<div class="row"> <!--
+    CARD: HISTORIAL ENTREGADOS (PAGINATED) -->
+    <div class="col-12 mt-4" id="cardEntregados">
+        <div class="card bg-dark border-secondary shadow-sm h-100">
+            <div class="card-header border-secondary d-flex justify-content-between align-items-center">
+                <div class="text-white fw-bold"><i class="fas fa-history me-2"></i> HISTORIAL DE ENTREGADOS</div>
+                <input type="text" id="searchEntregadosGrouped"
+                    class="form-control form-control-sm bg-dark text-light border-secondary" placeholder="Buscar..."
+                    style="width: 150px;">
+            </div>
+            <div class="card-body p-0 table-responsive">
+                <table class="table table-dark table-hover mb-0 align-middle">
+                    <thead>
+                        <tr class="text-secondary text-xs text-uppercase">
+                            <th class="ps-4">Equipo</th>
+                            <th>Estado</th>
+                            <th>Encargado</th>
+                            <th>Fecha</th>
+                            <th>Tiempo</th>
+                            <th class="text-end pe-4">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableEntregadosGrouped">
+                        <!-- JS Rendered -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer border-secondary d-flex justify-content-between align-items-center py-2">
+                <small class="text-muted" id="infoEntregadosGrouped">0-0/0</small>
+                <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-secondary" id="btnPrevEntregadosGrouped" disabled><i
+                            class="fas fa-chevron-left"></i></button>
+                    <button class="btn btn-outline-secondary" id="btnNextEntregadosGrouped" disabled><i
+                            class="fas fa-chevron-right"></i></button>
                 </div>
             </div>
         </div>
-    style="display:none;"></div>
+    </div>
+</div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -873,61 +879,61 @@
 
             // LOGIC FOR ENTREGADOS PAGINATION (GROUPED VIEW)
             const cardEntregados = document.getElementById('cardEntregados');
-            
+
             if (isAlmacenRole) {
-                if(cardEntregados) cardEntregados.classList.add('d-none');
+                if (cardEntregados) cardEntregados.classList.add('d-none');
             } else {
-                if(cardEntregados) cardEntregados.classList.remove('d-none');
-                
+                if (cardEntregados) cardEntregados.classList.remove('d-none');
+
                 // Render Logic
                 const tEntregados = document.getElementById('tableEntregadosGrouped');
                 const sEntregados = document.getElementById('searchEntregadosGrouped');
                 const btnPrev = document.getElementById('btnPrevEntregadosGrouped');
                 const btnNext = document.getElementById('btnNextEntregadosGrouped');
                 const infoEnt = document.getElementById('infoEntregadosGrouped');
-                
+
                 let entPage = 1;
                 const entLimit = 5;
-                let entData = equipments.filter(i => (i.estado||'').toLowerCase().includes('entregado'));
-                
+                let entData = equipments.filter(i => (i.estado || '').toLowerCase().includes('entregado'));
+
                 function renderEntregadosSpecial() {
                     const term = normalize(sEntregados ? sEntregados.value : '');
-                    const filtered = entData.filter(item => 
+                    const filtered = entData.filter(item =>
                         normalize(item.fr).includes(term) ||
                         normalize(item.marca).includes(term) ||
                         normalize(item.modelo).includes(term) ||
                         normalize(item.cliente).includes(term)
                     );
-                    
+
                     const totalPages = Math.ceil(filtered.length / entLimit) || 1;
                     if (entPage > totalPages) entPage = 1;
-                    
+
                     const start = (entPage - 1) * entLimit;
                     const end = start + entLimit;
                     const pageData = filtered.slice(start, end);
-                    
+
                     if (tEntregados) {
-                        tEntregados.innerHTML = pageData.length ? pageData.map(i => createRow(i, true)).join('') 
+                        tEntregados.innerHTML = pageData.length ? pageData.map(i => createRow(i, true)).join('')
                             : '<tr><td colspan="6" class="text-center text-muted">Sin equipos entregados</td></tr>';
                     }
-                    
-                    if(infoEnt) infoEnt.innerText = `${entPage}/${totalPages}`;
-                    if(btnPrev) btnPrev.disabled = (entPage === 1);
-                    if(btnNext) btnNext.disabled = (entPage === totalPages);
+
+                    if (infoEnt) infoEnt.innerText = `${entPage}/${totalPages}`;
+                    if (btnPrev) btnPrev.disabled = (entPage === 1);
+                    if (btnNext) btnNext.disabled = (entPage === totalPages);
                 }
-                
+
                 if (sEntregados) {
                     sEntregados.addEventListener('input', () => { entPage = 1; renderEntregadosSpecial(); });
                 }
-                
-                if (btnPrev) btnPrev.onclick = () => { if(entPage > 1) { entPage--; renderEntregadosSpecial(); } };
-                if (btnNext) btnNext.onclick = () => { 
+
+                if (btnPrev) btnPrev.onclick = () => { if (entPage > 1) { entPage--; renderEntregadosSpecial(); } };
+                if (btnNext) btnNext.onclick = () => {
                     const term = normalize(sEntregados ? sEntregados.value : '');
                     const filtered = entData.filter(item => normalize(item.fr).includes(term) || normalize(item.marca).includes(term));
-                    const totalPages = Math.ceil(filtered.length / entLimit); 
-                    if(entPage < totalPages) { entPage++; renderEntregadosSpecial(); } 
+                    const totalPages = Math.ceil(filtered.length / entLimit);
+                    if (entPage < totalPages) { entPage++; renderEntregadosSpecial(); }
                 };
-                
+
                 // Initial call
                 renderEntregadosSpecial();
             }
