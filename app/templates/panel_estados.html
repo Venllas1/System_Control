@@ -3,1035 +3,331 @@
 
 {% block content %}
 <div class="container-fluid py-4">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="text-white mb-0"><i class="fas fa-tasks me-2"></i> Gestión de Estados</h2>
-            <p class="text-muted mb-0">Panel de Control: {{ current_role|title }}</p>
-        </div>
-
-        <div class="d-flex gap-2">
-            {% if current_role != 'visualizador' %}
-            <div class="input-group">
-                <span class="input-group-text bg-dark border-secondary text-secondary">
-                    <i class="fas fa-search"></i>
-                </span>
-                <input type="text" id="searchInput" class="form-control bg-dark text-light border-secondary"
-                    placeholder="Buscar equipo...">
+    <!-- Header Section -->
+    <div class="header mb-4">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-clipboard-list me-3" style="font-size: 2rem; color: var(--primary);"></i>
+            <div>
+                <h1 class="mb-0">Gestión de Estados</h1>
+                <p class="subtitle mb-0">Panel de Control: {{ current_user.role|title }}</p>
             </div>
-            {% endif %}
-            <!-- Excel Sync Disabled (Native DB Mode)
-            <button class="btn btn-outline-light refresh-btn" title="Refrescar Datos">
-                <i class="fas fa-sync-alt"></i>
-            </button>
-            -->
-            <!-- Export Button is enough -->
         </div>
     </div>
 
-    {% if current_role == 'visualizador' %}
-    <!-- KPI SUMMARY CARDS -->
-    <div class="row g-4 mb-4">
-        <!-- 1. En Diagnóstico -->
-        <div class="col-xl-3 col-sm-6">
-            <div class="card bg-dark-card border-secondary shadow-sm h-100">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center">
-                        <div class="icon icon-shape bg-info shadow text-center border-radius-md">
-                            <i class="fas fa-stethoscope text-white opacity-10"></i>
-                        </div>
-                        <div class="ms-3">
-                            <p class="text-xs font-weight-bold mb-0 text-info text-uppercase">En Diagnóstico</p>
-                            <h4 class="font-weight-bolder text-white mb-0" id="kpiDiag">0</h4>
-                        </div>
+    <!-- Stats Cards -->
+    <div class="stats-container mb-4">
+        <!-- Diagnóstico Card -->
+        <div class="stat-card diagnostico">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="stat-icon">
+                        <i class="fas fa-stethoscope"></i>
                     </div>
+                    <div class="stat-label mt-2">EN DIAGNÓSTICO</div>
+                    <div class="stat-number">{{ stats.diagnostico or 0 }}</div>
                 </div>
             </div>
         </div>
-        <!-- 2. Aprobados -->
-        <div class="col-xl-3 col-sm-6">
-            <div class="card bg-dark-card border-secondary shadow-sm h-100">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center">
-                        <div class="icon icon-shape bg-success shadow text-center border-radius-md">
-                            <i class="fas fa-check-circle text-white opacity-10"></i>
-                        </div>
-                        <div class="ms-3">
-                            <p class="text-xs font-weight-bold mb-0 text-success text-uppercase">Aprobados</p>
-                            <h4 class="font-weight-bolder text-white mb-0" id="kpiApro">0</h4>
-                        </div>
+
+        <!-- Aprobados Card -->
+        <div class="stat-card aprobado">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
                     </div>
+                    <div class="stat-label mt-2">APROBADOS</div>
+                    <div class="stat-number">{{ stats.aprobados or 0 }}</div>
                 </div>
             </div>
         </div>
-        <!-- 3. Pendientes de Aprobación -->
-        <div class="col-xl-3 col-sm-6">
-            <div class="card bg-dark-card border-secondary shadow-sm h-100">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center">
-                        <div class="icon icon-shape bg-warning shadow text-center border-radius-md">
-                            <i class="fas fa-clock text-white opacity-10"></i>
-                        </div>
-                        <div class="ms-3">
-                            <p class="text-xs font-weight-bold mb-0 text-warning text-uppercase">Pendientes de
-                                Aprobación</p>
-                            <h4 class="font-weight-bolder text-white mb-0" id="kpiPend">0</h4>
-                        </div>
+
+        <!-- Pendientes Card -->
+        <div class="stat-card pendiente">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
                     </div>
+                    <div class="stat-label mt-2">PENDIENTES DE APROBACIÓN</div>
+                    <div class="stat-number">{{ stats.pendientes or 0 }}</div>
                 </div>
             </div>
         </div>
-        <!-- 4. Total Equipos -->
-        <div class="col-xl-3 col-sm-6">
-            <div class="card bg-dark-card border-secondary shadow-sm h-100">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center">
-                        <div class="icon icon-shape bg-primary shadow text-center border-radius-md">
-                            <i class="fas fa-cubes text-white opacity-10"></i>
-                        </div>
-                        <div class="ms-3">
-                            <p class="text-xs font-weight-bold mb-0 text-secondary text-uppercase">Total Equipos</p>
-                            <h4 class="font-weight-bolder text-white mb-0" id="kpiTotal">0</h4>
-                        </div>
+
+        <!-- Total Card -->
+        <div class="stat-card total">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="stat-icon">
+                        <i class="fas fa-boxes"></i>
                     </div>
+                    <div class="stat-label mt-2">TOTAL EQUIPOS</div>
+                    <div class="stat-number">{{ stats.total or 0 }}</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- VISTA VISUALIZADOR (3 TABLAS + FILTROS INDEPENDIENTES) -->
-    <!-- ORDER: 1. Diagnostico, 2. Pendiente, 3. Revision -->
-    <div class="row g-4">
-
-        <!-- 1. DIAGNOSTICO -->
-        <div class="col-12">
-            <div class="card bg-dark-card border-secondary shadow-sm">
-                <div
-                    class="card-header border-secondary d-flex justify-content-between align-items-center bg-info bg-opacity-10">
-                    <h5 class="mb-0 text-info"><i class="fas fa-stethoscope me-2"></i> Diagnóstico</h5>
-                    <div class="input-group input-group-sm w-25">
-                        <input type="text" id="searchDiagnostico"
-                            class="form-control bg-dark text-light border-secondary" placeholder="Filtrar...">
-                    </div>
+    <!-- Diagnóstico Section -->
+    <div class="section-container mb-4">
+        <div class="section-header" data-bs-toggle="collapse" data-bs-target="#diagnosticoSection"
+            style="cursor: pointer;">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-stethoscope me-2" style="color: var(--info);"></i>
+                    <span class="section-title">Diagnóstico</span>
                 </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-dark table-hover mb-0 align-middle">
-                            <thead>
-                                <tr class="text-secondary text-uppercase text-xs">
-                                    <th class="ps-4">FR</th>
-                                    <th>Marca/Modelo</th>
-                                    <th>Estado</th>
-                                    <th>Encargado</th>
-                                    <th>Fecha</th>
-                                    <th class="text-center">Días</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tableDiagnostico"></tbody>
-                        </table>
-                    </div>
-                </div>
+                <i class="fas fa-chevron-down"></i>
             </div>
         </div>
-
-        <!-- 2. APROBADOS (Visible now, excluding Entregados) -->
-        <div class="col-12">
-            <div class="card bg-dark-card border-secondary shadow-sm">
-                <div
-                    class="card-header border-secondary d-flex justify-content-between align-items-center bg-success bg-opacity-10">
-                    <h5 class="mb-0 text-success"><i class="fas fa-check-circle me-2"></i> Aprobados / En Servicio</h5>
-                    <div class="d-flex align-items-center gap-2">
-                        <div class="input-group input-group-sm" style="width: 200px;">
-                            <input type="text" id="searchAprobado"
-                                class="form-control bg-dark text-light border-secondary" placeholder="Filtrar...">
-                        </div>
-                        <!-- Pagination Controls -->
-                        <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-secondary" id="btnPrevAprobado" disabled><i
-                                    class="fas fa-chevron-left"></i></button>
-                            <span class="btn btn-outline-secondary disabled text-light border-secondary"
-                                id="pageInfoAprobado">1/1</span>
-                            <button class="btn btn-outline-secondary" id="btnNextAprobado" disabled><i
-                                    class="fas fa-chevron-right"></i></button>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-dark table-hover mb-0 align-middle">
-                            <thead>
-                                <tr class="text-secondary text-uppercase text-xs">
-                                    <th class="ps-4">FR</th>
-                                    <th>Marca/Modelo</th>
-                                    <th>Estado</th>
-                                    <th>Encargado</th>
-                                    <th>Fecha</th>
-                                    <th class="text-center">Días</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tableAprobado"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 3. REEVALUACIONES O REVISION -->
-        <div class="col-12">
-            <div class="card bg-dark-card border-secondary shadow-sm">
-                <div
-                    class="card-header border-secondary d-flex justify-content-between align-items-center bg-primary bg-opacity-10">
-                    <h5 class="mb-0 text-primary"><i class="fas fa-sync-alt me-2"></i> Reevaluaciones o Revisión</h5>
-                    <div class="input-group input-group-sm w-25">
-                        <input type="text" id="searchRevision" class="form-control bg-dark text-light border-secondary"
-                            placeholder="Filtrar...">
-                    </div>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-dark table-hover mb-0 align-middle">
-                            <thead>
-                                <tr class="text-secondary text-uppercase text-xs">
-                                    <th class="ps-4">FR</th>
-                                    <th>Marca/Modelo</th>
-                                    <th>Estado</th>
-                                    <th>Encargado</th>
-                                    <th>Fecha</th>
-                                    <th class="text-center">Días</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tableRevision"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 4. PENDIENTE APROBACION (PAGINATED) -->
-        <div class="col-12">
-            <div class="card bg-dark-card border-secondary shadow-sm">
-                <div
-                    class="card-header border-secondary d-flex justify-content-between align-items-center bg-warning bg-opacity-10">
-                    <h5 class="mb-0 text-warning"><i class="fas fa-clock me-2"></i> Pendiente Aprobación</h5>
-                    <div class="d-flex align-items-center gap-2">
-                        <div class="input-group input-group-sm" style="width: 200px;">
-                            <input type="text" id="searchPendiente"
-                                class="form-control bg-dark text-light border-secondary" placeholder="Filtrar...">
-                        </div>
-                        <!-- Pagination Controls -->
-                        <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-secondary" id="btnPrevPendiente" disabled><i
-                                    class="fas fa-chevron-left"></i></button>
-                            <span class="btn btn-outline-secondary disabled text-light border-secondary"
-                                id="pageInfoPendiente">1/1</span>
-                            <button class="btn btn-outline-secondary" id="btnNextPendiente" disabled><i
-                                    class="fas fa-chevron-right"></i></button>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-dark table-hover mb-0 align-middle">
-                            <thead>
-                                <tr class="text-secondary text-uppercase text-xs">
-                                    <th class="ps-4">FR</th>
-                                    <th>Marca/Modelo</th>
-                                    <th>Estado</th>
-                                    <!-- RENAMED COLUMN PER USER REQUEST -->
-                                    <th>ENCARGADO DEL DIAGNOSTICO</th>
-                                    <th>Fecha</th>
-                                    <th class="text-center">Días</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tablePendiente"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    {% else %}
-    <!-- VISTA OPERATIVA (AGRUPADA) -->
-    <div id="operationalView">
-        <!-- LOGIC HANDLED BY JS: We create containers for all possibilities, and JS hides/shows based on Role -->
-
-        <!-- ROW 1: PENDIENTES (Rec/Ops) -->
-        <div class="card bg-dark-card border-secondary shadow-sm mb-4" id="cardPendientesOp">
-            <div class="card-header border-secondary text-warning">
-                <i class="fas fa-clock me-2"></i> Pendientes de Aprobación
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-dark table-hover mb-0 align-middle">
-                        <thead class="text-secondary text-uppercase text-xs font-weight-bolder">
-                            <tr>
-                                <th class="ps-4">Equipo / FR</th>
-                                <th>Estado</th>
-                                <th>Encargado</th>
-                                <th>Fecha</th>
-                                <th>Días</th>
-                                <th class="text-end pe-4">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tablePendientesOp"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- ROW 2: DIAGNOSTICO (Rec/Ops) -->
-        <div class="card bg-dark-card border-secondary shadow-sm mb-4" id="cardDiagnosticoOp">
-            <div class="card-header border-secondary text-info">
-                <i class="fas fa-microscope me-2"></i> En Diagnóstico
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-dark table-hover mb-0 align-middle">
-                        <thead class="text-secondary text-uppercase text-xs font-weight-bolder">
-                            <tr>
-                                <th class="ps-4">Equipo / FR</th>
-                                <th>Estado</th>
-                                <th>Encargado</th>
-                                <th>Fecha</th>
-                                <th>Días</th>
-                                <th class="text-end pe-4">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableDiagnosticoOp"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- ROW 3: APROBADOS (Rec/Ops) -->
-        <div class="card bg-dark-card border-secondary shadow-sm mb-4" id="cardAprobadosOp">
-            <div class="card-header border-secondary text-success">
-                <i class="fas fa-check-circle me-2"></i> Aprobados / Servicio
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-dark table-hover mb-0 align-middle">
-                        <thead class="text-secondary text-uppercase text-xs font-weight-bolder">
-                            <tr>
-                                <th class="ps-4">Equipo / FR</th>
-                                <th>Estado</th>
-                                <th>Encargado</th>
-                                <th>Fecha</th>
-                                <th>Días</th>
-                                <th class="text-end pe-4">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableAprobadosOp"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- ALMACEN CONTAINERS -->
-        <!-- ROW 1: REPUESTOS DIAG -->
-        <div class="card bg-dark-card border-secondary shadow-sm mb-4 d-none" id="cardRepDiag">
-            <div class="card-header border-secondary text-warning">
-                <i class="fas fa-boxes me-2"></i> Repuestos para Diagnóstico
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-dark table-hover mb-0 align-middle">
-                        <thead class="text-secondary text-uppercase text-xs font-weight-bolder">
-                            <tr>
-                                <th class="ps-4">Equipo / FR</th>
-                                <th>Estado</th>
-                                <th>Encargado</th>
-                                <th>Fecha</th>
-                                <th>Días</th>
-                                <th class="text-end pe-4">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableRepDiag"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- ROW 2: REPUESTOS SERV -->
-        <div class="card bg-dark-card border-secondary shadow-sm mb-4 d-none" id="cardRepServ">
-            <div class="card-header border-secondary text-info">
-                <i class="fas fa-cogs me-2"></i> Repuestos para Servicio
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-dark table-hover mb-0 align-middle">
-                        <thead class="text-secondary text-uppercase text-xs font-weight-bolder">
-                            <tr>
-                                <th class="ps-4">Equipo / FR</th>
-                                <th>Estado</th>
-                                <th>Encargado</th>
-                                <th>Fecha</th>
-                                <th>Días</th>
-                                <th class="text-end pe-4">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableRepServ"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    {% endif %}
-
-    <!-- INFO MODAL -->
-    <div class="modal fade" id="detailedInfoModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content bg-dark-card border-secondary text-light">
-                <div class="modal-header border-secondary">
-                    <h5 class="modal-title"><i class="fas fa-info-circle text-info me-2"></i>Detalles del Equipo</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3 border-bottom border-secondary pb-2">
-                        <small class="text-secondary text-uppercase d-block">Equipo</small>
-                        <h4 id="infoMarca" class="mb-0"></h4>
-                        <span id="infoFr" class="badge bg-secondary mt-1"></span>
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <small class="text-secondary text-uppercase">Cliente</small>
-                            <p id="infoCliente" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
-                        </div>
-                        <div class="col-md-6">
-                            <small class="text-secondary text-uppercase">Serie</small>
-                            <p id="infoSerie" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
-                        </div>
-
-                        <div class="col-md-6">
-                            <small class="text-secondary text-uppercase">Fecha Ingreso</small>
-                            <p id="infoFecha" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
-                        </div>
-                        <div class="col-md-6">
-                            <small class="text-secondary text-uppercase">Condición</small>
-                            <p id="infoCondicion" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
-                        </div>
-
-                        <div class="col-md-6">
-                            <small class="text-secondary text-uppercase">Encargado Mantenimiento</small>
-                            <p id="infoEncargado" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
-                        </div>
-                        <div class="col-md-6">
-                            <small class="text-secondary text-uppercase">Accesorios</small>
-                            <p id="infoAccesorios" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
-                        </div>
-                        <div class="col-md-6">
-                            <small class="text-secondary text-uppercase text-info">No. Informe</small>
-                            <p id="infoInforme" class="fw-bold text-info mb-0 border-bottom border-dark pb-1"></p>
-                        </div>
-                        <div class="col-12 mt-3">
-                            <small class="text-secondary text-uppercase">Estado</small>
-                            <div id="infoEstado" class="mt-1"></div>
-                        </div>
-
-
-                        <div class="col-12 mt-3">
-                            <small class="text-secondary text-uppercase text-info"><i class="fas fa-file-alt me-1"></i>
-                                Reporte Cliente</small>
-                            <div class="p-2 bg-dark rounded border border-secondary text-light small" id="infoReporte"
-                                style="max-height:100px; overflow-y:auto;"></div>
-                        </div>
-                        <div class="col-12 mt-2">
-                            <small class="text-secondary text-uppercase text-warning"><i
-                                    class="fas fa-sticky-note me-1"></i> Observaciones</small>
-                            <div class="p-2 bg-dark rounded border border-secondary text-light small mt-1"
-                                id="infoObservaciones" style="max-height:100px; overflow-y:auto;"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer border-secondary p-1">
-                    <button type="button" class="btn btn-sm btn-secondary w-100" data-bs-dismiss="modal">Cerrar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- DATA -->
-<div id="equipmentsData" data-equipments='{{ equipments_json|safe }}' data-user-role='{{ current_role|tojson }}'
-    style="display:none;"></div>
-
-<div class="row"> <!--
-    CARD: HISTORIAL ENTREGADOS (PAGINATED) -->
-    <div class="col-12 mt-4" id="cardEntregados">
-        <div class="card bg-dark border-secondary shadow-sm h-100">
-            <div class="card-header border-secondary d-flex justify-content-between align-items-center">
-                <div class="text-white fw-bold"><i class="fas fa-history me-2"></i> HISTORIAL DE ENTREGADOS</div>
-                <input type="text" id="searchEntregadosGrouped"
-                    class="form-control form-control-sm bg-dark text-light border-secondary" placeholder="Buscar..."
-                    style="width: 150px;">
-            </div>
-            <div class="card-body p-0 table-responsive">
-                <table class="table table-dark table-hover mb-0 align-middle">
+        <div class="collapse show" id="diagnosticoSection">
+            <div class="table-responsive mt-3">
+                <table class="table table-dark table-hover">
                     <thead>
-                        <tr class="text-secondary text-xs text-uppercase">
-                            <th class="ps-4">Equipo</th>
-                            <th>Estado</th>
-                            <th>Encargado</th>
-                            <th>Fecha</th>
-                            <th>Tiempo</th>
-                            <th class="text-end pe-4">Acción</th>
+                        <tr>
+                            <th>FR</th>
+                            <th>MARCA/MODELO</th>
+                            <th>ESTADO</th>
+                            <th>ENCARGADO</th>
+                            <th>FECHA</th>
+                            <th>DÍAS</th>
                         </tr>
                     </thead>
-                    <tbody id="tableEntregadosGrouped">
-                        <!-- JS Rendered -->
+                    <tbody>
+                        {% if diagnostico_equipos %}
+                        {% for eq in diagnostico_equipos %}
+                        <tr>
+                            <td>{{ eq.fr }}</td>
+                            <td>{{ eq.marca_modelo }}</td>
+                            <td><span class="badge" style="background: var(--info);">Sin resultados</span></td>
+                            <td>{{ eq.encargado or '-' }}</td>
+                            <td>{{ eq.fecha_ingreso.strftime('%Y-%m-%d') if eq.fecha_ingreso else '-' }}</td>
+                            <td>{{ ((now() - eq.fecha_ingreso).days if eq.fecha_ingreso else '-') }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">Sin resultados</td>
+                        </tr>
+                        {% endif %}
                     </tbody>
                 </table>
             </div>
-            <div class="card-footer border-secondary d-flex justify-content-between align-items-center py-2">
-                <small class="text-muted" id="infoEntregadosGrouped">0-0/0</small>
-                <div class="btn-group btn-group-sm">
-                    <button class="btn btn-outline-secondary" id="btnPrevEntregadosGrouped" disabled><i
-                            class="fas fa-chevron-left"></i></button>
-                    <button class="btn btn-outline-secondary" id="btnNextEntregadosGrouped" disabled><i
-                            class="fas fa-chevron-right"></i></button>
+        </div>
+    </div>
+
+    <!-- Aprobados / En Servicio Section -->
+    <div class="section-container mb-4">
+        <div class="section-header" data-bs-toggle="collapse" data-bs-target="#aprobadosSection"
+            style="cursor: pointer;">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-check-circle me-2" style="color: var(--success);"></i>
+                    <span class="section-title">Aprobados / En Servicio</span>
                 </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="text-muted small">{{ aprobados_equipos|length if aprobados_equipos else 0 }} / {{
+                        servicio_equipos|length if servicio_equipos else 0 }}</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+        </div>
+        <div class="collapse show" id="aprobadosSection">
+            <div class="table-responsive mt-3">
+                <table class="table table-dark table-hover">
+                    <thead>
+                        <tr>
+                            <th>FR</th>
+                            <th>MARCA/MODELO</th>
+                            <th>ESTADO</th>
+                            <th>ENCARGADO</th>
+                            <th>FECHA</th>
+                            <th>DÍAS</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if aprobados_equipos %}
+                        {% for eq in aprobados_equipos %}
+                        <tr>
+                            <td>{{ eq.fr }}</td>
+                            <td>{{ eq.marca_modelo }}</td>
+                            <td>
+                                {% if eq.estado == 'Aprobado' %}
+                                <span class="badge" style="background: var(--primary);">✓ aprobó servicio</span>
+                                {% elif eq.estado == 'En Servicio' %}
+                                <span class="badge" style="background: var(--info);">⚙ en servicio</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ eq.encargado or '-' }}</td>
+                            <td>{{ eq.fecha_ingreso.strftime('%Y-%m-%d') if eq.fecha_ingreso else '-' }}</td>
+                            <td>{{ ((now() - eq.fecha_ingreso).days if eq.fecha_ingreso else '-') }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-info" onclick="showDetails({{ eq.id }})">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% endif %}
+                        {% if servicio_equipos %}
+                        {% for eq in servicio_equipos %}
+                        <tr>
+                            <td>{{ eq.fr }}</td>
+                            <td>{{ eq.marca_modelo }}</td>
+                            <td><span class="badge" style="background: var(--info);">⚙ en servicio</span></td>
+                            <td>{{ eq.encargado or '-' }}</td>
+                            <td>{{ eq.fecha_ingreso.strftime('%Y-%m-%d') if eq.fecha_ingreso else '-' }}</td>
+                            <td>{{ ((now() - eq.fecha_ingreso).days if eq.fecha_ingreso else '-') }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-info" onclick="showDetails({{ eq.id }})">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% endif %}
+                        {% if not aprobados_equipos and not servicio_equipos %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">Sin resultados</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reevaluaciones o Revisión Section -->
+    <div class="section-container mb-4">
+        <div class="section-header" data-bs-toggle="collapse" data-bs-target="#reevaluacionSection"
+            style="cursor: pointer;">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-redo me-2" style="color: var(--primary);"></i>
+                    <span class="section-title">Reevaluaciones o Revisión</span>
+                </div>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </div>
+        <div class="collapse" id="reevaluacionSection">
+            <div class="table-responsive mt-3">
+                <table class="table table-dark table-hover">
+                    <thead>
+                        <tr>
+                            <th>FR</th>
+                            <th>MARCA/MODELO</th>
+                            <th>ESTADO</th>
+                            <th>ENCARGADO</th>
+                            <th>FECHA</th>
+                            <th>DÍAS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">Sin resultados</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pendiente Aprobación Section -->
+    <div class="section-container mb-4">
+        <div class="section-header" data-bs-toggle="collapse" data-bs-target="#pendienteSection"
+            style="cursor: pointer;">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-clock me-2" style="color: var(--warning);"></i>
+                    <span class="section-title">Pendiente Aprobación</span>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="text-muted small">{{ pendientes_equipos|length if pendientes_equipos else 0 }}</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+        </div>
+        <div class="collapse show" id="pendienteSection">
+            <div class="table-responsive mt-3">
+                <table class="table table-dark table-hover">
+                    <thead>
+                        <tr>
+                            <th>FR</th>
+                            <th>MARCA/MODELO</th>
+                            <th>ESTADO</th>
+                            <th>ENCARGADO DEL DIAGNÓSTICO</th>
+                            <th>FECHA</th>
+                            <th>DÍAS</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if pendientes_equipos %}
+                        {% for eq in pendientes_equipos %}
+                        <tr>
+                            <td>{{ eq.fr }}</td>
+                            <td>{{ eq.marca_modelo }}</td>
+                            <td><span class="badge" style="background: var(--warning);">⏳ PENDIENTE DE APROBACIÓN</span>
+                            </td>
+                            <td>{{ eq.encargado or 'GERSSON' }}</td>
+                            <td>{{ eq.fecha_ingreso.strftime('%Y-%m-%d') if eq.fecha_ingreso else '-' }}</td>
+                            <td>{{ ((now() - eq.fecha_ingreso).days if eq.fecha_ingreso else '-') }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-info" onclick="showDetails({{ eq.id }})">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">Sin resultados</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const dataEl = document.getElementById('equipmentsData');
-        if (!dataEl) return;
-
-        let equipments = JSON.parse(dataEl.dataset.equipments);
-        let userRole = JSON.parse(dataEl.dataset.userRole);
-        if (userRole) userRole = userRole.toLowerCase();
-
-        // Helper to normalize strings (remove accents and lowercase)
-        const normalize = str => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-
-        // Helper functions
-        function getStatusBadge(status) {
-            let badgeClass = 'bg-secondary';
-            let icon = 'fa-circle';
-            let s = status.toLowerCase();
-
-            if (s.includes('diagnostico') || s.includes('revision') || s.includes('standby')) { badgeClass = 'bg-info text-dark'; icon = 'fa-stethoscope'; }
-            else if (s.includes('aprobado')) { badgeClass = 'bg-success'; icon = 'fa-check-circle'; }
-            else if (s.includes('espera') || s.includes('pendiente')) { badgeClass = 'bg-warning text-dark'; icon = 'fa-clock'; }
-            else if (s.includes('servicio') || s.includes('reparacion')) { badgeClass = 'bg-primary'; icon = 'fa-tools'; }
-            else if (s.includes('culminado') || s.includes('entregado')) { badgeClass = 'bg-success'; icon = 'fa-flag-checkered'; }
-
-            return `<span class="badge ${badgeClass} text-uppercase"><i class="fas ${icon} me-1"></i> ${status}</span>`;
-        }
-
-        function createRow(item, isVisualizador = false) {
-            const today = new Date();
-            const ingreso = new Date(item.fecha_ingreso);
-            const diffDays = Math.ceil(Math.abs(today - ingreso) / (1000 * 60 * 60 * 24));
-            const s = normalize(item.estado);
-
-            // Info Button (Universal)
-            const infoBtn = `<button class="btn btn-sm btn-outline-info ms-1" onclick="showInfo(${item.id})" title="Ver Detalles"><i class="fas fa-eye"></i></button>`;
-
-            let actionsHtml = '';
-            if (!isVisualizador) {
-                actionsHtml = `<div class="btn-group">`;
-                const role = userRole.toLowerCase();
-                const isAdmin = role === 'admin' || role === 'venllas';
-                const isOps = role === 'operaciones' || isAdmin;
-                const isRec = role === 'recepcion' || isAdmin;
-                const isAlm = role === 'almacen' || isAdmin;
-
-                // State Machine Logic
-                if (s.includes('espera de diagnostico') || s === 'espera diagnostico') {
-                    if (isOps) actionsHtml += `<button class="btn btn-sm btn-info" onclick="startDiagnostics(${item.id}, 'en Diagnostico')">Iniciar Diag</button>`;
-                }
-                else if (s.includes('diagnostico') && !s.includes('espera')) {
-                    if (isOps) {
-                        actionsHtml += `<button class="btn btn-sm btn-success" onclick="updateStatus(${item.id}, 'Pendiente de aprobacion')">Terminar Diag</button>`;
-                        actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'espera de repuesto o consumible')">Pedir Repuestos</button>`;
-                    }
-                }
-                else if (s.includes('consumible') || (s.includes('repuesto') && !s.includes('repuestos'))) {
-                    if (isAlm) actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'Repuesto entregado')">Confirmar Llegada</button>`;
-                }
-                else if (s.includes('repuesto entregado')) {
-                    if (isOps) actionsHtml += `<button class="btn btn-sm btn-primary" onclick="updateStatus(${item.id}, 'Pendiente de aprobacion')">Continuar (Fin Diag)</button>`;
-                }
-                else if (s.includes('pendiente de aprobacion') || s.includes('pendiente aprobacion')) {
-                    if (isRec) {
-                        actionsHtml += `<button class="btn btn-sm btn-success" onclick="updateStatus(${item.id}, 'Aprobado')">Aprobar</button>`;
-                        actionsHtml += `<button class="btn btn-sm btn-danger" onclick="updateStatus(${item.id}, 'Rechazado')">Rechazar</button>`;
-                    }
-                }
-                else if (s === 'aprobado') {
-                    if (isOps) actionsHtml += `<button class="btn btn-sm btn-primary" onclick="updateStatus(${item.id}, 'Inicio de Servicio')">Iniciar Mantenimiento</button>`;
-                }
-                else if (s.includes('inicio de servicio') || s.includes('en servicio')) {
-                    if (isOps) {
-                        actionsHtml += `<button class="btn btn-sm btn-success" onclick="updateStatus(${item.id}, 'Servicio culminado')">Terminar Mantenimiento</button>`;
-                        actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'espera de repuestos')">Pedir Repuestos</button>`;
-                    }
-                }
-                else if (s.includes('espera de repuestos')) {
-                    if (isAlm) actionsHtml += `<button class="btn btn-sm btn-primary" onclick="updateStatus(${item.id}, 'En servicio')">Confirmar Llegada (Serv)</button>`;
-                }
-                else if (s.includes('servicio culminado')) {
-                    if (isRec) actionsHtml += `<button class="btn btn-sm btn-info" onclick="updateStatus(${item.id}, 'Entregado')">Entregar Cliente</button>`;
-                }
-
-                if (isAdmin) {
-                    actionsHtml += `<button class="btn btn-sm btn-outline-danger ms-2" onclick="deleteEquipment(${item.id})" title="Eliminar"><i class="fas fa-trash"></i></button>`;
-                }
-
-                // Add Info Button
-                actionsHtml += infoBtn;
-                actionsHtml += `</div>`;
-            } else {
-                // Visualizador Actions (Just Info Button)
-                actionsHtml = infoBtn;
-            }
-
-            const frDisplay = item.fr || 'Sin FR';
-
-            if (isVisualizador) {
-                // Days logic for visualizador: Only for "En Diagnostico"
-                let daysCell = '';
-                // Check if table is "Diagnostico" type based on state content.
-                // We'll trust the caller passes items filtered. 
-                // But specifically, user asked for "Días" column only for "En diagnóstico".
-                // Since this function builds a row, we check the item state.
-
-                // However, we need to know if we should render the TD or not depending on the table header.
-                // The table headers are static in HTML. We need to match.
-                // 1. Diagnostico Table -> Has "Días"? No, header says specific cols.
-                // 2. Approved Table -> No days column requested?
-
-                // Actually, the request says "Añade una columna “Días” ... calcularse únicamente para equipos en estado “En diagnóstico”."
-                // This implies the Diagnostico table needs that column.
-                // The generic createRow returns a TR string. formatting must match the TABLE THEAD.
-
-                // Current Table 1 (Diag) Headers: FR, Marca/Modelo, Estado, Encargado, Fecha. (5 cols)
-                // We need to ADD "Días" header to table 1 HTML.
-                // And for other tables, we shouldn't show it? Or show it but empty?
-                // The cleanest way is to just render it for all tables in Visualizador mode, but only populate it for Diag items.
-                // BUT, HTML Thead must match.
-                // I will add "Días" header to ALL Visualizador tables for consistency, or dynamically.
-                // Let's assume I'll update the HTML headers to include "Días" for all 3 tables or just Diag.
-                // User said "Esta columna debe calcularse únicamente para equipos en estado “En diagnóstico”."
-                // If I add the column <td> to the row, I must add <th> to the table.
-
-                let daysValue = '-';
-                if (s.includes('diagnostico') && !s.includes('espera')) {
-                    daysValue = `<span class="badge ${diffDays > 3 ? 'bg-danger' : 'bg-success'}">${diffDays} días</span>`;
-                }
-
-                // Assuming all Visualizador tables will have the 'Días' column added to THEAD
-                return `
-                <tr>
-                    <td class="ps-4 fw-bold text-info">${frDisplay}</td>
-                    <td>${item.marca} ${item.modelo}</td>
-                    <td>${getStatusBadge(item.estado)}</td>
-                    <td class="text-light">${item.encargado}</td>
-                    <td class="text-muted">${item.fecha_ingreso || 'N/A'}</td>
-                    <td class="text-center">${daysValue}</td> <!-- Days Column -->
-                    <td class="text-end pe-4">${actionsHtml}</td> <!-- Actions including Info -->
-                </tr>
-            `;
-            } else {
-                return `
-                <tr>
-                    <td class="ps-4">
-                        <div class="d-flex flex-column">
-                            <span class="fw-bold text-white text-uppercase">${item.marca} ${item.modelo}</span>
-                            <span class="text-xs text-info">${frDisplay}</span>
-                        </div>
-                    </td>
-                    <td>${getStatusBadge(item.estado)}</td>
-                    <td class="text-sm text-light"><i class="fas fa-user-circle me-1 text-muted"></i> ${item.encargado}</td>
-                    <td class="text-sm text-muted">${item.fecha_ingreso || 'N/A'}</td>
-                    <td><span class="badge ${diffDays > 5 ? 'bg-danger' : 'bg-success'} badge-pill">${diffDays} días</span></td>
-                    <td class="text-end pe-4">${actionsHtml}</td>
-                </tr>
-            `;
-            }
-        }
-
-        // ... [KPI Logic unchanged] ...
-        let countDiag = 0, countPend = 0, countApro = 0, countRev = 0;
-        equipments.forEach(item => {
-            const s = (item.estado || '').toLowerCase();
-            if (s.includes('revision') || s.includes('reevaluacion')) countRev++;
-            else if (s.includes('diagnostico')) countDiag++;
-            else if (s.includes('pendiente') || s.includes('espera de aprobacion')) countPend++;
-            else if ((s.includes('aprobado') || s.includes('servicio') || s.includes('repuesto')) && !s.includes('culminado') && !s.includes('entregado')) countApro++;
-        });
-
-        if (document.getElementById('kpiTotal')) document.getElementById('kpiTotal').innerText = equipments.length;
-        if (document.getElementById('kpiDiag')) document.getElementById('kpiDiag').innerText = countDiag;
-        if (document.getElementById('kpiPend')) document.getElementById('kpiPend').innerText = countPend;
-        if (document.getElementById('kpiApro')) document.getElementById('kpiApro').innerText = countApro;
-
-
-        if (userRole === 'visualizador') {
-            const ITEMS_PER_PAGE = 5; // Updated to 5 per request (was 15)
-
-            // Helper for Pagination
-            function setupPagination(data, tableId, pageInfoId, btnPrevId, btnNextId, pageState) {
-                const table = document.getElementById(tableId);
-                const pageInfo = document.getElementById(pageInfoId);
-                const btnPrev = document.getElementById(btnPrevId);
-                const btnNext = document.getElementById(btnNextId);
-
-                if (!table) return () => { };
-
-                function render() {
-                    const totalPages = Math.ceil(data.length / ITEMS_PER_PAGE) || 1;
-                    if (pageState.page > totalPages) pageState.page = 1;
-
-                    const start = (pageState.page - 1) * ITEMS_PER_PAGE;
-                    const end = start + ITEMS_PER_PAGE;
-                    const pageData = data.slice(start, end);
-
-                    table.innerHTML = pageData.length ? pageData.map(i => createRow(i, true)).join('')
-                        : `<tr><td colspan="7" class="text-center text-muted py-3">Sin equipos</td></tr>`;
-
-                    if (pageInfo) pageInfo.innerText = `${pageState.page}/${totalPages}`;
-                    if (btnPrev) btnPrev.disabled = (pageState.page === 1);
-                    if (btnNext) btnNext.disabled = (pageState.page === totalPages);
-                }
-
-                if (btnPrev) {
-                    btnPrev.onclick = () => { if (pageState.page > 1) { pageState.page--; render(); } };
-                }
-                if (btnNext) {
-                    btnNext.onclick = () => { const totalPages = Math.ceil(data.length / ITEMS_PER_PAGE); if (pageState.page < totalPages) { pageState.page++; render(); } };
-                }
-
-                return render;
-            }
-
-            function createRenderLogic(filterFn, tableId, searchId, paginationIds = null) {
-                let sectionData = equipments.filter(item => filterFn(normalize(item.estado)));
-
-                // Search filtering
-                const searchInput = document.getElementById(searchId);
-                let currentTerm = '';
-
-                let pageState = { page: 1 };
-
-                function render() {
-                    let filtered = sectionData.filter(item =>
-                        normalize(item.fr).includes(currentTerm) ||
-                        normalize(item.marca).includes(currentTerm) ||
-                        normalize(item.modelo).includes(currentTerm)
-                    );
-
-                    if (paginationIds) {
-                        const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
-                        if (pageState.page > totalPages) pageState.page = 1;
-
-                        const start = (pageState.page - 1) * ITEMS_PER_PAGE;
-                        const end = start + ITEMS_PER_PAGE;
-                        const pageData = filtered.slice(start, end);
-
-                        const table = document.getElementById(tableId);
-                        table.innerHTML = pageData.length ? pageData.map(i => createRow(i, true)).join('')
-                            : `<tr><td colspan="7" class="text-center text-muted py-3">Sin resultados</td></tr>`;
-
-                        document.getElementById(paginationIds.info).innerText = `${pageState.page}/${totalPages}`;
-                        document.getElementById(paginationIds.prev).disabled = (pageState.page === 1);
-                        document.getElementById(paginationIds.next).disabled = (pageState.page === totalPages);
-
-                    } else {
-                        const table = document.getElementById(tableId);
-                        table.innerHTML = filtered.length ? filtered.map(i => createRow(i, true)).join('')
-                            : `<tr><td colspan="7" class="text-center text-muted py-3">Sin resultados</td></tr>`;
-                    }
-                }
-
-                if (searchInput) {
-                    searchInput.addEventListener('input', (e) => {
-                        currentTerm = normalize(e.target.value);
-                        pageState.page = 1;
-                        render();
-                    });
-                }
-
-                if (paginationIds) {
-                    document.getElementById(paginationIds.prev).addEventListener('click', () => {
-                        if (pageState.page > 1) { pageState.page--; render(); }
-                    });
-                    document.getElementById(paginationIds.next).addEventListener('click', () => {
-                        const filtered = sectionData.filter(item =>
-                            normalize(item.fr).includes(currentTerm) ||
-                            normalize(item.marca).includes(currentTerm) ||
-                            normalize(item.modelo).includes(currentTerm)
-                        );
-                        const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
-                        if (pageState.page < totalPages) { pageState.page++; render(); }
-                    });
-                }
-
-                render();
-            }
-
-            // 1. Diagnostico
-            createRenderLogic(
-                s => (s.includes('diagnostico') && !s.includes('revision')) || s.includes('consumible') || (s.includes('repuesto') && !s.includes('repuestos')),
-                'tableDiagnostico',
-                'searchDiagnostico'
-            );
-
-            // 2. Aprobados (NOW PAGINATED)
-            createRenderLogic(
-                s => (s.includes('aprobado') || s.includes('servicio') || s.includes('repuestos')) && !s.includes('entregado') && !s.includes('culminado'),
-                'tableAprobado',
-                'searchAprobado',
-                { prev: 'btnPrevAprobado', next: 'btnNextAprobado', info: 'pageInfoAprobado' }
-            );
-
-            // 3. Revisión
-            createRenderLogic(
-                s => s.includes('revision') || s.includes('reevaluacion'),
-                'tableRevision',
-                'searchRevision'
-            );
-
-            // 4. Pendiente (Paginated)
-            createRenderLogic(
-                s => s.includes('pendiente') || s.includes('espera de aprobacion'),
-                'tablePendiente',
-                'searchPendiente',
-                { prev: 'btnPrevPendiente', next: 'btnNextPendiente', info: 'pageInfoPendiente' }
-            );
-
-        } else {
-            // UNIFIED VIEW LOGIC (GROUPED)
-            const isAlmacenRole = userRole === 'almacen';
-
-            // Toggle visibility of containers based on role
-            if (isAlmacenRole) {
-                document.getElementById('cardPendientesOp').classList.add('d-none');
-                document.getElementById('cardDiagnosticoOp').classList.add('d-none');
-                document.getElementById('cardAprobadosOp').classList.add('d-none');
-                document.getElementById('cardRepDiag').classList.remove('d-none');
-                document.getElementById('cardRepServ').classList.remove('d-none');
-            } else {
-                document.getElementById('cardPendientesOp').classList.remove('d-none');
-                document.getElementById('cardDiagnosticoOp').classList.remove('d-none');
-                document.getElementById('cardAprobadosOp').classList.remove('d-none');
-                // Almacen cards defined as d-none by default in HTML? No, I added d-none class in HTML just in case.
-            }
-
-            function renderGrouped(data) {
-                // Containers
-                const tPend = document.getElementById('tablePendientesOp');
-                const tDiag = document.getElementById('tableDiagnosticoOp');
-                const tApro = document.getElementById('tableAprobadosOp');
-                const tRepD = document.getElementById('tableRepDiag');
-                const tRepS = document.getElementById('tableRepServ');
-
-                if (isAlmacenRole) {
-                    // Filter Almacen
-                    // 1. Repuestos Diag
-                    const d1 = data.filter(i => {
-                        const s = (i.estado || '').toLowerCase();
-                        return s.includes('diagnostico') || s.includes('consumible');
-                    });
-                    // 2. Repuestos Serv
-                    const d2 = data.filter(i => {
-                        const s = (i.estado || '').toLowerCase();
-                        return s.includes('servicio') && s.includes('repuesto');
-                    });
-
-                    tRepD.innerHTML = d1.length ? d1.map(i => createRow(i, false)).join('') : '<tr><td colspan="6" class="text-center text-muted">Sin pendientes</td></tr>';
-                    tRepS.innerHTML = d2.length ? d2.map(i => createRow(i, false)).join('') : '<tr><td colspan="6" class="text-center text-muted">Sin pendientes</td></tr>';
-
-                } else {
-                    // Filter Rec/Ops
-                    // 1. Pendientes
-                    const d1 = data.filter(i => {
-                        const s = (i.estado || '').toLowerCase();
-                        return (s.includes('pendiente') && s.includes('aprobacion'));
-                    });
-                    // 2. Diagnostico
-                    const d2 = data.filter(i => {
-                        const s = (i.estado || '').toLowerCase();
-                        return s.includes('diagnostico') || s.includes('consumible') || s.includes('repuesto entregado');
-                    });
-                    // 3. Aprobado / Servicio
-                    const d3 = data.filter(i => {
-                        const s = (i.estado || '').toLowerCase();
-                        return (s.includes('aprobado') || s.includes('servicio') || s.includes('entregado'));
-                    });
-
-                    tPend.innerHTML = d1.length ? d1.map(i => createRow(i, false)).join('') : '<tr><td colspan="6" class="text-center text-muted">Sin equipos</td></tr>';
-                    tDiag.innerHTML = d2.length ? d2.map(i => createRow(i, false)).join('') : '<tr><td colspan="6" class="text-center text-muted">Sin equipos</td></tr>';
-                    tApro.innerHTML = d3.length ? d3.map(i => createRow(i, false)).join('') : '<tr><td colspan="6" class="text-center text-muted">Sin equipos</td></tr>';
-                }
-            }
-
-            renderGrouped(equipments);
-
-            // LOGIC FOR ENTREGADOS PAGINATION (GROUPED VIEW)
-            const cardEntregados = document.getElementById('cardEntregados');
-
-            if (isAlmacenRole) {
-                if (cardEntregados) cardEntregados.classList.add('d-none');
-            } else {
-                if (cardEntregados) cardEntregados.classList.remove('d-none');
-
-                // Render Logic
-                const tEntregados = document.getElementById('tableEntregadosGrouped');
-                const sEntregados = document.getElementById('searchEntregadosGrouped');
-                const btnPrev = document.getElementById('btnPrevEntregadosGrouped');
-                const btnNext = document.getElementById('btnNextEntregadosGrouped');
-                const infoEnt = document.getElementById('infoEntregadosGrouped');
-
-                let entPage = 1;
-                const entLimit = 5;
-                let entData = equipments.filter(i => (i.estado || '').toLowerCase().includes('entregado'));
-
-                function renderEntregadosSpecial() {
-                    const term = normalize(sEntregados ? sEntregados.value : '');
-                    const filtered = entData.filter(item =>
-                        normalize(item.fr).includes(term) ||
-                        normalize(item.marca).includes(term) ||
-                        normalize(item.modelo).includes(term) ||
-                        normalize(item.cliente).includes(term)
-                    );
-
-                    const totalPages = Math.ceil(filtered.length / entLimit) || 1;
-                    if (entPage > totalPages) entPage = 1;
-
-                    const start = (entPage - 1) * entLimit;
-                    const end = start + entLimit;
-                    const pageData = filtered.slice(start, end);
-
-                    if (tEntregados) {
-                        tEntregados.innerHTML = pageData.length ? pageData.map(i => createRow(i, true)).join('')
-                            : '<tr><td colspan="6" class="text-center text-muted">Sin equipos entregados</td></tr>';
-                    }
-
-                    if (infoEnt) infoEnt.innerText = `${entPage}/${totalPages}`;
-                    if (btnPrev) btnPrev.disabled = (entPage === 1);
-                    if (btnNext) btnNext.disabled = (entPage === totalPages);
-                }
-
-                if (sEntregados) {
-                    sEntregados.addEventListener('input', () => { entPage = 1; renderEntregadosSpecial(); });
-                }
-
-                if (btnPrev) btnPrev.onclick = () => { if (entPage > 1) { entPage--; renderEntregadosSpecial(); } };
-                if (btnNext) btnNext.onclick = () => {
-                    const term = normalize(sEntregados ? sEntregados.value : '');
-                    const filtered = entData.filter(item => normalize(item.fr).includes(term) || normalize(item.marca).includes(term));
-                    const totalPages = Math.ceil(filtered.length / entLimit);
-                    if (entPage < totalPages) { entPage++; renderEntregadosSpecial(); }
-                };
-
-                // Initial call
-                renderEntregadosSpecial();
-            }
-
-            // Search (Generic filtering across all visible tables)
-            const searchInput = document.getElementById('searchInput');
-            if (searchInput) {
-                searchInput.addEventListener('input', (e) => {
-                    const term = normalize(e.target.value);
-                    const filtered = equipments.filter(item =>
-                        normalize(item.fr).includes(term) ||
-                        normalize(item.marca).includes(term) ||
-                        normalize(item.modelo).includes(term)
-                    );
-                    renderGrouped(filtered);
-                });
-            }
-
-
-        }
-
-        // Global Action wrappers
-        window.startDiagnostics = function (id, status) {
-            const encargado = prompt("ASIGNACIÓN DE TÉCNICO:\nPor favor, ingrese el nombre del encargado:");
-            if (encargado === null) return;
-            if (!encargado.trim()) { alert("Debe asignar un encargado."); return; }
-            updateStatus(id, status, encargado.trim());
-        };
-
-        window.updateStatus = function (id, newStatus, newEncargado = null) {
-            let msg = `¿Cambiar estado a: ${newStatus}?`;
-            if (newEncargado) msg += `\nAsignando a: ${newEncargado}`;
-            if (!confirm(msg)) return;
-
-            const formData = new FormData();
-            formData.append('status', newStatus);
-            if (newEncargado) formData.append('encargado', newEncargado);
-
-            fetch(`/api/equipment/${id}/update_status`, { method: 'POST', body: formData })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.success) location.reload();
-                    else alert('Error: ' + data.error);
-                })
-                .catch(err => alert('Error de red: ' + err));
-        };
-
-        window.deleteEquipment = function (id) {
-            if (!confirm('¿ESTÁ SEGURO DE ELIMINAR ESTE EQUIPO?')) return;
-            fetch(`/api/equipment/${id}/delete`, { method: 'POST' })
-                .then(r => r.json()).then(d => { if (d.success) location.reload(); else alert(d.error); });
-        };
-
-        // Show Info Modal Logic
-        window.showInfo = function (id) {
-            // Find item
-            const item = equipments.find(e => e.id === id);
-            if (!item) return;
-
-            // Populate Modal
-            document.getElementById('infoFr').innerText = item.fr || 'N/A';
-            document.getElementById('infoMarca').innerText = `${item.marca} ${item.modelo}`;
-            document.getElementById('infoEstado').innerHTML = getStatusBadge(item.estado);
-            document.getElementById('infoEncargado').innerText = item.encargado || 'No Asignado';
-            document.getElementById('infoFecha').innerText = item.fecha_ingreso || 'N/A';
-            document.getElementById('infoReporte').innerText = item.reporte_cliente || 'Sin reporte';
-
-            // New Fields
-            if (document.getElementById('infoCliente')) document.getElementById('infoCliente').innerText = item.cliente || 'N/A';
-            if (document.getElementById('infoSerie')) document.getElementById('infoSerie').innerText = item.serie || 'N/A';
-            if (document.getElementById('infoCondicion')) document.getElementById('infoCondicion').innerText = item.condicion || 'Regular';
-            if (document.getElementById('infoAccesorios')) document.getElementById('infoAccesorios').innerText = item.accesorios || 'Ninguno';
-            if (document.getElementById('infoInforme')) document.getElementById('infoInforme').innerText = item.numero_informe || 'N/A';
-            if (document.getElementById('infoObservaciones')) document.getElementById('infoObservaciones').innerText = item.observaciones || 'Sin observaciones';
-
-            const myModal = new bootstrap.Modal(document.getElementById('detailedInfoModal'));
-            myModal.show();
-        };
-    });
-</script>
-
 <style>
-    .bg-dark-card {
-        background-color: #1e1e2f;
+    .section-container {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 1.5rem;
     }
 
-    .card-header {
+    .section-header {
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--glass-border);
+        transition: all 0.3s;
+    }
+
+    .section-header:hover {
+        color: var(--primary);
+    }
+
+    .section-title {
+        font-size: 1.1rem;
         font-weight: 600;
-        letter-spacing: 0.5px;
+        color: var(--text-main);
     }
 
-    .icon-shape {
-        width: 48px;
-        height: 48px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 0.75rem;
+    .stat-icon {
+        font-size: 2rem;
     }
 </style>
+
+<script>
+    function showDetails(equipmentId) {
+        // Implementar modal de detalles
+        console.log('Showing details for equipment:', equipmentId);
+    }
+</script>
 {% endblock %}
