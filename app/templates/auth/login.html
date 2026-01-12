@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar Sesión - CABELAB{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-5">
+            <div class="card bg-dark-card shadow-lg border-0">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <h2 class="text-white fw-bold">CABELAB 2025</h2>
+                        <p class="text-secondary">Sistema de Control de Equipos</p>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('auth.login') }}">
+                        <div class="mb-3">
+                            <label for="username" class="form-label text-white">Usuario</label>
+                            <input type="text" class="form-control bg-dark text-white border-secondary" id="username"
+                                name="username" required autofocus>
+                        </div>
+                        <div class="mb-4">
+                            <label for="password" class="form-label text-white">Contraseña</label>
+                            <input type="password" class="form-control bg-dark text-white border-secondary"
+                                id="password" name="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 py-2">
+                            <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        <p class="text-secondary small mb-0">
+                            ¿No tienes cuenta?
+                            <a href="{{ url_for('auth.register') }}" class="text-primary">Regístrate aquí</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

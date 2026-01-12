@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Registro - CABELAB{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-5">
+            <div class="card bg-dark-card shadow-lg border-0">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <h2 class="text-white fw-bold">Crear Cuenta</h2>
+                        <p class="text-secondary">CABELAB 2025</p>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('auth.register') }}">
+                        <div class="mb-3">
+                            <label for="username" class="form-label text-white">Usuario</label>
+                            <input type="text" class="form-control bg-dark text-white border-secondary" id="username"
+                                name="username" required autofocus>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label text-white">Contraseña</label>
+                            <input type="password" class="form-control bg-dark text-white border-secondary"
+                                id="password" name="password" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="confirm_password" class="form-label text-white">Confirmar Contraseña</label>
+                            <input type="password" class="form-control bg-dark text-white border-secondary"
+                                id="confirm_password" name="confirm_password" required>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 py-2">
+                            <i class="fas fa-user-plus me-2"></i>Registrarse
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        <p class="text-secondary small mb-0">
+                            ¿Ya tienes cuenta?
+                            <a href="{{ url_for('auth.login') }}" class="text-primary">Inicia sesión</a>
+                        </p>
+                    </div>
+
+                    <div class="alert alert-info mt-3 small">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Tu cuenta será revisada por un administrador antes de ser aprobada.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
