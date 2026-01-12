@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 from app.services.equipment_service import EquipmentService
 from app.models.user import UserRoles
 from app.models.equipment import Equipment
+from app.extensions import db
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
