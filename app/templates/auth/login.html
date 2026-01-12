@@ -3,41 +3,121 @@
 {% block title %}Iniciar Sesión - CABELAB{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row justify-content-center mt-5">
-        <div class="col-md-5">
-            <div class="card bg-dark-card shadow-lg border-0">
-                <div class="card-body p-5">
-                    <div class="text-center mb-4">
-                        <h2 class="text-white fw-bold">CABELAB 2025</h2>
-                        <p class="text-secondary">Sistema de Control de Equipos</p>
-                    </div>
+<div class="login-container">
+    <div class="login-card">
+        <!-- Logo y Título -->
+        <div class="text-center mb-4">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="CABELAB" class="login-logo mb-3">
+            <p class="login-subtitle">GESTIÓN DE EQUIPOS</p>
+            <p class="login-description">Inicia sesión para continuar</p>
+        </div>
 
-                    <form method="POST" action="{{ url_for('auth.login') }}">
-                        <div class="mb-3">
-                            <label for="username" class="form-label text-white">Usuario</label>
-                            <input type="text" class="form-control bg-dark text-white border-secondary" id="username"
-                                name="username" required autofocus>
-                        </div>
-                        <div class="mb-4">
-                            <label for="password" class="form-label text-white">Contraseña</label>
-                            <input type="password" class="form-control bg-dark text-white border-secondary"
-                                id="password" name="password" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100 py-2">
-                            <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
-                        </button>
-                    </form>
-
-                    <div class="text-center mt-4">
-                        <p class="text-secondary small mb-0">
-                            ¿No tienes cuenta?
-                            <a href="{{ url_for('auth.register') }}" class="text-primary">Regístrate aquí</a>
-                        </p>
-                    </div>
-                </div>
+        <!-- Formulario de Login -->
+        <form method="POST" action="{{ url_for('auth.login') }}">
+            <div class="mb-3">
+                <label for="username" class="form-label text-light">Usuario</label>
+                <input type="text" class="form-control form-control-dark" id="username" name="username" required
+                    autofocus placeholder="Ingresa tu usuario">
             </div>
+            <div class="mb-4">
+                <label for="password" class="form-label text-light">Contraseña</label>
+                <input type="password" class="form-control form-control-dark" id="password" name="password" required
+                    placeholder="Ingresa tu contraseña">
+            </div>
+            <button type="submit" class="btn btn-primary-custom w-100 py-2 mb-3">
+                Ingresar
+            </button>
+        </form>
+
+        <!-- Link de Registro -->
+        <div class="text-center">
+            <p class="text-secondary small mb-0">
+                ¿No tienes cuenta?
+                <a href="{{ url_for('auth.register') }}" class="text-primary-custom">Regístrate</a>
+            </p>
         </div>
     </div>
 </div>
+
+<style>
+    .login-container {
+        min-height: calc(100vh - 60px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #0f1419 0%, #1a1d2e 50%, #0f1419 100%);
+        padding: 20px;
+    }
+
+    .login-card {
+        background: rgba(26, 29, 46, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 40px;
+        max-width: 420px;
+        width: 100%;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .login-logo {
+        max-width: 200px;
+        height: auto;
+    }
+
+    .login-subtitle {
+        color: #00d9ff;
+        font-size: 0.9rem;
+        font-weight: 600;
+        letter-spacing: 2px;
+        margin: 0;
+    }
+
+    .login-description {
+        color: #9ca3af;
+        font-size: 0.95rem;
+        margin-top: 8px;
+    }
+
+    .form-control-dark {
+        background-color: rgba(15, 20, 25, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #fff;
+        padding: 12px;
+    }
+
+    .form-control-dark:focus {
+        background-color: rgba(15, 20, 25, 0.8);
+        border-color: #3b82f6;
+        color: #fff;
+        box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+    }
+
+    .form-control-dark::placeholder {
+        color: #6b7280;
+    }
+
+    .btn-primary-custom {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        border: none;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        transition: all 0.3s;
+    }
+
+    .btn-primary-custom:hover {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+
+    .text-primary-custom {
+        color: #60a5fa !important;
+        text-decoration: none;
+    }
+
+    .text-primary-custom:hover {
+        color: #3b82f6 !important;
+        text-decoration: underline;
+    }
+</style>
 {% endblock %}

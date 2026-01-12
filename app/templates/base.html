@@ -98,33 +98,59 @@
 </head>
 
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
+    <!-- Modern Dark Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark"
+        style="background-color: #1a1d2e; border-bottom: 1px solid rgba(255,255,255,0.1);">
         <div class="container-fluid px-4">
-            <a class="navbar-brand" href="{{ url_for('dashboard.index') }}">
-                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="CABELAB Logo" height="30"
-                    class="d-inline-block align-text-top me-2">
-
+            <!-- Logo CABELAB -->
+            <a class="navbar-brand d-flex align-items-center"
+                href="{{ url_for('dashboard.index') if current_user.is_authenticated else url_for('auth.login') }}">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="CABELAB" height="32" class="me-2">
             </a>
+
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    {% if current_user.is_authenticated %}
-                    <li class="nav-item d-flex align-items-center">
-                        <span class="user-badge me-3">
-                            <i class="fas fa-user-circle me-1"></i> {{ current_user.username }}
-                        </span>
-                        <a class="btn-logout" href="{{ url_for('auth.logout') }}">
-                            <span>Salir</span> <i class="fas fa-sign-out-alt"></i>
+                {% if current_user.is_authenticated %}
+                <!-- Navigation Links -->
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard.panel') }}">
+                            <i class="fas fa-clipboard-list me-1"></i> Panel de Estados
                         </a>
                     </li>
-                    {% else %}
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Ingresar</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.register') }}">Registrarse</a></li>
+                    {% if current_user.is_admin %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.admin_users') }}">
+                            <i class="fas fa-users-cog me-1"></i> Contraseña
+                        </a>
+                    </li>
                     {% endif %}
                 </ul>
+
+                <!-- User Info & Logout -->
+                <div class="d-flex align-items-center gap-3">
+                    <span class="text-light">
+                        <i class="fas fa-user-circle me-2"></i>
+                        {{ current_user.username }}
+                    </span>
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-outline-light">
+                        <i class="fas fa-sign-out-alt me-1"></i> Salir
+                    </a>
+                </div>
+                {% else %}
+                <!-- Guest Links -->
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.login') }}">Ingresar</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.register') }}">Registrarse</a>
+                    </li>
+                </ul>
+                {% endif %}
             </div>
         </div>
     </nav>
