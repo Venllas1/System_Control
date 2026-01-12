@@ -35,30 +35,16 @@ def index():
 @dashboard_bp.route('/panel')
 @login_required
 def panel():
-    # Get all equipment for the user's role
+    # Similar logic for Panel de Estados
     config = EquipmentService.get_dashboard_config(current_user)
     equipments = EquipmentService.get_equipment_by_role(current_user)
     
-    # Group equipment by status
-    diagnostico_equipos = [eq for eq in equipments if eq.estado == 'Espera de Diagnostico']
-    aprobados_equipos = [eq for eq in equipments if eq.estado == 'Aprobado']
-    servicio_equipos = [eq for eq in equipments if eq.estado == 'En Servicio']
-    pendientes_equipos = [eq for eq in equipments if eq.estado == 'Pendiente de Aprobacion']
-    
-    # Calculate stats
-    stats = {
-        'diagnostico': len(diagnostico_equipos),
-        'aprobados': len(aprobados_equipos) + len(servicio_equipos),
-        'pendientes': len(pendientes_equipos),
-        'total': len(equipments)
-    }
+    # Convert to JSON for the existing JS logic in panel_estados.html
+    equipments_json = json.dumps([eq.to_dict() for eq in equipments])
     
     return render_template('panel_estados.html',
-                         diagnostico_equipos=diagnostico_equipos,
-                         aprobados_equipos=aprobados_equipos,
-                         servicio_equipos=servicio_equipos,
-                         pendientes_equipos=pendientes_equipos,
-                         stats=stats,
+                         equipments=equipments,
+                         equipments_json=equipments_json,
                          Status=Equipment.Status,
                          current_role=current_user.role)
 
