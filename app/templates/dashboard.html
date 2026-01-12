@@ -88,12 +88,12 @@
 
 <!-- MAIN TABLES -->
 {% if 'active' in config.tables or 'relevant' in config.tables %}
-{{ render_equipment_table(equipments, "Tareas Pendientes", "fa-tasks", "text-info", config) }}
+{{ render_equipment_table(equipments, "Tareas Pendientes", "fa-tasks", "text-info", config, now_func=now) }}
 {% endif %}
 
 {% if 'history' in config.tables %}
 {{ render_equipment_table(history, "Historial de Entregados", "fa-history", "text-warning", config, empty_msg="Sin
-entregados recientes") }}
+entregados recientes", now_func=now) }}
 {% endif %}
 
 </div>

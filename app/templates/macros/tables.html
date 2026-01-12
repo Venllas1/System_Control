@@ -1,5 +1,5 @@
 {% macro render_equipment_table(equipments, title, icon, color_class, actions_config, empty_msg="No hay equipos
-registrados") %}
+registrados", now_func=none) %}
 <div class="card bg-dark-card border-secondary shadow-sm mb-4">
     <div class="card-header border-secondary d-flex justify-content-between align-items-center">
         <div class="{{ color_class }} fw-bold">
@@ -41,7 +41,7 @@ registrados") %}
                         <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') if eq.fecha_ingreso else 'N/A' }}</td>
                         <td>
                             {% if eq.fecha_ingreso %}
-                            {% set dias = (now() - eq.fecha_ingreso).days %}
+                            {% set dias = ((now_func or now)() - eq.fecha_ingreso).days %}
                             <span
                                 class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">
                                 {{ dias }}
