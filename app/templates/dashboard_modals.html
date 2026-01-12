@@ -1,0 +1,141 @@
+<!-- Modals Fragment -->
+
+<!-- INFO MODAL -->
+<div class="modal fade" id="detailedInfoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content bg-dark border-secondary text-light">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title"><i class="fas fa-info-circle text-info me-2"></i>Detalles del Equipo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="infoModalBody">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="text-muted small text-uppercase">FR</label>
+                        <div id="infoFr" class="fw-bold"></div>
+                    </div>
+                    <div class="col-md-8">
+                        <label class="text-muted small text-uppercase">Equipo</label>
+                        <div id="infoMarca" class="fw-bold h5"></div>
+                    </div>
+                    <hr class="border-secondary">
+                    <div class="col-md-6">
+                        <label class="text-muted small text-uppercase">Cliente</label>
+                        <div id="infoCliente"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small text-uppercase">Estado</label>
+                        <div id="infoEstado"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small text-uppercase">Encargado</label>
+                        <div id="infoEncargado"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small text-uppercase">Fecha Ingreso</label>
+                        <div id="infoFecha"></div>
+                    </div>
+                    <div class="col-12">
+                        <label class="text-muted small text-uppercase">Reporte Cliente</label>
+                        <div id="infoReporte" class="bg-black bg-opacity-25 p-2 rounded border border-secondary"></div>
+                    </div>
+                    <div class="col-12">
+                        <label class="text-muted small text-uppercase">Observaciones</label>
+                        <div id="infoObservaciones" class="bg-black bg-opacity-25 p-2 rounded border border-secondary">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CREATE MODAL -->
+<div class="modal fade" id="createEquipmentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content bg-dark text-light border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title"><i class="fas fa-file-medical me-2 text-success"></i> Registrar Equipo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="createEquipmentForm">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Número de FR</label>
+                            <input type="text" name="fr" class="form-control bg-dark text-light border-secondary"
+                                placeholder="Ej: 100-1">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Cliente *</label>
+                            <input type="text" name="cliente" class="form-control bg-dark text-light border-secondary"
+                                required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Marca *</label>
+                            <input type="text" name="marca" class="form-control bg-dark text-light border-secondary"
+                                required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Modelo *</label>
+                            <input type="text" name="modelo" class="form-control bg-dark text-light border-secondary"
+                                required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Reporte del Cliente *</label>
+                            <textarea name="reporte_cliente" class="form-control bg-dark text-light border-secondary"
+                                rows="3" required></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar Equipo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- UPDATE STATUS MODAL -->
+<div class="modal fade" id="updateStatusModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-light border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title">Actualizar Estado</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="updateStatusForm">
+                <input type="hidden" name="equipment_id" id="update_id">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nuevo Estado</label>
+                        <select name="status" class="form-select bg-dark text-light border-secondary"
+                            id="update_status_select">
+                            <option value="Espera de Diagnostico">Espera de Diagnostico</option>
+                            <option value="en Diagnostico">en Diagnostico</option>
+                            <option value="Pendiente de aprobacion">Pendiente de aprobacion</option>
+                            <option value="Aprobado">Aprobado</option>
+                            <option value="Inicio de Servicio">Inicio de Servicio</option>
+                            <option value="En servicio">En servicio</option>
+                            <option value="Servicio culminado">Servicio culminado</option>
+                            <option value="Entregado text-success">Entregado</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Asignar Encargado</label>
+                        <input type="text" name="encargado" class="form-control bg-dark text-light border-secondary">
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Actualizar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
