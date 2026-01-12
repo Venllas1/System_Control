@@ -79,3 +79,46 @@ class EquipmentService:
         db.session.add(history)
         db.session.commit()
         return True, "Estado actualizado"
+
+    @staticmethod
+    def create_equipment(data):
+        try:
+            new_eq = Equipment(
+                fr=data.get('fr', '').upper(),
+                marca=data.get('marca', '').upper(),
+                modelo=data.get('modelo', '').upper(),
+                reporte_cliente=data.get('reporte_cliente', '').upper(),
+                observaciones=data.get('observaciones', '').upper(),
+                encargado=data.get('encargado', 'No asignado'),
+                cliente=data.get('cliente', '').upper(),
+                serie=data.get('serie', '').upper(),
+                accesorios=data.get('accesorios', '').upper(),
+                fecha_ingreso=datetime.now(),
+                estado=Equipment.Status.ESPERA_DIAGNOSTICO
+            )
+            db.session.add(new_eq)
+            db.session.commit()
+            return True, new_eq
+        except Exception as e:
+            db.session.rollback()
+            return False, str(e)
+
+    @staticmethod
+    def search(search_query):
+        search_pattern = f"%{search_query}%"
+        return Equipment.query.filter(or_(
+            Equipment.fr.ilike(search_pattern),
+            Equipment.marca.ilike(search_pattern),
+            Equipment.modelo.ilike(search_pattern),
+            Equipment.encargado.ilike(search_pattern),
+            Equipment.cliente.ilike(search_pattern)
+        )).limit(100).all()
+
+    @staticmethod
+    def delete_equipment(equipment_id):
+        eq = Equipment.query.get(equipment_id)
+        if eq:
+            db.session.delete(eq)
+            db.session.commit()
+            return True
+        return False

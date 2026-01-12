@@ -1,9 +1,24 @@
 from flask import Blueprint, jsonify, request
 from flask_login import login_required, current_user
+from datetime import datetime
+from app.models.equipment import Equipment
 from app.services.equipment_service import EquipmentService
 from app.core.permissions import role_required, can_perform_action
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')
+
+@api_bp.route('/stats')
+@login_required
+def get_stats():
+    # Parity with original monolithic app.py
+    stats = {
+        'diagnostico': Equipment.query.filter(Equipment.estado == Equipment.Status.EN_DIAGNOSTICO).count(),
+        'aprobado': Equipment.query.filter(Equipment.estado == Equipment.Status.APROBADO).count(),
+        'pendiente': Equipment.query.filter(Equipment.estado == Equipment.Status.PENDIENTE_APROBACION).count(),
+        'total': Equipment.query.count()
+    }
+    stats['diagnostico_servicio'] = stats['diagnostico'] + stats['aprobado']
+    return jsonify({'success': True, 'data': stats})
 
 @api_bp.route('/equipment/<int:id>/update_status', methods=['POST'])
 @login_required
@@ -28,9 +43,74 @@ def update_status(id):
         return jsonify({'success': True, 'message': message})
     return jsonify({'success': False, 'error': message}), 400
 
+@api_bp.route('/equipment/create', methods=['POST'])
+@login_required
+def create_equipment():
+    if not can_perform_action(current_user, 'edit'):
+        return jsonify({'success': False, 'error': 'Permiso denegado'}), 403
+    
+    data = request.get_json(silent=True) or request.form
+    success, result = EquipmentService.create_equipment(data)
+    
+    if success:
+        return jsonify({'success': True, 'id': result.id})
+    return jsonify({'success': False, 'error': result}), 400
+
 @api_bp.route('/equipment/<int:id>/details', methods=['GET'])
 @login_required
 def get_details(id):
-    from app.models.equipment import Equipment
     eq = Equipment.query.get_or_404(id)
     return jsonify(eq.to_dict())
+
+@api_bp.route('/equipment/<int:id>/delete', methods=['POST'])
+@login_required
+def delete_equipment(id):
+    if not current_user.is_admin:
+        return jsonify({'success': False, 'error': 'Solo administradores'}), 403
+    
+    if EquipmentService.delete_equipment(id):
+        return jsonify({'success': True})
+    return jsonify({'success': False, 'error': 'No encontrado'}), 404
+
+@api_bp.route('/search')
+@login_required
+def search():
+    query = request.args.get('q', '').strip()
+    if not query:
+        return jsonify({'success': True, 'data': []})
+    
+    results = EquipmentService.search(query)
+    return jsonify({
+        'success': True,
+        'data': [item.to_dict() for item in results]
+    })
+
+@api_bp.route('/export/<formato>')
+@login_required
+def export_data(formato):
+    import pandas as pd
+    import os
+    from flask import send_file
+    
+    try:
+        estado = request.args.get('estado', 'all')
+        query = Equipment.query
+        if estado != 'all':
+            query = query.filter(Equipment.estado == estado)
+        
+        items = query.all()
+        df = pd.DataFrame([i.to_dict() for i in items])
+        
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        os.makedirs('exports', exist_ok=True)
+        filename = f'export_{estado}_{timestamp}.{formato}'
+        filepath = os.path.join('exports', filename)
+        
+        if formato == 'csv':
+            df.to_csv(filepath, index=False, encoding='utf-8-sig')
+        else:
+            df.to_excel(filepath, index=False)
+            
+        return send_file(filepath, as_attachment=True)
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500

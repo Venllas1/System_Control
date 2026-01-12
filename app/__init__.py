@@ -25,4 +25,34 @@ def create_app(config_class=Config):
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(api_bp)
 
+    @app.context_processor
+    def inject_now():
+        from datetime import datetime
+        return {'now': datetime.now}
+
+    @app.before_request
+    def ensure_db():
+        # Vercel logic: Ensure tables and default users exist
+        from app.models.user import User, UserRoles
+        from app.extensions import db
+        
+        # We use a static flag to avoid repeated checks per request
+        if not getattr(app, '_db_initialized', False):
+            try:
+                db.create_all()
+                if not User.query.filter_by(username='admin').first():
+                    u = User(username='admin', is_admin=True, role='admin')
+                    u.set_password('admin123')
+                    db.session.add(u)
+                
+                if not User.query.filter_by(username='Venllas').first():
+                    u = User(username='Venllas', is_admin=True, role='admin')
+                    u.set_password('Venllas2025')
+                    db.session.add(u)
+                
+                db.session.commit()
+                app._db_initialized = True
+            except Exception as e:
+                print(f"Init DB Error: {e}")
+
     return app
