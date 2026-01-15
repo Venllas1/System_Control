@@ -11,16 +11,32 @@ class EquipmentService:
         return Config.DASHBOARD_ROLES.get(role, Config.DASHBOARD_ROLES['visualizador'])
 
     @staticmethod
-    def get_equipment_by_role(user):
+    def get_equipment_by_role(user, include_delivered=False):
         config = EquipmentService.get_dashboard_config(user)
         query = Equipment.query
 
         if config.get('can_view_all'):
             # Admin and Visualizador see everything active
-            return query.filter(~Equipment.estado.ilike('%entregado%')).order_by(Equipment.fecha_ingreso.desc()).all()
+            # If include_delivered is True (for panel_estados), include all equipment
+            if include_delivered:
+                return query.order_by(Equipment.fecha_ingreso.desc()).all()
+            else:
+                return query.filter(~Equipment.estado.ilike('%entregado%')).order_by(Equipment.fecha_ingreso.desc()).all()
         
         # Others see relevant statuses defined in config
         relevant_statuses = config.get('relevant_statuses', [])
+        
+        # If include_delivered, also add delivered equipment
+        if include_delivered:
+            # Use or_ to combine: either in relevant_statuses OR is delivered
+            from sqlalchemy import or_
+            return query.filter(
+                or_(
+                    Equipment.estado.in_(relevant_statuses),
+                    Equipment.estado.ilike('%entregado%')
+                )
+            ).order_by(Equipment.fecha_ingreso.desc()).all()
+        
         return query.filter(Equipment.estado.in_(relevant_statuses)).order_by(Equipment.fecha_ingreso.desc()).all()
 
     @staticmethod

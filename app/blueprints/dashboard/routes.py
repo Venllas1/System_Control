@@ -37,7 +37,8 @@ def index():
 def panel():
     # Similar logic for Panel de Estados
     config = EquipmentService.get_dashboard_config(current_user)
-    equipments = EquipmentService.get_equipment_by_role(current_user)
+    # IMPORTANT: Pass include_delivered=True so the JS can filter and show the "Entregados" table
+    equipments = EquipmentService.get_equipment_by_role(current_user, include_delivered=True)
     
     # Convert to JSON for the existing JS logic in panel_estados.html
     equipments_json = json.dumps([eq.to_dict() for eq in equipments])
