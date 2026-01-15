@@ -253,127 +253,211 @@
     </div>
 
     {% else %}
-    <!-- VISTA OPERATIVA (AGRUPADA) -->
-    <div id="operationalView">
-        <!-- LOGIC HANDLED BY JS: We create containers for all possibilities, and JS hides/shows based on Role -->
+    <!-- VISTA OPERATIVA (REORGANIZADA COMO VISUALIZADOR) -->
+    <div id="operationalView" class="row g-4">
 
-        <!-- ROW 1: PENDIENTES (Rec/Ops) -->
-        <div class="card bg-dark-card border-secondary shadow-sm mb-4" id="cardPendientesOp">
-            <div class="card-header border-secondary text-warning">
-                <i class="fas fa-clock me-2"></i> Pendientes de Aprobación
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-dark table-hover mb-0 align-middle">
-                        <thead class="text-secondary text-uppercase text-xs font-weight-bolder">
-                            <tr>
-                                <th class="ps-4">Equipo / FR</th>
-                                <th>Estado</th>
-                                <th>Encargado</th>
-                                <th>Fecha</th>
-                                <th>Días</th>
-                                <th class="text-end pe-4">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tablePendientesOp"></tbody>
-                    </table>
+        <!-- RECEPCIÓN: Pendientes de Aprobación, Servicio Culminado -->
+        <div class="col-12" id="cardPendientesOp">
+            <div class="card bg-dark-card border-secondary shadow-sm">
+                <div
+                    class="card-header border-secondary d-flex justify-content-between align-items-center bg-warning bg-opacity-10">
+                    <h5 class="mb-0 text-warning fw-bold"><i class="fas fa-clock me-2"></i> Pendientes de Aprobación
+                    </h5>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="input-group input-group-sm" style="width: 200px;">
+                            <input type="text" id="searchPendientesOp"
+                                class="form-control bg-dark text-light border-secondary" placeholder="Filtrar...">
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-secondary" id="btnPrevPendientesOp" disabled><i
+                                    class="fas fa-chevron-left"></i></button>
+                            <span class="btn btn-outline-secondary disabled text-light border-secondary"
+                                id="pageInfoPendientesOp">1/1</span>
+                            <button class="btn btn-outline-secondary" id="btnNextPendientesOp" disabled><i
+                                    class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead class="text-secondary text-uppercase text-xs">
+                                <tr>
+                                    <th class="ps-4">FR</th>
+                                    <th>Marca/Modelo</th>
+                                    <th>Estado</th>
+                                    <th>Encargado</th>
+                                    <th>Fecha</th>
+                                    <th class="text-center">Días</th>
+                                    <th class="text-end pe-4">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablePendientesOp"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- ROW 2: DIAGNOSTICO (Rec/Ops) -->
-        <div class="card bg-dark-card border-secondary shadow-sm mb-4" id="cardDiagnosticoOp">
-            <div class="card-header border-secondary text-info">
-                <i class="fas fa-microscope me-2"></i> En Diagnóstico
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-dark table-hover mb-0 align-middle">
-                        <thead class="text-secondary text-uppercase text-xs font-weight-bolder">
-                            <tr>
-                                <th class="ps-4">Equipo / FR</th>
-                                <th>Estado</th>
-                                <th>Encargado</th>
-                                <th>Fecha</th>
-                                <th>Días</th>
-                                <th class="text-end pe-4">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableDiagnosticoOp"></tbody>
-                    </table>
+        <!-- OPERACIONES: En Diagnóstico -->
+        <div class="col-12" id="cardDiagnosticoOp">
+            <div class="card bg-dark-card border-secondary shadow-sm">
+                <div
+                    class="card-header border-secondary d-flex justify-content-between align-items-center bg-info bg-opacity-10">
+                    <h5 class="mb-0 text-info fw-bold"><i class="fas fa-microscope me-2"></i> En Diagnóstico</h5>
+                    <div class="input-group input-group-sm w-25">
+                        <input type="text" id="searchDiagnosticoOp"
+                            class="form-control bg-dark text-light border-secondary" placeholder="Filtrar...">
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead class="text-secondary text-uppercase text-xs">
+                                <tr>
+                                    <th class="ps-4">FR</th>
+                                    <th>Marca/Modelo</th>
+                                    <th>Estado</th>
+                                    <th>Encargado</th>
+                                    <th>Fecha</th>
+                                    <th class="text-center">Días</th>
+                                    <th class="text-end pe-4">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableDiagnosticoOp"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- ROW 3: APROBADOS (Rec/Ops) -->
-        <div class="card bg-dark-card border-secondary shadow-sm mb-4" id="cardAprobadosOp">
-            <div class="card-header border-secondary text-success">
-                <i class="fas fa-check-circle me-2"></i> Aprobados / Servicio
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-dark table-hover mb-0 align-middle">
-                        <thead class="text-secondary text-uppercase text-xs font-weight-bolder">
-                            <tr>
-                                <th class="ps-4">Equipo / FR</th>
-                                <th>Estado</th>
-                                <th>Encargado</th>
-                                <th>Fecha</th>
-                                <th>Días</th>
-                                <th class="text-end pe-4">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableAprobadosOp"></tbody>
-                    </table>
+        <!-- OPERACIONES: Aprobados / En Servicio -->
+        <div class="col-12" id="cardAprobadosOp">
+            <div class="card bg-dark-card border-secondary shadow-sm">
+                <div
+                    class="card-header border-secondary d-flex justify-content-between align-items-center bg-success bg-opacity-10">
+                    <h5 class="mb-0 text-success fw-bold"><i class="fas fa-check-circle me-2"></i> Aprobados / En
+                        Servicio</h5>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="input-group input-group-sm" style="width: 200px;">
+                            <input type="text" id="searchAprobadosOp"
+                                class="form-control bg-dark text-light border-secondary" placeholder="Filtrar...">
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-secondary" id="btnPrevAprobadosOp" disabled><i
+                                    class="fas fa-chevron-left"></i></button>
+                            <span class="btn btn-outline-secondary disabled text-light border-secondary"
+                                id="pageInfoAprobadosOp">1/1</span>
+                            <button class="btn btn-outline-secondary" id="btnNextAprobadosOp" disabled><i
+                                    class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead class="text-secondary text-uppercase text-xs">
+                                <tr>
+                                    <th class="ps-4">FR</th>
+                                    <th>Marca/Modelo</th>
+                                    <th>Estado</th>
+                                    <th>Encargado</th>
+                                    <th>Fecha</th>
+                                    <th class="text-center">Días</th>
+                                    <th class="text-end pe-4">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableAprobadosOp"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- ALMACEN CONTAINERS -->
-        <!-- ROW 1: REPUESTOS DIAG -->
-        <div class="card bg-dark-card border-secondary shadow-sm mb-4 d-none" id="cardRepDiag">
-            <div class="card-header border-secondary text-warning">
-                <i class="fas fa-boxes me-2"></i> Repuestos para Diagnóstico
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-dark table-hover mb-0 align-middle">
-                        <thead class="text-secondary text-uppercase text-xs font-weight-bolder">
-                            <tr>
-                                <th class="ps-4">Equipo / FR</th>
-                                <th>Estado</th>
-                                <th>Encargado</th>
-                                <th>Fecha</th>
-                                <th>Días</th>
-                                <th class="text-end pe-4">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableRepDiag"></tbody>
-                    </table>
+        <!-- RECEPCIÓN: Servicio Culminado (Listos para Entregar) -->
+        <div class="col-12" id="cardCulminadosOp">
+            <div class="card bg-dark-card border-secondary shadow-sm">
+                <div
+                    class="card-header border-secondary d-flex justify-content-between align-items-center bg-primary bg-opacity-10">
+                    <h5 class="mb-0 text-primary fw-bold"><i class="fas fa-flag-checkered me-2"></i> Servicio Culminado
+                        (Listos para Entregar)</h5>
+                    <div class="input-group input-group-sm w-25">
+                        <input type="text" id="searchCulminadosOp"
+                            class="form-control bg-dark text-light border-secondary" placeholder="Filtrar...">
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead class="text-secondary text-uppercase text-xs">
+                                <tr>
+                                    <th class="ps-4">FR</th>
+                                    <th>Marca/Modelo</th>
+                                    <th>Estado</th>
+                                    <th>Encargado</th>
+                                    <th>Fecha</th>
+                                    <th class="text-center">Días</th>
+                                    <th class="text-end pe-4">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableCulminadosOp"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- ROW 2: REPUESTOS SERV -->
-        <div class="card bg-dark-card border-secondary shadow-sm mb-4 d-none" id="cardRepServ">
-            <div class="card-header border-secondary text-info">
-                <i class="fas fa-cogs me-2"></i> Repuestos para Servicio
+        <!-- ALMACÉN: Repuestos para Diagnóstico -->
+        <div class="col-12 d-none" id="cardRepDiag">
+            <div class="card bg-dark-card border-secondary shadow-sm">
+                <div class="card-header border-secondary bg-warning bg-opacity-10">
+                    <h5 class="mb-0 text-warning fw-bold"><i class="fas fa-boxes me-2"></i> Repuestos para Diagnóstico
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead class="text-secondary text-uppercase text-xs">
+                                <tr>
+                                    <th class="ps-4">FR</th>
+                                    <th>Marca/Modelo</th>
+                                    <th>Estado</th>
+                                    <th>Encargado</th>
+                                    <th>Fecha</th>
+                                    <th class="text-center">Días</th>
+                                    <th class="text-end pe-4">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableRepDiag"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-dark table-hover mb-0 align-middle">
-                        <thead class="text-secondary text-uppercase text-xs font-weight-bolder">
-                            <tr>
-                                <th class="ps-4">Equipo / FR</th>
-                                <th>Estado</th>
-                                <th>Encargado</th>
-                                <th>Fecha</th>
-                                <th>Días</th>
-                                <th class="text-end pe-4">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableRepServ"></tbody>
-                    </table>
+        </div>
+
+        <!-- ALMACÉN: Repuestos para Servicio -->
+        <div class="col-12 d-none" id="cardRepServ">
+            <div class="card bg-dark-card border-secondary shadow-sm">
+                <div class="card-header border-secondary bg-info bg-opacity-10">
+                    <h5 class="mb-0 text-info fw-bold"><i class="fas fa-cogs me-2"></i> Repuestos para Servicio</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead class="text-secondary text-uppercase text-xs">
+                                <tr>
+                                    <th class="ps-4">FR</th>
+                                    <th>Marca/Modelo</th>
+                                    <th>Estado</th>
+                                    <th>Encargado</th>
+                                    <th>Fecha</th>
+                                    <th class="text-center">Días</th>
+                                    <th class="text-end pe-4">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableRepServ"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -783,49 +867,109 @@
             createRenderLogic(s => s.includes('pendiente') || s.includes('espera de aprobacion'), 'tablePendiente', 'searchPendiente', { prev: 'btnPrevPendiente', next: 'btnNextPendiente', info: 'pageInfoPendiente' });
 
         } else {
-            // OPERATIONAL VIEW LOGIC (Grouped by state for Rec/Ops/Alm)
+            // OPERATIONAL VIEW LOGIC (Individual tables with search/pagination like visualizador)
+            const ITEMS_PER_PAGE = 5;
+
+            // Hide/show cards based on role
             if (isAlmacenRole) {
                 document.getElementById('cardPendientesOp').classList.add('d-none');
                 document.getElementById('cardDiagnosticoOp').classList.add('d-none');
                 document.getElementById('cardAprobadosOp').classList.add('d-none');
+                document.getElementById('cardCulminadosOp').classList.add('d-none');
                 document.getElementById('cardRepDiag').classList.remove('d-none');
                 document.getElementById('cardRepServ').classList.remove('d-none');
             } else {
                 document.getElementById('cardPendientesOp').classList.remove('d-none');
                 document.getElementById('cardDiagnosticoOp').classList.remove('d-none');
                 document.getElementById('cardAprobadosOp').classList.remove('d-none');
+                document.getElementById('cardCulminadosOp').classList.remove('d-none');
             }
 
-            function renderGrouped(data) {
-                const tPend = document.getElementById('tablePendientesOp');
-                const tDiag = document.getElementById('tableDiagnosticoOp');
-                const tApro = document.getElementById('tableAprobadosOp');
-                const tRepD = document.getElementById('tableRepDiag');
-                const tRepS = document.getElementById('tableRepServ');
+            // Reusable render logic function (same as visualizador)
+            function createRenderLogicOp(filterFn, tableId, searchId, paginationIds = null) {
+                let sectionData = equipments.filter(item => filterFn(normalize(item.estado)));
+                const searchInput = document.getElementById(searchId);
+                let currentTerm = '';
+                let pageState = { page: 1 };
 
-                if (isAlmacenRole) {
-                    const d1 = data.filter(i => normalize(i.estado).includes('diagnostico') || normalize(i.estado).includes('consumible'));
-                    const d2 = data.filter(i => normalize(i.estado).includes('servicio') && normalize(i.estado).includes('repuesto'));
-                    tRepD.innerHTML = d1.length ? d1.map(i => createRow(i, false)).join('') : '<tr><td colspan="6" class="text-center text-muted">Sin pendientes</td></tr>';
-                    tRepS.innerHTML = d2.length ? d2.map(i => createRow(i, false)).join('') : '<tr><td colspan="6" class="text-center text-muted">Sin pendientes</td></tr>';
-                } else {
-                    const d1 = data.filter(i => normalize(i.estado).includes('pendiente') && normalize(i.estado).includes('aprobacion'));
-                    const d2 = data.filter(i => normalize(i.estado).includes('diagnostico') || normalize(i.estado).includes('consumible') || normalize(i.estado).includes('repuesto entregado'));
-                    const d3 = data.filter(i => normalize(i.estado).includes('aprobado') || normalize(i.estado).includes('servicio') || normalize(i.estado).includes('entregado'));
-                    tPend.innerHTML = d1.length ? d1.map(i => createRow(i, false)).join('') : '<tr><td colspan="6" class="text-center text-muted">Sin equipos</td></tr>';
-                    tDiag.innerHTML = d2.length ? d2.map(i => createRow(i, false)).join('') : '<tr><td colspan="6" class="text-center text-muted">Sin equipos</td></tr>';
-                    tApro.innerHTML = d3.length ? d3.map(i => createRow(i, false)).join('') : '<tr><td colspan="6" class="text-center text-muted">Sin equipos</td></tr>';
+                function render() {
+                    let filtered = sectionData.filter(item =>
+                        normalize(item.fr).includes(currentTerm) ||
+                        normalize(item.marca).includes(currentTerm) ||
+                        normalize(item.modelo).includes(currentTerm)
+                    );
+
+                    if (paginationIds) {
+                        const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
+                        if (pageState.page > totalPages) pageState.page = 1;
+                        const start = (pageState.page - 1) * ITEMS_PER_PAGE;
+                        const pageData = filtered.slice(start, start + ITEMS_PER_PAGE);
+                        document.getElementById(tableId).innerHTML = pageData.length ? pageData.map(i => createRow(i, true)).join('')
+                            : `<tr><td colspan="7" class="text-center text-muted py-3">Sin resultados</td></tr>`;
+                        document.getElementById(paginationIds.info).innerText = `${pageState.page}/${totalPages}`;
+                        document.getElementById(paginationIds.prev).disabled = (pageState.page === 1);
+                        document.getElementById(paginationIds.next).disabled = (pageState.page === totalPages);
+                    } else {
+                        document.getElementById(tableId).innerHTML = filtered.length ? filtered.map(i => createRow(i, true)).join('')
+                            : `<tr><td colspan="7" class="text-center text-muted py-3">Sin resultados</td></tr>`;
+                    }
                 }
-            }
-            renderGrouped(equipments);
 
-            const searchInput = document.getElementById('searchInput');
-            if (searchInput) {
-                searchInput.addEventListener('input', (e) => {
-                    const term = normalize(e.target.value);
-                    const filtered = equipments.filter(item => normalize(item.fr).includes(term) || normalize(item.marca).includes(term) || normalize(item.modelo).includes(term));
-                    renderGrouped(filtered);
-                });
+                if (searchInput) searchInput.addEventListener('input', (e) => { currentTerm = normalize(e.target.value); pageState.page = 1; render(); });
+                if (paginationIds) {
+                    document.getElementById(paginationIds.prev).addEventListener('click', () => { if (pageState.page > 1) { pageState.page--; render(); } });
+                    document.getElementById(paginationIds.next).addEventListener('click', () => {
+                        const filtered = sectionData.filter(i => normalize(i.fr).includes(currentTerm) || normalize(i.marca).includes(currentTerm));
+                        if (pageState.page < Math.ceil(filtered.length / ITEMS_PER_PAGE)) { pageState.page++; render(); }
+                    });
+                }
+                render();
+            }
+
+            // RECEPCIÓN & OPERACIONES: Pendientes de Aprobación (paginated)
+            createRenderLogicOp(
+                s => s.includes('pendiente') && s.includes('aprobacion'),
+                'tablePendientesOp',
+                'searchPendientesOp',
+                { prev: 'btnPrevPendientesOp', next: 'btnNextPendientesOp', info: 'pageInfoPendientesOp' }
+            );
+
+            // OPERACIONES: En Diagnóstico (with search)
+            createRenderLogicOp(
+                s => (s.includes('diagnostico') && !s.includes('revision')) || s.includes('consumible') || s.includes('repuesto entregado'),
+                'tableDiagnosticoOp',
+                'searchDiagnosticoOp'
+            );
+
+            // OPERACIONES: Aprobados / En Servicio (paginated)
+            createRenderLogicOp(
+                s => (s.includes('aprobado') || s.includes('servicio') || s.includes('repuestos')) && !s.includes('culminado') && !s.includes('entregado'),
+                'tableAprobadosOp',
+                'searchAprobadosOp',
+                { prev: 'btnPrevAprobadosOp', next: 'btnNextAprobadosOp', info: 'pageInfoAprobadosOp' }
+            );
+
+            // RECEPCIÓN: Servicio Culminado (listos para entregar)
+            createRenderLogicOp(
+                s => s.includes('culminado'),
+                'tableCulminadosOp',
+                'searchCulminadosOp'
+            );
+
+            // ALMACÉN: Repuestos para Diagnóstico
+            if (isAlmacenRole) {
+                createRenderLogicOp(
+                    s => s.includes('repuesto') && s.includes('consumible'),
+                    'tableRepDiag',
+                    null
+                );
+
+                // ALMACÉN: Repuestos para Servicio
+                createRenderLogicOp(
+                    s => s.includes('espera') && s.includes('repuestos'),
+                    'tableRepServ',
+                    null
+                );
             }
         }
 
