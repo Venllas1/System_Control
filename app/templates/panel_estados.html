@@ -676,51 +676,71 @@
         if (document.getElementById('kpiApro')) document.getElementById('kpiApro').innerText = countApro;
 
 
-        if (userRole === 'visualizador') {
-            const ITEMS_PER_PAGE = 5; // Updated to 5 per request (was 15)
+        // --- LOGIC FOR ENTREGADOS TABLE (Universal except Almacen) ---
+        const cardEntregados = document.getElementById('cardEntregados');
+        const isAlmacenRole = userRole === 'almacen';
 
-            // Helper for Pagination
-            function setupPagination(data, tableId, pageInfoId, btnPrevId, btnNextId, pageState) {
-                const table = document.getElementById(tableId);
-                const pageInfo = document.getElementById(pageInfoId);
-                const btnPrev = document.getElementById(btnPrevId);
-                const btnNext = document.getElementById(btnNextId);
+        if (isAlmacenRole) {
+            if (cardEntregados) cardEntregados.classList.add('d-none');
+        } else {
+            if (cardEntregados) cardEntregados.classList.remove('d-none');
 
-                if (!table) return () => { };
+            const tEntregados = document.getElementById('tableEntregadosGrouped');
+            const sEntregados = document.getElementById('searchEntregadosGrouped');
+            const btnPrev = document.getElementById('btnPrevEntregadosGrouped');
+            const btnNext = document.getElementById('btnNextEntregadosGrouped');
+            const infoEnt = document.getElementById('infoEntregadosGrouped');
 
-                function render() {
-                    const totalPages = Math.ceil(data.length / ITEMS_PER_PAGE) || 1;
-                    if (pageState.page > totalPages) pageState.page = 1;
+            let entPage = 1;
+            const entLimit = 5;
 
-                    const start = (pageState.page - 1) * ITEMS_PER_PAGE;
-                    const end = start + ITEMS_PER_PAGE;
-                    const pageData = data.slice(start, end);
+            // Filter including all variations of "entregado" using normalize
+            let entData = equipments.filter(i => normalize(i.estado).includes('entregado'));
 
-                    table.innerHTML = pageData.length ? pageData.map(i => createRow(i, true)).join('')
-                        : `<tr><td colspan="7" class="text-center text-muted py-3">Sin equipos</td></tr>`;
+            function renderEntregadosSpecial() {
+                const term = normalize(sEntregados ? sEntregados.value : '');
+                const filtered = entData.filter(item =>
+                    normalize(item.fr).includes(term) ||
+                    normalize(item.marca).includes(term) ||
+                    normalize(item.modelo).includes(term) ||
+                    normalize(item.cliente).includes(term)
+                );
 
-                    if (pageInfo) pageInfo.innerText = `${pageState.page}/${totalPages}`;
-                    if (btnPrev) btnPrev.disabled = (pageState.page === 1);
-                    if (btnNext) btnNext.disabled = (pageState.page === totalPages);
+                const totalPages = Math.ceil(filtered.length / entLimit) || 1;
+                if (entPage > totalPages) entPage = 1;
+
+                const start = (entPage - 1) * entLimit;
+                const end = start + entLimit;
+                const pageData = filtered.slice(start, end);
+
+                if (tEntregados) {
+                    tEntregados.innerHTML = pageData.length ? pageData.map(i => createRow(i, true)).join('')
+                        : '<tr><td colspan="6" class="text-center text-muted py-3">Sin equipos entregados</td></tr>';
                 }
 
-                if (btnPrev) {
-                    btnPrev.onclick = () => { if (pageState.page > 1) { pageState.page--; render(); } };
-                }
-                if (btnNext) {
-                    btnNext.onclick = () => { const totalPages = Math.ceil(data.length / ITEMS_PER_PAGE); if (pageState.page < totalPages) { pageState.page++; render(); } };
-                }
-
-                return render;
+                if (infoEnt) infoEnt.innerText = `${entPage}/${totalPages}`;
+                if (btnPrev) btnPrev.disabled = (entPage === 1);
+                if (btnNext) btnNext.disabled = (entPage === totalPages);
             }
+
+            if (sEntregados) sEntregados.addEventListener('input', () => { entPage = 1; renderEntregadosSpecial(); });
+            if (btnPrev) btnPrev.onclick = () => { if (entPage > 1) { entPage--; renderEntregadosSpecial(); } };
+            if (btnNext) btnNext.onclick = () => {
+                const term = normalize(sEntregados ? sEntregados.value : '');
+                const filtered = entData.filter(item => normalize(item.fr).includes(term) || normalize(item.marca).includes(term));
+                if (entPage < Math.ceil(filtered.length / entLimit)) { entPage++; renderEntregadosSpecial(); }
+            };
+            renderEntregadosSpecial();
+        }
+
+        // --- ROLE-BASED VIEW LOGIC ---
+        if (userRole === 'visualizador') {
+            const ITEMS_PER_PAGE = 5;
 
             function createRenderLogic(filterFn, tableId, searchId, paginationIds = null) {
                 let sectionData = equipments.filter(item => filterFn(normalize(item.estado)));
-
-                // Search filtering
                 const searchInput = document.getElementById(searchId);
                 let currentTerm = '';
-
                 let pageState = { page: 1 };
 
                 function render() {
@@ -733,87 +753,37 @@
                     if (paginationIds) {
                         const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
                         if (pageState.page > totalPages) pageState.page = 1;
-
                         const start = (pageState.page - 1) * ITEMS_PER_PAGE;
-                        const end = start + ITEMS_PER_PAGE;
-                        const pageData = filtered.slice(start, end);
-
-                        const table = document.getElementById(tableId);
-                        table.innerHTML = pageData.length ? pageData.map(i => createRow(i, true)).join('')
+                        const pageData = filtered.slice(start, start + ITEMS_PER_PAGE);
+                        document.getElementById(tableId).innerHTML = pageData.length ? pageData.map(i => createRow(i, true)).join('')
                             : `<tr><td colspan="7" class="text-center text-muted py-3">Sin resultados</td></tr>`;
-
                         document.getElementById(paginationIds.info).innerText = `${pageState.page}/${totalPages}`;
                         document.getElementById(paginationIds.prev).disabled = (pageState.page === 1);
                         document.getElementById(paginationIds.next).disabled = (pageState.page === totalPages);
-
                     } else {
-                        const table = document.getElementById(tableId);
-                        table.innerHTML = filtered.length ? filtered.map(i => createRow(i, true)).join('')
+                        document.getElementById(tableId).innerHTML = filtered.length ? filtered.map(i => createRow(i, true)).join('')
                             : `<tr><td colspan="7" class="text-center text-muted py-3">Sin resultados</td></tr>`;
                     }
                 }
 
-                if (searchInput) {
-                    searchInput.addEventListener('input', (e) => {
-                        currentTerm = normalize(e.target.value);
-                        pageState.page = 1;
-                        render();
-                    });
-                }
-
+                if (searchInput) searchInput.addEventListener('input', (e) => { currentTerm = normalize(e.target.value); pageState.page = 1; render(); });
                 if (paginationIds) {
-                    document.getElementById(paginationIds.prev).addEventListener('click', () => {
-                        if (pageState.page > 1) { pageState.page--; render(); }
-                    });
+                    document.getElementById(paginationIds.prev).addEventListener('click', () => { if (pageState.page > 1) { pageState.page--; render(); } });
                     document.getElementById(paginationIds.next).addEventListener('click', () => {
-                        const filtered = sectionData.filter(item =>
-                            normalize(item.fr).includes(currentTerm) ||
-                            normalize(item.marca).includes(currentTerm) ||
-                            normalize(item.modelo).includes(currentTerm)
-                        );
-                        const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
-                        if (pageState.page < totalPages) { pageState.page++; render(); }
+                        const filtered = sectionData.filter(i => normalize(i.fr).includes(currentTerm) || normalize(i.marca).includes(currentTerm));
+                        if (pageState.page < Math.ceil(filtered.length / ITEMS_PER_PAGE)) { pageState.page++; render(); }
                     });
                 }
-
                 render();
             }
 
-            // 1. Diagnostico
-            createRenderLogic(
-                s => (s.includes('diagnostico') && !s.includes('revision')) || s.includes('consumible') || (s.includes('repuesto') && !s.includes('repuestos')),
-                'tableDiagnostico',
-                'searchDiagnostico'
-            );
-
-            // 2. Aprobados (NOW PAGINATED)
-            createRenderLogic(
-                s => (s.includes('aprobado') || s.includes('servicio') || s.includes('repuestos')) && !s.includes('entregado') && !s.includes('culminado'),
-                'tableAprobado',
-                'searchAprobado',
-                { prev: 'btnPrevAprobado', next: 'btnNextAprobado', info: 'pageInfoAprobado' }
-            );
-
-            // 3. Revisión
-            createRenderLogic(
-                s => s.includes('revision') || s.includes('reevaluacion'),
-                'tableRevision',
-                'searchRevision'
-            );
-
-            // 4. Pendiente (Paginated)
-            createRenderLogic(
-                s => s.includes('pendiente') || s.includes('espera de aprobacion'),
-                'tablePendiente',
-                'searchPendiente',
-                { prev: 'btnPrevPendiente', next: 'btnNextPendiente', info: 'pageInfoPendiente' }
-            );
+            createRenderLogic(s => (s.includes('diagnostico') && !s.includes('revision')) || s.includes('consumible') || (s.includes('repuesto') && !s.includes('repuestos')), 'tableDiagnostico', 'searchDiagnostico');
+            createRenderLogic(s => (s.includes('aprobado') || s.includes('servicio') || s.includes('repuestos')) && !s.includes('entregado') && !s.includes('culminado'), 'tableAprobado', 'searchAprobado', { prev: 'btnPrevAprobado', next: 'btnNextAprobado', info: 'pageInfoAprobado' });
+            createRenderLogic(s => s.includes('revision') || s.includes('reevaluacion'), 'tableRevision', 'searchRevision');
+            createRenderLogic(s => s.includes('pendiente') || s.includes('espera de aprobacion'), 'tablePendiente', 'searchPendiente', { prev: 'btnPrevPendiente', next: 'btnNextPendiente', info: 'pageInfoPendiente' });
 
         } else {
-            // UNIFIED VIEW LOGIC (GROUPED)
-            const isAlmacenRole = userRole === 'almacen';
-
-            // Toggle visibility of containers based on role
+            // OPERATIONAL VIEW LOGIC (Grouped by state for Rec/Ops/Alm)
             if (isAlmacenRole) {
                 document.getElementById('cardPendientesOp').classList.add('d-none');
                 document.getElementById('cardDiagnosticoOp').classList.add('d-none');
@@ -824,11 +794,9 @@
                 document.getElementById('cardPendientesOp').classList.remove('d-none');
                 document.getElementById('cardDiagnosticoOp').classList.remove('d-none');
                 document.getElementById('cardAprobadosOp').classList.remove('d-none');
-                // Almacen cards defined as d-none by default in HTML? No, I added d-none class in HTML just in case.
             }
 
             function renderGrouped(data) {
-                // Containers
                 const tPend = document.getElementById('tablePendientesOp');
                 const tDiag = document.getElementById('tableDiagnosticoOp');
                 const tApro = document.getElementById('tableAprobadosOp');
@@ -836,123 +804,29 @@
                 const tRepS = document.getElementById('tableRepServ');
 
                 if (isAlmacenRole) {
-                    // Filter Almacen
-                    // 1. Repuestos Diag
-                    const d1 = data.filter(i => {
-                        const s = (i.estado || '').toLowerCase();
-                        return s.includes('diagnostico') || s.includes('consumible');
-                    });
-                    // 2. Repuestos Serv
-                    const d2 = data.filter(i => {
-                        const s = (i.estado || '').toLowerCase();
-                        return s.includes('servicio') && s.includes('repuesto');
-                    });
-
+                    const d1 = data.filter(i => normalize(i.estado).includes('diagnostico') || normalize(i.estado).includes('consumible'));
+                    const d2 = data.filter(i => normalize(i.estado).includes('servicio') && normalize(i.estado).includes('repuesto'));
                     tRepD.innerHTML = d1.length ? d1.map(i => createRow(i, false)).join('') : '<tr><td colspan="6" class="text-center text-muted">Sin pendientes</td></tr>';
                     tRepS.innerHTML = d2.length ? d2.map(i => createRow(i, false)).join('') : '<tr><td colspan="6" class="text-center text-muted">Sin pendientes</td></tr>';
-
                 } else {
-                    // Filter Rec/Ops
-                    // 1. Pendientes
-                    const d1 = data.filter(i => {
-                        const s = (i.estado || '').toLowerCase();
-                        return (s.includes('pendiente') && s.includes('aprobacion'));
-                    });
-                    // 2. Diagnostico
-                    const d2 = data.filter(i => {
-                        const s = (i.estado || '').toLowerCase();
-                        return s.includes('diagnostico') || s.includes('consumible') || s.includes('repuesto entregado');
-                    });
-                    // 3. Aprobado / Servicio
-                    const d3 = data.filter(i => {
-                        const s = (i.estado || '').toLowerCase();
-                        return (s.includes('aprobado') || s.includes('servicio') || s.includes('entregado'));
-                    });
-
+                    const d1 = data.filter(i => normalize(i.estado).includes('pendiente') && normalize(i.estado).includes('aprobacion'));
+                    const d2 = data.filter(i => normalize(i.estado).includes('diagnostico') || normalize(i.estado).includes('consumible') || normalize(i.estado).includes('repuesto entregado'));
+                    const d3 = data.filter(i => normalize(i.estado).includes('aprobado') || normalize(i.estado).includes('servicio') || normalize(i.estado).includes('entregado'));
                     tPend.innerHTML = d1.length ? d1.map(i => createRow(i, false)).join('') : '<tr><td colspan="6" class="text-center text-muted">Sin equipos</td></tr>';
                     tDiag.innerHTML = d2.length ? d2.map(i => createRow(i, false)).join('') : '<tr><td colspan="6" class="text-center text-muted">Sin equipos</td></tr>';
                     tApro.innerHTML = d3.length ? d3.map(i => createRow(i, false)).join('') : '<tr><td colspan="6" class="text-center text-muted">Sin equipos</td></tr>';
                 }
             }
-
             renderGrouped(equipments);
 
-            // LOGIC FOR ENTREGADOS PAGINATION (GROUPED VIEW)
-            const cardEntregados = document.getElementById('cardEntregados');
-
-            if (isAlmacenRole) {
-                if (cardEntregados) cardEntregados.classList.add('d-none');
-            } else {
-                if (cardEntregados) cardEntregados.classList.remove('d-none');
-
-                // Render Logic
-                const tEntregados = document.getElementById('tableEntregadosGrouped');
-                const sEntregados = document.getElementById('searchEntregadosGrouped');
-                const btnPrev = document.getElementById('btnPrevEntregadosGrouped');
-                const btnNext = document.getElementById('btnNextEntregadosGrouped');
-                const infoEnt = document.getElementById('infoEntregadosGrouped');
-
-                let entPage = 1;
-                const entLimit = 5;
-                let entData = equipments.filter(i => (i.estado || '').toLowerCase().includes('entregado'));
-
-                function renderEntregadosSpecial() {
-                    const term = normalize(sEntregados ? sEntregados.value : '');
-                    const filtered = entData.filter(item =>
-                        normalize(item.fr).includes(term) ||
-                        normalize(item.marca).includes(term) ||
-                        normalize(item.modelo).includes(term) ||
-                        normalize(item.cliente).includes(term)
-                    );
-
-                    const totalPages = Math.ceil(filtered.length / entLimit) || 1;
-                    if (entPage > totalPages) entPage = 1;
-
-                    const start = (entPage - 1) * entLimit;
-                    const end = start + entLimit;
-                    const pageData = filtered.slice(start, end);
-
-                    if (tEntregados) {
-                        tEntregados.innerHTML = pageData.length ? pageData.map(i => createRow(i, true)).join('')
-                            : '<tr><td colspan="6" class="text-center text-muted">Sin equipos entregados</td></tr>';
-                    }
-
-                    if (infoEnt) infoEnt.innerText = `${entPage}/${totalPages}`;
-                    if (btnPrev) btnPrev.disabled = (entPage === 1);
-                    if (btnNext) btnNext.disabled = (entPage === totalPages);
-                }
-
-                if (sEntregados) {
-                    sEntregados.addEventListener('input', () => { entPage = 1; renderEntregadosSpecial(); });
-                }
-
-                if (btnPrev) btnPrev.onclick = () => { if (entPage > 1) { entPage--; renderEntregadosSpecial(); } };
-                if (btnNext) btnNext.onclick = () => {
-                    const term = normalize(sEntregados ? sEntregados.value : '');
-                    const filtered = entData.filter(item => normalize(item.fr).includes(term) || normalize(item.marca).includes(term));
-                    const totalPages = Math.ceil(filtered.length / entLimit);
-                    if (entPage < totalPages) { entPage++; renderEntregadosSpecial(); }
-                };
-
-                // Initial call
-                renderEntregadosSpecial();
-            }
-
-            // Search (Generic filtering across all visible tables)
             const searchInput = document.getElementById('searchInput');
             if (searchInput) {
                 searchInput.addEventListener('input', (e) => {
                     const term = normalize(e.target.value);
-                    const filtered = equipments.filter(item =>
-                        normalize(item.fr).includes(term) ||
-                        normalize(item.marca).includes(term) ||
-                        normalize(item.modelo).includes(term)
-                    );
+                    const filtered = equipments.filter(item => normalize(item.fr).includes(term) || normalize(item.marca).includes(term) || normalize(item.modelo).includes(term));
                     renderGrouped(filtered);
                 });
             }
-
-
         }
 
         // Global Action wrappers
