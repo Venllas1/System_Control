@@ -1005,4 +1005,4 @@ if __name__ == "__main__":
  
  **Documento generado**: 2026-01-19 
  **Versión del sistema**: 2.0.0 
- **Autor**: Análisis automatizado del código fuente (
+ **Autor**: Análisis automatizado del código fuente si
