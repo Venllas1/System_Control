@@ -114,3 +114,81 @@ def export_data(formato):
         return send_file(filepath, as_attachment=True)
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
+
+# ============================================================================
+# WORKFLOW ENDPOINTS - Guided State Transitions
+# ============================================================================
+
+@api_bp.route('/pending_tasks')
+@login_required
+def get_pending_tasks():
+    """
+    Get equipment that requires action from the current user's role.
+    Returns pending tasks ordered by priority (oldest first).
+    """
+    try:
+        pending = EquipmentService.get_pending_tasks(current_user)
+        return jsonify({
+            'success': True,
+            'data': [eq.to_dict() for eq in pending],
+            'count': len(pending)
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@api_bp.route('/equipment/<int:id>/next_state')
+@login_required
+def get_next_state(id):
+    """
+    Get information about the next possible state(s) for an equipment.
+    Includes current state, next states, and user permissions.
+    """
+    try:
+        info = EquipmentService.get_next_state_info(id, current_user)
+        if not info:
+            return jsonify({'success': False, 'error': 'Equipo no encontrado'}), 404
+        
+        return jsonify({
+            'success': True,
+            'data': info
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@api_bp.route('/equipment/<int:id>/advance', methods=['POST'])
+@login_required
+def advance_equipment(id):
+    """
+    Advance equipment to the next state in the workflow.
+    Validates transitions and role permissions.
+    
+    Body (optional):
+        next_state: str - Specific next state (required if multiple options)
+    """
+    if not can_perform_action(current_user, 'edit'):
+        return jsonify({'success': False, 'error': 'Permiso denegado'}), 403
+    
+    try:
+        data = request.get_json(silent=True) or {}
+        next_state = data.get('next_state')
+        
+        success, message, new_state = EquipmentService.advance_to_next_state(
+            id, 
+            current_user, 
+            next_state
+        )
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'message': message,
+                'new_state': new_state
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': message
+            }), 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+

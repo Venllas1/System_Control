@@ -256,6 +256,50 @@
     <!-- VISTA OPERATIVA (REORGANIZADA COMO VISUALIZADOR) -->
     <div id="operationalView" class="row g-4">
 
+        <!-- ========== TAREAS PENDIENTES (PRIORITY SECTION) ========== -->
+        <div class="col-12" id="pendingTasksContainer">
+            <div class="card bg-gradient-dark border-warning shadow-lg">
+                <div class="card-header border-warning bg-warning bg-opacity-20">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0 text-warning fw-bold">
+                            <i class="fas fa-clipboard-list me-2"></i> 📋 Tareas Pendientes
+                        </h4>
+                        <div class="d-flex align-items-center gap-2">
+                            <span id="pendingTasksCount" class="badge bg-warning text-dark">0 tareas</span>
+                            <button class="btn btn-sm btn-outline-warning" id="refreshPendingTasks" title="Actualizar">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="alert alert-warning border-0 rounded-0 mb-0 py-2 px-4" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <small><strong>Equipos que requieren tu atención inmediata</strong> - Ordenados por antigüedad
+                            (más antiguos primero)</small>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover mb-0 align-middle">
+                            <thead class="text-secondary text-uppercase text-xs">
+                                <tr>
+                                    <th class="ps-4">Equipo</th>
+                                    <th>Estado</th>
+                                    <th>Encargado</th>
+                                    <th>Fecha Ingreso</th>
+                                    <th class="text-center">Días</th>
+                                    <th class="text-end pe-4">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pendingTasksTable">
+                                <!-- Populated by workflow.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- ========== END TAREAS PENDIENTES ========== -->
+
         <!-- RECEPCIÓN: Pendientes de Aprobación, Servicio Culminado -->
         <div class="col-12" id="cardPendientesOp">
             <div class="card bg-dark-card border-secondary shadow-sm">
@@ -1058,4 +1102,8 @@
         line-height: 1.2;
     }
 </style>
+
+<!-- Workflow Management Script -->
+<script src="{{ url_for('static', filename='js/workflow.js') }}"></script>
+
 {% endblock %}

@@ -3,6 +3,7 @@ from sqlalchemy import or_, func
 from app.extensions import db
 from app.models.equipment import Equipment, StatusHistory
 from app.core.config import Config
+from app.core.workflow_engine import WorkflowEngine
 
 class EquipmentService:
     @staticmethod
@@ -138,3 +139,109 @@ class EquipmentService:
             db.session.commit()
             return True
         return False
+
+    @staticmethod
+    def get_pending_tasks(user):
+        """
+        Get equipment that requires action from the user's role.
+        Returns equipment in states that are pending for the user's role,
+        ordered by oldest first (priority).
+        """
+        role = user.role.lower()
+        pending_states = WorkflowEngine.get_pending_states_for_role(role)
+        
+        if not pending_states:
+            return []
+        
+        # Get active equipment (not delivered) in pending states
+        return Equipment.query.filter(
+            Equipment.estado.in_(pending_states),
+            ~Equipment.estado.ilike('%entregado%')
+        ).order_by(Equipment.fecha_ingreso.asc()).all()
+    
+    @staticmethod
+    def get_next_state_info(equipment_id, user):
+        """
+        Get information about the next possible state(s) for an equipment.
+        
+        Returns:
+            dict: Information about current state, next states, and permissions
+        """
+        equipment = Equipment.query.get(equipment_id)
+        if not equipment:
+            return None
+        
+        role = user.role.lower()
+        state_info = WorkflowEngine.get_state_info(equipment.estado, role)
+        
+        return {
+            'equipment_id': equipment_id,
+            'current_state': equipment.estado,
+            'next_states': state_info['next_states'],
+            'can_advance': state_info['can_advance'],
+            'requires_decision': state_info['requires_decision'],
+            'is_terminal': state_info['is_terminal']
+        }
+    
+    @staticmethod
+    def advance_to_next_state(equipment_id, user, next_state=None):
+        """
+        Advance equipment to the next state in the workflow.
+        Validates transitions and role permissions.
+        
+        Args:
+            equipment_id: ID of the equipment
+            user: User object performing the action
+            next_state: Specific next state (required if multiple options exist)
+            
+        Returns:
+            tuple: (success: bool, message: str, new_state: str or None)
+        """
+        equipment = Equipment.query.get(equipment_id)
+        if not equipment:
+            return False, "Equipo no encontrado", None
+        
+        current_state = equipment.estado
+        role = user.role.lower()
+        
+        # Get possible next states
+        next_states = WorkflowEngine.get_next_states(current_state)
+        
+        if next_states is None:
+            return False, "El equipo ya está en estado terminal (Entregado)", None
+        
+        # Check if user can advance from current state
+        if not WorkflowEngine.can_advance(current_state, role):
+            return False, f"Tu rol ({user.role}) no puede avanzar equipos desde '{current_state}'", None
+        
+        # Determine the target state
+        if len(next_states) == 1:
+            # Only one option, use it
+            target_state = next_states[0]
+        elif len(next_states) > 1:
+            # Multiple options, user must specify
+            if not next_state:
+                return False, "Debes seleccionar el siguiente estado", None
+            if next_state not in next_states:
+                return False, f"Estado '{next_state}' no es una opción válida desde '{current_state}'", None
+            target_state = next_state
+        else:
+            return False, "No hay estados siguientes definidos", None
+        
+        # Validate the transition
+        is_valid, error_msg = WorkflowEngine.validate_transition(current_state, target_state, role)
+        if not is_valid:
+            return False, error_msg, None
+        
+        # Perform the state change
+        success, message = EquipmentService.update_status(
+            equipment_id,
+            target_state,
+            user.username
+        )
+        
+        if success:
+            return True, f"Equipo avanzado de '{current_state}' a '{target_state}'", target_state
+        else:
+            return False, message, None
+
