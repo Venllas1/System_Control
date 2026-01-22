@@ -44,6 +44,9 @@
 │  ┌────────────────────────────────────────────┐             │
 │  │      EquipmentService (Lógica de Negocio)  │             │
 │  └────────────────────────────────────────────┘             │
+│  ┌────────────────────────────────────────────┐             │
+│  │   WorkflowEngine (Validación de Estados)   │ ⚡ CRÍTICO  │
+│  └────────────────────────────────────────────┘             │
 └────────────────────┬────────────────────────────────────────┘
                      │
 ┌────────────────────▼────────────────────────────────────────┐
@@ -103,6 +106,182 @@ System_Control/
 ├── requirements.txt             # Dependencias Python
 ├── vercel.json                  # Configuración de despliegue
 └── cabelab.db                   # Base de datos SQLite (local)
+---
+
+## ⚡ WorkflowEngine - Motor de Flujo de Trabajo
+
+### Propósito
+**Componente crítico** que implementa una máquina de estados para validar transiciones de equipos y controlar permisos por rol. Garantiza la integridad del flujo operativo impidiendo cambios de estado inválidos.
+
+### Ubicación
+`app/core/workflow_engine.py`
+
+### Responsabilidades
+1. **Definir transiciones válidas** entre estados de equipos
+2. **Validar permisos por rol** para cada transición
+3. **Identificar estados pendientes** para cada rol
+4. **Detectar estados terminales** que no permiten más cambios
+5. **Manejar decisiones** cuando hay múltiples opciones de transición
+
+### Componentes Principales
+
+#### 1. STATE_FLOW - Grafo de Transiciones
+
+Define el flujo completo de estados con transiciones permitidas y roles autorizados:
+
+```python
+STATE_FLOW = {
+    'Espera de Diagnostico': {
+        'next': ['en Diagnostico'],
+        'allowed_roles': ['admin', 'operaciones'],
+        'requires_decision': False
+    },
+    'en Diagnostico': {
+        'next': ['espera de repuesto o consumible', 'Pendiente de aprobacion'],
+        'allowed_roles': ['admin', 'operaciones'],
+        'requires_decision': True  # Usuario elige entre dos caminos
+    },
+    # ... 11 estados en total
+}
+```
+
+**Estructura de cada estado**:
+- `next`: Lista de estados siguientes permitidos (None si es terminal)
+- `allowed_roles`: Roles que pueden avanzar desde este estado
+- `requires_decision`: True si hay múltiples opciones (usuario debe elegir)
+
+#### 2. PENDING_LOGIC - Estados Pendientes por Rol
+
+Define qué estados requieren acción de cada rol:
+
+```python
+PENDING_LOGIC = {
+    'recepcion': ['Pendiente de aprobacion', 'Servicio culminado'],
+    'operaciones': ['Espera de Diagnostico', 'en Diagnostico', 'Repuesto entregado', 
+                    'Aprobado', 'Inicio de Servicio', 'En servicio'],
+    'almacen': ['espera de repuesto o consumible', 'espera de repuestos'],
+    'admin': [],  # Admin ve todo pero no tiene estados "pendientes" específicos
+    'visualizador': []  # Solo lectura
+}
+```
+
+### Métodos Principales
+
+#### validate_transition(current_state, new_state, user_role)
+**Propósito**: Valida si una transición de estado es permitida.
+
+**Validaciones**:
+1. ✅ Estado actual existe en el flujo
+2. ✅ Estado actual no es terminal
+3. ✅ Nuevo estado está en las transiciones permitidas
+4. ✅ Rol del usuario tiene permisos para la transición
+
+**Retorna**: `(is_valid: bool, error_message: str or None)`
+
+**Ejemplo**:
+```python
+is_valid, error = WorkflowEngine.validate_transition(
+    'en Diagnostico', 
+    'Aprobado',  # Transición inválida (debe pasar por otros estados)
+    'operaciones'
+)
+# is_valid = False
+# error = "Transición no permitida: 'en Diagnostico' → 'Aprobado'"
+```
+
+#### can_advance(current_state, user_role)
+**Propósito**: Verifica si un rol puede avanzar desde un estado.
+
+**Retorna**: `bool`
+
+#### get_next_states(current_state)
+**Propósito**: Obtiene los estados siguientes posibles.
+
+**Retorna**: `list` de estados o `None` si es terminal
+
+#### get_pending_states_for_role(role)
+**Propósito**: Obtiene estados que requieren acción del rol.
+
+**Retorna**: `list` de estados pendientes
+
+#### get_state_info(current_state, user_role)
+**Propósito**: Información completa sobre un estado para un usuario.
+
+**Retorna**:
+```python
+{
+    'current_state': str,
+    'next_states': list,
+    'can_advance': bool,
+    'requires_decision': bool,
+    'is_terminal': bool,
+    'allowed_roles': list
+}
+```
+
+### Integración con EquipmentService
+
+El `WorkflowEngine` es utilizado por `EquipmentService.advance_to_next_state()`:
+
+```python
+# 1. Obtener estados siguientes
+next_states = WorkflowEngine.get_next_states(current_state)
+
+# 2. Verificar permisos
+if not WorkflowEngine.can_advance(current_state, user.role):
+    return False, "No tienes permisos"
+
+# 3. Validar transición
+is_valid, error = WorkflowEngine.validate_transition(
+    current_state, target_state, user.role
+)
+
+# 4. Si es válida, ejecutar cambio
+if is_valid:
+    _update_status_internal(equipment_id, target_state, user.username)
+```
+
+### Reglas de Negocio Implementadas
+
+1. **Transiciones Unidireccionales**: No se puede retroceder en el flujo
+2. **Estado Terminal**: "Entregado" no permite más cambios
+3. **Decisiones Operativas**: 
+   - Desde "en Diagnostico" → requiere repuesto O aprobación
+   - Desde "En servicio" → requiere más repuestos O está culminado
+4. **Separación de Responsabilidades**:
+   - Recepción: Aprobaciones y entregas
+   - Operaciones: Diagnóstico y servicio
+   - Almacén: Entrega de repuestos
+
+### Ejemplo de Flujo Validado
+
+```
+Usuario: Operaciones
+Equipo actual: "Espera de Diagnostico"
+
+1. Intenta avanzar a "en Diagnostico"
+   ✅ Transición válida
+   ✅ Rol tiene permiso
+   → Cambio ejecutado
+
+2. Intenta avanzar a "Servicio culminado"
+   ❌ Transición no permitida (debe pasar por estados intermedios)
+   → Cambio rechazado
+
+3. Intenta avanzar a "espera de repuesto o consumible"
+   ✅ Transición válida
+   ✅ Rol tiene permiso
+   → Cambio ejecutado
+
+Usuario: Almacén
+Equipo actual: "espera de repuesto o consumible"
+
+4. Intenta avanzar a "Repuesto entregado"
+   ✅ Transición válida
+   ✅ Rol tiene permiso
+   → Cambio ejecutado
+```
+
 ---
  
  ## 📊 Modelos de Datos
@@ -236,12 +415,33 @@ System_Control/
             └─────────────────────────┘
 ### Reglas de Transición
  
- ⚠️ **IMPORTANTE**: El sistema NO valida transiciones de estado a nivel de código. Cualquier usuario con permisos de edición puede cambiar un equipo a cualquier estado. La responsabilidad de seguir el flujo correcto recae en el usuario.
+ ✅ **VALIDACIÓN IMPLEMENTADA**: El sistema valida todas las transiciones de estado a través del `WorkflowEngine`. Solo se permiten transiciones válidas según el flujo definido y los permisos del rol del usuario.
  
- **Implicaciones**:
- - Los usuarios deben conocer el flujo operativo correcto
- - El historial (StatusHistory) registra todos los cambios para auditoría
- - No hay validaciones de "estado anterior → estado siguiente"
+ **Características del Sistema de Validación**:
+ - ✅ **Transiciones Controladas**: Solo se permiten cambios a estados siguientes válidos
+ - ✅ **Permisos por Rol**: Cada transición requiere un rol específico
+ - ✅ **Estados Terminales**: El estado "Entregado" no permite más cambios
+ - ✅ **Decisiones Guiadas**: Cuando hay múltiples opciones, el usuario debe elegir
+ - ✅ **Auditoría Completa**: Todos los cambios se registran en StatusHistory
+ 
+ **Validaciones Aplicadas**:
+ 1. Estado actual debe existir en el flujo
+ 2. Estado actual no puede ser terminal
+ 3. Nuevo estado debe estar en las transiciones permitidas
+ 4. Rol del usuario debe tener permisos para la transición
+ 
+ **Ejemplo de Validación**:
+ ```
+ Estado actual: "en Diagnostico"
+ Intento de cambio: "Servicio culminado"
+ Resultado: ❌ RECHAZADO
+ Razón: "Transición no permitida: 'en Diagnostico' → 'Servicio culminado'"
+ 
+ Estado actual: "en Diagnostico"
+ Intento de cambio: "espera de repuesto o consumible"
+ Rol: operaciones
+ Resultado: ✅ PERMITIDO
+ ```
  
  ---
  
@@ -444,7 +644,9 @@ atrasados = Equipment.query.filter(
     ~Equipment.estado.ilike('%entregado%'),
     Equipment.fecha_ingreso < fecha_limite
 ).count()
-##### update_status(equipment_id, new_status, user_name, encargado=None)
+##### _update_status_internal(equipment_id, new_status, user_name, encargado=None)
+ **⚠️ Método Interno**: No debe llamarse directamente. Usar `advance_to_next_state()`.
+ 
  **Flujo**:
  1. Busca equipo por ID
  2. Guarda estado anterior
@@ -452,7 +654,51 @@ atrasados = Equipment.query.filter(
  4. Crea registro en StatusHistory
  5. Commit a base de datos
  
- ⚠️ **NO valida transiciones**: Acepta cualquier cambio de estado.
+ **NO valida transiciones**: Solo actualiza la base de datos.
+ 
+ ##### advance_to_next_state(equipment_id, user, next_state=None)
+ **⚡ Método Principal para Cambios de Estado**
+ 
+ **Flujo**:
+ 1. Obtiene estado actual del equipo
+ 2. Obtiene estados siguientes posibles del WorkflowEngine
+ 3. Verifica que el usuario puede avanzar desde el estado actual
+ 4. Determina el estado destino (automático si solo hay uno, requiere selección si hay múltiples)
+ 5. Valida la transición con WorkflowEngine.validate_transition()
+ 6. Si es válida, ejecuta el cambio con _update_status_internal()
+ 
+ **Retorna**: `(success: bool, message: str, new_state: str or None)`
+ 
+ **Validaciones**:
+ - ✅ Estado actual existe en el flujo
+ - ✅ No es estado terminal
+ - ✅ Transición es permitida
+ - ✅ Usuario tiene permisos
+ 
+ ##### get_pending_tasks(user)
+ Obtiene equipos que requieren acción del rol del usuario.
+ 
+ **Flujo**:
+ 1. Obtiene estados pendientes del rol desde WorkflowEngine
+ 2. Filtra equipos en esos estados (excluyendo entregados)
+ 3. Ordena por fecha_ingreso ASC (más antiguos primero)
+ 
+ **Retorna**: Lista de equipos pendientes
+ 
+ ##### get_next_state_info(equipment_id, user)
+ Obtiene información sobre los siguientes estados posibles para un equipo.
+ 
+ **Retorna**:
+ ```python
+ {
+     'equipment_id': int,
+     'current_state': str,
+     'next_states': list,
+     'can_advance': bool,
+     'requires_decision': bool,
+     'is_terminal': bool
+ }
+ ```
  
  ##### create_equipment(data)
  **Flujo**:
@@ -508,12 +754,14 @@ atrasados = Equipment.query.filter(
  | Ruta | Método | Descripción | Permisos |
  |------|--------|-------------|----------|
  | /stats | GET | Estadísticas del dashboard | Login |
- | /equipment/<id>/update_status | POST | Cambiar estado de equipo | can_edit |
+ | /equipment/<id>/update_status | POST | Cambiar estado con validación de workflow ⚡ | can_edit |
  | /equipment/create | POST | Crear nuevo equipo | can_edit |
  | /equipment/<id>/details | GET | Detalles de equipo | Login |
  | /equipment/<id>/delete | POST | Eliminar equipo | Admin |
  | /search?q=<query> | GET | Búsqueda de equipos | Login |
  | /export/<formato> | GET | Exportar datos (CSV/Excel) | Login |
+ | /pending_tasks | GET | Tareas pendientes del usuario | Login |
+ | /equipment/<id>/next_state | GET | Info de siguiente estado posible | Login |
  
  **Formato de respuesta**:
 json
@@ -733,22 +981,26 @@ Usuario puede hacer login (si aprobado y no expirado)
  
  ## ⚠️ Puntos Críticos y Consideraciones
  
- ### 1. Sin Validación de Transiciones de Estado
+ ### 1. ✅ Validación de Transiciones de Estado - IMPLEMENTADO
  
- **Problema**: El sistema permite cambiar un equipo de cualquier estado a cualquier otro sin validaciones.
+ **Estado**: ✅ **RESUELTO** mediante WorkflowEngine
  
- **Riesgo**:
- - Usuarios pueden saltar pasos del flujo
- - Equipos pueden marcarse como "Entregado" sin pasar por servicio
- - Inconsistencias en el proceso operativo
+ **Implementación**:
+ - Máquina de estados completa con transiciones definidas
+ - Validación de permisos por rol para cada transición
+ - Estados terminales protegidos
+ - Auditoría completa en StatusHistory
  
- **Mitigación actual**:
- - Confianza en capacitación de usuarios
- - Historial completo en StatusHistory para auditoría
+ **Beneficios**:
+ - ✅ Integridad del flujo operativo garantizada
+ - ✅ Imposible saltar pasos del proceso
+ - ✅ Separación clara de responsabilidades por rol
+ - ✅ Prevención de estados inconsistentes
  
- **Recomendación para cambios futuros**:
- - Implementar máquina de estados con transiciones permitidas
- - Validar en EquipmentService.update_status() antes de actualizar
+ **Consideraciones**:
+ - El método `_update_status_internal()` existe para uso interno pero NO debe llamarse directamente
+ - Todos los cambios de estado deben pasar por `advance_to_next_state()`
+ - El endpoint `/api/equipment/<id>/update_status` ahora valida todas las transiciones
  
  ### 2. Inicialización en Cada Request
  
@@ -954,6 +1206,7 @@ if __name__ == "__main__":
  ### Para entender el sistema rápidamente:
  
  1. **Lee primero**:
+ - app/core/workflow_engine.py ⚡ **CRÍTICO** (máquina de estados)
  - app/models/equipment.py (estados del equipo)
  - app/core/config.py (configuración de roles)
  - app/services/equipment_service.py (lógica de negocio)
@@ -961,6 +1214,7 @@ if __name__ == "__main__":
  2. **Flujo principal**:
  - Usuario se registra → Admin aprueba → Usuario accede
  - Recepción crea equipo → Operaciones diagnostica → Almacén entrega repuestos → Operaciones repara → Recepción entrega
+ - **IMPORTANTE**: Todos los cambios de estado pasan por WorkflowEngine
  
  3. **Puntos de entrada**:
  - manage.py (desarrollo local)
@@ -968,20 +1222,25 @@ if __name__ == "__main__":
  
  4. **Modificar permisos**:
  - Editar Config.DASHBOARD_ROLES en app/core/config.py
+ - Editar WorkflowEngine.STATE_FLOW para permisos de transiciones
  
  5. **Agregar estado**:
  - Agregar constante en Equipment.Status
- - Actualizar relevant_statuses de roles afectados
+ - Agregar en WorkflowEngine.STATE_FLOW con transiciones y roles permitidos
+ - Actualizar relevant_statuses de roles afectados en config.py
+ - Actualizar WorkflowEngine.PENDING_LOGIC si es necesario
  - Actualizar templates si es necesario
  
  ### Para IAs que modificarán el código:
  
- - **NO hay validaciones de transiciones de estado**: Implementar si se requiere
+ - ✅ **SÍ hay validaciones de transiciones**: Implementadas en WorkflowEngine
+ - ⚠️ **NO llamar _update_status_internal() directamente**: Usar advance_to_next_state()
  - **Recarga de página**: Patrón actual, considerar si se desea SPA
  - **Roles son excluyentes**: Un usuario = un rol
  - **Historial es auditoría**: No eliminar registros de StatusHistory
  - **Mayúsculas**: Campos de texto se normalizan a UPPER
  - **Filtrado por rol**: Lógica en EquipmentService.get_equipment_by_role()
+ - **Workflow obligatorio**: Todos los cambios de estado deben validarse
  
  ---
  

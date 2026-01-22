@@ -202,7 +202,7 @@ function showDecisionModal(equipmentId, currentState, nextStates) {
  */
 async function advanceEquipment(equipmentId, nextState = null) {
     try {
-        const response = await fetch(`/api/equipment/${equipmentId}/advance`, {
+        const response = await fetch(`/api/equipment/${equipmentId}/update_status`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

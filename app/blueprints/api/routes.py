@@ -23,25 +23,55 @@ def get_stats():
 @api_bp.route('/equipment/<int:id>/update_status', methods=['POST'])
 @login_required
 def update_status(id):
+    """
+    Update equipment status with workflow validation.
+    Validates transitions and role permissions through WorkflowEngine.
+    
+    Body:
+        status: str - New status (must be valid transition)
+        encargado: str (optional) - Assigned technician
+    """
     if not can_perform_action(current_user, 'edit'):
         return jsonify({'success': False, 'error': 'Permiso denegado'}), 403
     
-    new_status = request.form.get('status')
-    new_encargado = request.form.get('encargado')
-    
-    if not new_status:
-        return jsonify({'success': False, 'error': 'Falta el estado'}), 400
+    try:
+        # Accept both JSON and form data
+        data = request.get_json(silent=True) or request.form
+        new_status = data.get('status') or data.get('next_state')
+        new_encargado = data.get('encargado')
         
-    success, message = EquipmentService.update_status(
-        id, 
-        new_status, 
-        current_user.username, 
-        encargado=new_encargado
-    )
-    
-    if success:
-        return jsonify({'success': True, 'message': message})
-    return jsonify({'success': False, 'error': message}), 400
+        if not new_status:
+            return jsonify({'success': False, 'error': 'Falta el estado'}), 400
+        
+        # Use workflow-validated method
+        success, message, final_state = EquipmentService.advance_to_next_state(
+            id, 
+            current_user, 
+            new_status
+        )
+        
+        # Update encargado if provided
+        if success and new_encargado:
+            from app.models.equipment import Equipment
+            from app.extensions import db
+            equipment = Equipment.query.get(id)
+            if equipment:
+                equipment.encargado = new_encargado
+                db.session.commit()
+        
+        if success:
+            return jsonify({
+                'success': True, 
+                'message': message,
+                'new_state': final_state
+            })
+        else:
+            return jsonify({
+                'success': False, 
+                'error': message
+            }), 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @api_bp.route('/equipment/create', methods=['POST'])
 @login_required
@@ -115,9 +145,6 @@ def export_data(formato):
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
-# ============================================================================
-# WORKFLOW ENDPOINTS - Guided State Transitions
-# ============================================================================
 
 @api_bp.route('/pending_tasks')
 @login_required
@@ -155,40 +182,4 @@ def get_next_state(id):
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@api_bp.route('/equipment/<int:id>/advance', methods=['POST'])
-@login_required
-def advance_equipment(id):
-    """
-    Advance equipment to the next state in the workflow.
-    Validates transitions and role permissions.
-    
-    Body (optional):
-        next_state: str - Specific next state (required if multiple options)
-    """
-    if not can_perform_action(current_user, 'edit'):
-        return jsonify({'success': False, 'error': 'Permiso denegado'}), 403
-    
-    try:
-        data = request.get_json(silent=True) or {}
-        next_state = data.get('next_state')
-        
-        success, message, new_state = EquipmentService.advance_to_next_state(
-            id, 
-            current_user, 
-            next_state
-        )
-        
-        if success:
-            return jsonify({
-                'success': True,
-                'message': message,
-                'new_state': new_state
-            })
-        else:
-            return jsonify({
-                'success': False,
-                'error': message
-            }), 400
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
 

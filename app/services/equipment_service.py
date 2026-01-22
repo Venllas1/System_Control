@@ -76,7 +76,12 @@ class EquipmentService:
         return stats
 
     @staticmethod
-    def update_status(equipment_id, new_status, user_name, encargado=None):
+    def _update_status_internal(equipment_id, new_status, user_name, encargado=None):
+        """
+        Internal method to update equipment status and log history.
+        WARNING: This method does NOT validate transitions.
+        Use advance_to_next_state() for validated state changes.
+        """
         equipment = Equipment.query.get(equipment_id)
         if not equipment:
             return False, "Equipo no encontrado"
@@ -233,8 +238,8 @@ class EquipmentService:
         if not is_valid:
             return False, error_msg, None
         
-        # Perform the state change
-        success, message = EquipmentService.update_status(
+        # Perform the state change (internal method without validation)
+        success, message = EquipmentService._update_status_internal(
             equipment_id,
             target_state,
             user.username
