@@ -26,6 +26,13 @@
             </button>
             -->
             <!-- Export Button is enough -->
+            <div class="ms-2">
+                {% if current_role == 'visualizador' %}
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createEquipmentModal">
+                    <i class="fas fa-plus me-1"></i> Agregar Equipo
+                </button>
+                {% endif %}
+            </div>
         </div>
     </div>
 
@@ -630,6 +637,35 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // Create Equipment Logic
+        window.submitCreateEquipment = async function () {
+            const form = document.getElementById('createEquipmentForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/api/equipment/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('Equipo creado correctamente');
+                    location.reload();
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al procesar la solicitud');
+            }
+        };
+
         const dataEl = document.getElementById('equipmentsData');
         if (!dataEl) return;
 
@@ -1025,7 +1061,7 @@
             updateStatus(id, status, encargado.trim());
         };
 
-        window.updateStatus = function (id, newStatus, newEncargado = null) {
+        window.updateStatus = async function (id, newStatus, newEncargado = null) {
             let msg = `¿Cambiar estado a: ${newStatus}?`;
             if (newEncargado) msg += `\nAsignando a: ${newEncargado}`;
             if (!confirm(msg)) return;
@@ -1034,13 +1070,19 @@
             formData.append('status', newStatus);
             if (newEncargado) formData.append('encargado', newEncargado);
 
-            fetch(`/api/equipment/${id}/update_status`, { method: 'POST', body: formData })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.success) location.reload();
-                    else alert('Error: ' + data.error);
-                })
-                .catch(err => alert('Error de red: ' + err));
+            // Use legacy endpoint which now validates workflow
+            try {
+                const response = await fetch(`/api/equipment/${id}/update_status`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.success) location.reload();
+                else alert('Error: ' + data.error);
+            } catch (err) {
+                alert('Error de red: ' + err);
+            }
         };
 
         window.deleteEquipment = function (id) {

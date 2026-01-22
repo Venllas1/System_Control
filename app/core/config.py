@@ -72,9 +72,9 @@ class Config:
         },
         'visualizador': {
             'can_view_all': True,
-            'can_edit': False,
+            'can_edit': True,  # Allow editing general data, restricted by workflow
             'stats_visible': True,
             'tables': ['active', 'history'],
-            'actions': ['view']
+            'actions': ['view', 'edit']  # Allow edit action
         }
     }

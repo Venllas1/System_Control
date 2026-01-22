@@ -250,3 +250,35 @@ class EquipmentService:
         else:
             return False, message, None
 
+    @staticmethod
+    def update_equipment_data(equipment_id, data):
+        """
+        Update general equipment data without changing status.
+        Ignores 'estado' field to ensure workflow integrity.
+        """
+        try:
+            eq = Equipment.query.get(equipment_id)
+            if not eq:
+                return False, "Equipo no encontrado"
+
+            # Update uppercase fields
+            if 'fr' in data: eq.fr = data['fr'].upper()
+            if 'marca' in data: eq.marca = data['marca'].upper()
+            if 'modelo' in data: eq.modelo = data['modelo'].upper()
+            if 'cliente' in data: eq.cliente = data['cliente'].upper()
+            if 'serie' in data: eq.serie = data['serie'].upper()
+            if 'accesorios' in data: eq.accesorios = data['accesorios'].upper()
+            if 'reporte_cliente' in data: eq.reporte_cliente = data['reporte_cliente'].upper()
+            if 'observaciones' in data: eq.observaciones = data['observaciones'].upper()
+            if 'condicion' in data: eq.condicion = data['condicion']
+            if 'numero_informe' in data: eq.numero_informe = data['numero_informe']
+            
+            # Encargado can be updated here
+            if 'encargado' in data: eq.encargado = data['encargado']
+
+            db.session.commit()
+            return True, "Datos actualizados correctamente"
+        except Exception as e:
+            db.session.rollback()
+            return False, str(e)
+

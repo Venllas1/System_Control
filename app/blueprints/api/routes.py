@@ -106,6 +106,15 @@ def delete_equipment(id):
 @login_required
 def search():
     query = request.args.get('q', '').strip()
+    
+    if not query or query == 'all':
+        # Return all (limited to 500 recent) for general view
+        results = Equipment.query.order_by(Equipment.fecha_ingreso.desc()).limit(500).all()
+        return jsonify({
+            'success': True, 
+            'data': [item.to_dict() for item in results]
+        })
+        
     if not query:
         return jsonify({'success': True, 'data': []})
     
@@ -182,4 +191,22 @@ def get_next_state(id):
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
-
+@api_bp.route('/equipment/<int:id>/update_data', methods=['POST'])
+@login_required
+def update_equipment_data(id):
+    """
+    Update general equipment data (no status change).
+    Allowed for roles with can_edit permission.
+    """
+    if not can_perform_action(current_user, 'edit'):
+        return jsonify({'success': False, 'error': 'Permiso denegado'}), 403
+    
+    try:
+        data = request.get_json(silent=True) or request.form
+        success, message = EquipmentService.update_equipment_data(id, data)
+        
+        if success:
+            return jsonify({'success': True, 'message': message})
+        return jsonify({'success': False, 'error': message}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500

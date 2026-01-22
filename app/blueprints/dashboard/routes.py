@@ -49,6 +49,16 @@ def panel():
                          Status=Equipment.Status,
                          current_role=current_user.role)
 
+@dashboard_bp.route('/general')
+@login_required
+def panel_general():
+    return render_template('gestion_general.html')
+
+@dashboard_bp.route('/excel')
+@login_required
+def panel_excel():
+    return render_template('gestion_excel.html')
+
 @dashboard_bp.route('/admin/db/backup')
 @login_required
 def backup_db():
