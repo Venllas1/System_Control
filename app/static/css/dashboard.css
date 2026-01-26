@@ -3,9 +3,9 @@
     --bg-primary: #0f1419;
     --bg-secondary: #1a1d2e;
     --bg-card: rgba(26, 29, 46, 0.8);
-    --border-color: rgb(255, 255, 255);
+    --border-color: rgba(255, 255, 255, 0.1);
     --text-primary: #ffffff;
-    --text-secondary: #ffffff;
+    --text-secondary: #4d4b4b;
     --accent-blue: #3b82f6;
     --accent-cyan: #00d9ff;
 }
