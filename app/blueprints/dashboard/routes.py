@@ -10,7 +10,7 @@ dashboard_bp = Blueprint('dashboard', __name__)
 @dashboard_bp.route('/')
 @login_required
 def index():
-    if current_user.role.lower() == UserRoles.VISUALIZADOR.lower():
+    if current_user.role.lower() in [UserRoles.VISUALIZADOR.lower(), UserRoles.ADMIN.lower()]:
         return redirect(url_for('dashboard.panel'))
 
     config = EquipmentService.get_dashboard_config(current_user)

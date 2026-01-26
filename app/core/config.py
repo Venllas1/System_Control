@@ -28,6 +28,7 @@ class Config:
             'can_edit': True,
             'stats_visible': True,
             'tables': ['active', 'history'],
+            'columns': ['encargado'],
             'actions': ['view', 'edit', 'delete']
         },
         'recepcion': {
@@ -35,6 +36,7 @@ class Config:
             'can_edit': True,
             'stats_visible': False,
             'tables': ['relevant', 'history'],
+            'columns': ['encargado'],
             'relevant_statuses': [
                 'Espera de Diagnostico',
                 'Pendiente de aprobacion',
@@ -47,6 +49,7 @@ class Config:
             'can_edit': True,
             'stats_visible': False,
             'tables': ['relevant', 'history'],
+            'columns': ['encargado'],
             'relevant_statuses': [
                 'Espera de Diagnostico',
                 'en Diagnostico',
@@ -64,6 +67,7 @@ class Config:
             'can_edit': True,
             'stats_visible': False,
             'tables': ['relevant'],
+            'columns': ['encargado'],
             'relevant_statuses': [
                 'espera de repuestos',
                 'espera de repuesto o consumible'
@@ -72,9 +76,10 @@ class Config:
         },
         'visualizador': {
             'can_view_all': True,
-            'can_edit': True,  # Allow editing general data, restricted by workflow
+            'can_edit': True,
             'stats_visible': True,
             'tables': ['active', 'history'],
-            'actions': ['view', 'edit']  # Allow edit action
+            'columns': [],
+            'actions': ['view', 'edit']
         }
     }
