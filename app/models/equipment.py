@@ -17,6 +17,13 @@ class Equipment(db.Model):
     serie = db.Column(db.String(255))
     accesorios = db.Column(db.Text)
     numero_informe = db.Column(db.String(255))
+    
+    # New Fields for Excel View
+    encargado_mantenimiento = db.Column(db.String(255))
+    hora_inicio_diagnostico = db.Column(db.String(255)) # Storing as formatted string YYYY-MM-DD HH:MM
+    observaciones_diagnostico = db.Column(db.Text)
+    hora_inicio_mantenimiento = db.Column(db.String(255))
+    observaciones_mantenimiento = db.Column(db.Text)
 
     class Status:
         ESPERA_DIAGNOSTICO = 'Espera de Diagnostico'
@@ -46,7 +53,12 @@ class Equipment(db.Model):
             'serie': self.serie,
             'accesorios': self.accesorios,
             'condicion': self.condicion,
-            'numero_informe': self.numero_informe
+            'numero_informe': self.numero_informe,
+            'encargado_mantenimiento': self.encargado_mantenimiento,
+            'hora_inicio_diagnostico': self.hora_inicio_diagnostico,
+            'observaciones_diagnostico': self.observaciones_diagnostico,
+            'hora_inicio_mantenimiento': self.hora_inicio_mantenimiento,
+            'observaciones_mantenimiento': self.observaciones_mantenimiento
         }
 
 class StatusHistory(db.Model):

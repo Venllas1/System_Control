@@ -24,15 +24,25 @@ function renderExcelTable(data) {
     const tbody = document.getElementById('excelTableBody');
     tbody.innerHTML = data.map(item => `
         <tr data-id="${item.id}">
-            <td class="text-muted text-center">${item.id}</td>
             <td class="editable" data-field="fr">${item.fr || ''}</td>
             <td class="editable" data-field="marca">${item.marca || ''}</td>
             <td class="editable" data-field="modelo">${item.modelo || ''}</td>
-            <td class="editable" data-field="cliente">${item.cliente || ''}</td>
-            <td class="editable" data-field="encargado">${item.encargado || ''}</td>
-            <td class="editable text-truncate" data-field="observaciones" style="max-width: 250px;" title="${item.observaciones || ''}">${item.observaciones || ''}</td>
-            <td class="editable" data-field="serie">${item.serie || ''}</td>
+            <td class="editable text-truncate" data-field="reporte_cliente" style="max-width: 250px;" title="${item.reporte_cliente || ''}">${item.reporte_cliente || ''}</td>
             <td class="text-info fst-italic bg-darker">${item.estado}</td>
+            <td class="editable" data-field="condicion">${item.condicion || ''}</td>
+            <td class="editable" data-field="encargado">${item.encargado || ''}</td>
+            <td class="editable" data-field="fecha_ingreso">${item.fecha_ingreso || ''}</td>
+            <td class="editable text-truncate" data-field="observaciones" style="max-width: 250px;" title="${item.observaciones || ''}">${item.observaciones || ''}</td>
+            <td class="editable" data-field="cliente">${item.cliente || ''}</td>
+            <td class="editable" data-field="serie">${item.serie || ''}</td>
+            <td class="editable text-truncate" data-field="accesorios" style="max-width: 200px;" title="${item.accesorios || ''}">${item.accesorios || ''}</td>
+            <!-- NEW COLUMNS -->
+            <td class="editable" data-field="encargado_mantenimiento">${item.encargado_mantenimiento || ''}</td>
+            <td class="editable" data-field="numero_informe">${item.numero_informe || ''}</td>
+            <td class="editable" data-field="hora_inicio_diagnostico">${item.hora_inicio_diagnostico || ''}</td>
+            <td class="editable text-truncate" data-field="observaciones_diagnostico" style="max-width: 200px;" title="${item.observaciones_diagnostico || ''}">${item.observaciones_diagnostico || ''}</td>
+            <td class="editable" data-field="hora_inicio_mantenimiento">${item.hora_inicio_mantenimiento || ''}</td>
+            <td class="editable text-truncate" data-field="observaciones_mantenimiento" style="max-width: 200px;" title="${item.observaciones_mantenimiento || ''}">${item.observaciones_mantenimiento || ''}</td>
         </tr>
     `).join('');
 

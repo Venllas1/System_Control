@@ -273,6 +273,13 @@ class EquipmentService:
             if 'condicion' in data: eq.condicion = data['condicion']
             if 'numero_informe' in data: eq.numero_informe = data['numero_informe']
             
+            # New Excel Fields
+            if 'encargado_mantenimiento' in data: eq.encargado_mantenimiento = data['encargado_mantenimiento']
+            if 'hora_inicio_diagnostico' in data: eq.hora_inicio_diagnostico = data['hora_inicio_diagnostico']
+            if 'observaciones_diagnostico' in data: eq.observaciones_diagnostico = data['observaciones_diagnostico']
+            if 'hora_inicio_mantenimiento' in data: eq.hora_inicio_mantenimiento = data['hora_inicio_mantenimiento']
+            if 'observaciones_mantenimiento' in data: eq.observaciones_mantenimiento = data['observaciones_mantenimiento']
+            
             # Encargado can be updated here
             if 'encargado' in data: eq.encargado = data['encargado']
 

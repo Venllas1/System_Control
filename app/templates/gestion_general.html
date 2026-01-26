@@ -31,8 +31,7 @@
                 <table class="table table-dark table-hover mb-0 align-middle" id="generalTable">
                     <thead class="bg-dark text-secondary text-uppercase text-xs sticky-top">
                         <tr>
-                            <th class="ps-4">ID</th>
-                            <th>FR</th>
+                            <th class="ps-4">FR</th>
                             <th>Equipo</th>
                             <th>Estado</th>
                             <th>Cliente</th>
@@ -93,11 +92,45 @@
                             <input type="text" class="form-control bg-dark text-light border-secondary" name="encargado"
                                 id="editEncargado">
                         </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary">Encargado Mantenimiento</label>
+                            <input type="text" class="form-control bg-dark text-light border-secondary"
+                                name="encargado_mantenimiento" id="editEncMant">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary">No. Informe</label>
+                            <input type="text" class="form-control bg-dark text-light border-secondary"
+                                name="numero_informe" id="editInforme">
+                        </div>
+
+                        <!-- Fechas y Horas -->
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary">Inicio Diagnóstico</label>
+                            <input type="text" class="form-control bg-dark text-light border-secondary"
+                                name="hora_inicio_diagnostico" id="editInicioDiag" placeholder="YYYY-MM-DD HH:MM">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary">Inicio Mantenimiento</label>
+                            <input type="text" class="form-control bg-dark text-light border-secondary"
+                                name="hora_inicio_mantenimiento" id="editInicioMant" placeholder="YYYY-MM-DD HH:MM">
+                        </div>
+
                         <div class="col-12">
                             <label class="form-label text-secondary">Observaciones</label>
                             <textarea class="form-control bg-dark text-light border-secondary" name="observaciones"
-                                id="editObservaciones" rows="3"></textarea>
+                                id="editObservaciones" rows="2"></textarea>
                         </div>
+                        <div class="col-12">
+                            <label class="form-label text-secondary">Observaciones Diagnóstico</label>
+                            <textarea class="form-control bg-dark text-light border-secondary"
+                                name="observaciones_diagnostico" id="editObsDiag" rows="2"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label text-secondary">Observaciones Mantenimiento</label>
+                            <textarea class="form-control bg-dark text-light border-secondary"
+                                name="observaciones_mantenimiento" id="editObsMant" rows="2"></textarea>
+                        </div>
+
                         <div class="col-12">
                             <div class="alert alert-info border-info bg-opacity-10 d-flex align-items-center">
                                 <i class="fas fa-info-circle me-2"></i>
@@ -169,8 +202,7 @@
 
         tbody.innerHTML = data.map(item => `
             <tr>
-                <td class="ps-4 text-muted">#${item.id}</td>
-                <td class="text-info fw-bold">${item.fr || '-'}</td>
+                <td class="ps-4 text-info fw-bold">${item.fr || '-'}</td>
                 <td>
                     <div class="d-flex flex-column">
                         <span class="fw-bold text-white">${item.marca}</span>
@@ -200,6 +232,14 @@
         document.getElementById('editCliente').value = item.cliente || '';
         document.getElementById('editEncargado').value = item.encargado || '';
         document.getElementById('editObservaciones').value = item.observaciones || '';
+
+        // New Fields
+        document.getElementById('editEncMant').value = item.encargado_mantenimiento || '';
+        document.getElementById('editInforme').value = item.numero_informe || '';
+        document.getElementById('editInicioDiag').value = item.hora_inicio_diagnostico || '';
+        document.getElementById('editInicioMant').value = item.hora_inicio_mantenimiento || '';
+        document.getElementById('editObsDiag').value = item.observaciones_diagnostico || '';
+        document.getElementById('editObsMant').value = item.observaciones_mantenimiento || '';
 
         new bootstrap.Modal(document.getElementById('editDataModal')).show();
     }
