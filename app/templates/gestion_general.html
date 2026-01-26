@@ -195,53 +195,79 @@
         const count = document.getElementById('recordCount');
         container.innerHTML = '';
 
-        // Define Groups
-        const groups = {
-            'Diagnóstico': ['Espera de Diagnostico', 'en Diagnostico', 'espera de repuesto o consumible', 'Repuesto entregado'],
-            'Proceso y Mantenimiento': ['Pendiente de aprobacion', 'Aprobado', 'Inicio de Servicio', 'En servicio', 'espera de repuestos'],
-            'Finalizado': ['Servicio culminado', 'Entregado']
-        };
+        // NEW ORDER & GROUPING
+        const groupsConfig = [
+            {
+                name: 'Diagnóstico',
+                states: ['Espera de Diagnostico', 'en Diagnostico', 'espera de repuesto o consumible', 'Repuesto entregado'],
+                color: 'info'
+            },
+            {
+                name: 'Aprobado',
+                states: ['Aprobado', 'Inicio de Servicio', 'En servicio', 'espera de repuestos'],
+                color: 'success'
+            },
+            {
+                name: 'Pendiente de Aprobación',
+                states: ['Pendiente de aprobacion'],
+                color: 'warning'
+            },
+            {
+                name: 'Entregados y Otros',
+                states: ['Servicio culminado', 'Entregado'], // Others will be added here
+                isDefault: true,
+                color: 'secondary'
+            }
+        ];
 
-        // Bucket data
-        const buckets = { 'Otros': [] };
-        Object.keys(groups).forEach(k => buckets[k] = []);
+        // Initialize Buckets
+        const buckets = {};
+        groupsConfig.forEach(g => buckets[g.name] = []);
 
+        // Distribute Data
         data.forEach(item => {
             let placed = false;
-            for (const [groupName, states] of Object.entries(groups)) {
-                if (states.includes(item.estado)) {
-                    buckets[groupName].push(item);
+            for (const group of groupsConfig) {
+                if (group.states.includes(item.estado)) {
+                    buckets[group.name].push(item);
                     placed = true;
                     break;
                 }
             }
-            if (!placed) buckets['Otros'].push(item);
+            if (!placed) {
+                // Find the default group (Entregados y Otros)
+                const defaultGroup = groupsConfig.find(g => g.isDefault);
+                buckets[defaultGroup.name].push(item);
+            }
         });
 
-        // Render Groups
+        // Render Groups in specific ORDER
         let totalCount = 0;
-        for (const [groupName, items] of Object.entries(buckets)) {
-            if (items.length === 0) continue;
+        groupsConfig.forEach(group => {
+            const items = buckets[group.name];
+            if (items.length === 0 && !group.isDefault) return; // Skip empty except maybe others?
+            if (items.length === 0) return;
+
             totalCount += items.length;
 
             const card = document.createElement('div');
             card.className = 'card bg-dark-card border-secondary shadow-sm mb-4';
             card.innerHTML = `
                 <div class="card-header border-secondary d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 text-white border-start border-4 border-info ps-3">${groupName}</h5>
-                    <span class="badge bg-secondary">${items.length}</span>
+                    <h5 class="mb-0 text-white border-start border-4 border-${group.color} ps-3">${group.name}</h5>
+                    <span class="badge bg-${group.color} bg-opacity-25 text-${group.color}">${items.length} equipos</span>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-dark table-hover mb-0 align-middle">
                             <thead class="bg-dark text-secondary text-uppercase text-xs">
                                 <tr>
-                                    <th class="ps-4">FR</th>
-                                    <th>Equipo</th>
-                                    <th>Estado</th>
-                                    <th>Cliente</th>
-                                    <th>Serie</th> <!-- REPLACED ENCARGADO -->
-                                    <th>Fecha Ingreso</th>
+                                    <th class="ps-4" style="width: 15%">FR</th>
+                                    <th style="width: 25%">Equipo</th>
+                                    <th style="width: 20%">Estado</th>
+                                    <th style="width: 20%">Cliente</th>
+                                    <th style="width: 10%">Serie</th>
+                                    <th style="width: 10%">Fecha</th>
                                     <th class="text-end pe-4">Acciones</th>
                                 </tr>
                             </thead>
@@ -253,7 +279,7 @@
                 </div>
             `;
             container.appendChild(card);
-        }
+        });
 
         count.innerText = `${totalCount} registros totales`;
     }
