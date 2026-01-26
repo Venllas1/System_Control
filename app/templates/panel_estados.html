@@ -591,6 +591,76 @@
     </div>
 </div>
 
+<!-- CREATE EQUIPMENT MODAL -->
+<div class="modal fade" id="createEquipmentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content bg-dark-card border-secondary text-light">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title"><i class="fas fa-plus-circle text-success me-2"></i>Registrar Nuevo Equipo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createEquipmentForm">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label text-secondary small text-uppercase fw-bold">Número de FR</label>
+                            <input type="text" name="fr" class="form-control bg-dark text-light border-secondary"
+                                placeholder="Ej: 100-1">
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label text-secondary small text-uppercase fw-bold">Cliente *</label>
+                            <input type="text" name="cliente" class="form-control bg-dark text-light border-secondary"
+                                required>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label text-secondary small text-uppercase fw-bold">Fecha de
+                                Ingreso</label>
+                            <input type="date" name="fecha_ingreso"
+                                class="form-control bg-dark text-light border-secondary">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-secondary small text-uppercase fw-bold">Marca *</label>
+                            <input type="text" name="marca" class="form-control bg-dark text-light border-secondary"
+                                required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-secondary small text-uppercase fw-bold">Modelo *</label>
+                            <input type="text" name="modelo" class="form-control bg-dark text-light border-secondary"
+                                required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small text-uppercase fw-bold">Número de
+                                Serie</label>
+                            <input type="text" name="serie" class="form-control bg-dark text-light border-secondary">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small text-uppercase fw-bold">Accesorios</label>
+                            <input type="text" name="accesorios"
+                                class="form-control bg-dark text-light border-secondary">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label text-secondary small text-uppercase fw-bold">Reporte del Cliente
+                                *</label>
+                            <textarea name="reporte_cliente" class="form-control bg-dark text-light border-secondary"
+                                rows="3" required placeholder="Describa el problema o solicitud del cliente"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" onclick="submitCreateEquipment()">
+                    <i class="fas fa-save me-1"></i> Guardar Equipo
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- DATA -->
 <div id="equipmentsData" data-equipments='{{ equipments_json|safe }}' data-user-role='{{ current_role|tojson }}'
     style="display:none;"></div>
