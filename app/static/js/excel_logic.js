@@ -42,7 +42,7 @@ function applyFilters() {
             (item.cliente || '').toLowerCase().includes(textTerm);
 
         // Status Filter
-        const matchesStatus = !statusTerm || item.estado === statusTerm;
+        const matchesStatus = !statusTerm || (item.estado || '').toLowerCase().trim() === statusTerm.toLowerCase().trim();
 
         return matchesText && matchesStatus;
     });
@@ -64,7 +64,7 @@ function renderExcelTable(data) {
             <td class="editable" data-field="marca">${item.marca || ''}</td>
             <td class="editable" data-field="modelo">${item.modelo || ''}</td>
             <td class="editable text-truncate" data-field="reporte_cliente" style="max-width: 250px;" title="${item.reporte_cliente || ''}">${item.reporte_cliente || ''}</td>
-            <td class="text-info fst-italic bg-darker">${item.estado}</td>
+            <td class="text-info fst-italic bg-darker font-monospace" style="font-size: 0.8rem;">${(item.estado || '').toUpperCase()}</td>
             <td class="editable" data-field="condicion">${item.condicion || ''}</td>
             <td class="editable" data-field="encargado">${item.encargado || ''}</td>
             <td class="editable" data-field="fecha_ingreso">${item.fecha_ingreso || ''}</td>

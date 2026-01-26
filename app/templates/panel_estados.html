@@ -688,7 +688,7 @@
             else if (s.includes('servicio') || s.includes('reparacion')) { badgeClass = 'bg-primary'; icon = 'fa-tools'; }
             else if (s.includes('culminado') || s.includes('entregado')) { badgeClass = 'bg-success'; icon = 'fa-flag-checkered'; }
 
-            return `<span class="badge ${badgeClass} text-uppercase"><i class="fas ${icon} me-1"></i> ${status}</span>`;
+            return `<span class="badge ${badgeClass} text-uppercase"><i class="fas ${icon} me-1"></i> ${(status || '').toUpperCase()}</span>`;
         }
 
         function createRow(item, isVisualizador = false) {

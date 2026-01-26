@@ -227,8 +227,17 @@
         // Distribute Data
         data.forEach(item => {
             let placed = false;
+            const itemState = (item.estado || '').toLowerCase().trim();
+
             for (const group of groupsConfig) {
-                if (group.states.includes(item.estado)) {
+                // Check for exact match or partial match in normalized states
+                const matches = group.states.some(s => {
+                    const normS = s.toLowerCase().trim();
+                    // Basic match or if the item state contains the configured state keyword
+                    return itemState === normS || itemState.includes(normS);
+                });
+
+                if (matches) {
                     buckets[group.name].push(item);
                     placed = true;
                     break;
@@ -294,7 +303,7 @@
                         <small class="text-muted">${item.modelo}</small>
                     </div>
                 </td>
-                <td><span class="badge bg-secondary">${item.estado}</span></td>
+                <td><span class="badge bg-secondary font-monospace" style="font-size: 0.75rem;">${(item.estado || '').toUpperCase()}</span></td>
                 <td>${item.cliente || '-'}</td>
                 <td class="text-light font-monospace">${item.serie || '-'}</td> <!-- SERIE COLUMN -->
                 <td>${item.fecha_ingreso || '-'}</td>
