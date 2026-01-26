@@ -14,6 +14,37 @@
         </button>
     </div>
 
+    <!-- FILTER TOOLBAR -->
+    <div class="row g-3 mb-3">
+        <div class="col-md-4">
+            <div class="input-group">
+                <span class="input-group-text bg-dark border-secondary text-secondary">
+                    <i class="fas fa-search"></i>
+                </span>
+                <input type="text" id="filterText" class="form-control bg-dark text-light border-secondary"
+                    placeholder="Filtrar por FR, Marca, Modelo...">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <select id="filterStatus" class="form-select bg-dark text-light border-secondary">
+                <option value="">Todos los Estados</option>
+                <option value="Espera de Diagnostico">Espera de Diagnostico</option>
+                <option value="en Diagnostico">En Diagnostico</option>
+                <option value="Pendiente de aprobacion">Pendiente de Aprobación</option>
+                <option value="Aprobado">Aprobado</option>
+                <option value="Inicio de Servicio">Inicio de Servicio</option>
+                <option value="En servicio">En Servicio</option>
+                <option value="Servicio culminado">Servicio Culminado</option>
+                <option value="Entregado">Entregado</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-secondary w-100" id="clearFiltersBtn">
+                <i class="fas fa-times me-2"></i>Limpiar
+            </button>
+        </div>
+    </div>
+
     <div class="card bg-dark-card border-secondary shadow-sm">
         <div class="card-body p-0">
             <div class="table-responsive" style="max-height: 80vh; overflow-y: auto;">

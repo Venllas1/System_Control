@@ -1,11 +1,19 @@
 /**
  * Excel-like Inline Editing Logic
  * Handles double-click to edit, blur to save
+ * Includes Frontend Filtering
  */
+
+let allExcelData = [];
 
 document.addEventListener('DOMContentLoaded', function () {
     loadData();
     document.getElementById('refreshBtn').addEventListener('click', loadData);
+
+    // Filter Event Listeners
+    document.getElementById('filterText').addEventListener('keyup', applyFilters);
+    document.getElementById('filterStatus').addEventListener('change', applyFilters);
+    document.getElementById('clearFiltersBtn').addEventListener('click', clearFilters);
 });
 
 async function loadData() {
@@ -13,11 +21,39 @@ async function loadData() {
         const response = await fetch('/api/search?q=all');
         const result = await response.json();
         if (result.success) {
-            renderExcelTable(result.data);
+            allExcelData = result.data;
+            applyFilters(); // Render with current filters (or empty)
         }
     } catch (error) {
         console.error('Error loading data:', error);
     }
+}
+
+function applyFilters() {
+    const textTerm = document.getElementById('filterText').value.toLowerCase().trim();
+    const statusTerm = document.getElementById('filterStatus').value;
+
+    const filtered = allExcelData.filter(item => {
+        // Text Filter
+        const matchesText = !textTerm ||
+            (item.fr || '').toLowerCase().includes(textTerm) ||
+            (item.marca || '').toLowerCase().includes(textTerm) ||
+            (item.modelo || '').toLowerCase().includes(textTerm) ||
+            (item.cliente || '').toLowerCase().includes(textTerm);
+
+        // Status Filter
+        const matchesStatus = !statusTerm || item.estado === statusTerm;
+
+        return matchesText && matchesStatus;
+    });
+
+    renderExcelTable(filtered);
+}
+
+function clearFilters() {
+    document.getElementById('filterText').value = '';
+    document.getElementById('filterStatus').value = '';
+    applyFilters();
 }
 
 function renderExcelTable(data) {
@@ -114,6 +150,11 @@ async function saveCell(cell, newValue, originalValue) {
             cell.classList.add('bg-success', 'bg-opacity-25');
             setTimeout(() => cell.classList.remove('bg-success', 'bg-opacity-25'), 1000);
             showToast();
+
+            // Update local data store to reflect change for filtering
+            const item = allExcelData.find(i => i.id == id);
+            if (item) item[field] = newValue;
+
         } else {
             cell.innerText = originalValue;
             alert('Error al guardar: ' + result.error);
