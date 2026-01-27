@@ -109,7 +109,7 @@ def search():
     
     if not query or query == 'all':
         # Return all (limited to 500 recent) for general view
-        results = Equipment.query.order_by(Equipment.fecha_ingreso.desc()).limit(500).all()
+        results = Equipment.query.order_by(Equipment.fecha_ingreso.desc()).all()
         return jsonify({
             'success': True, 
             'data': [item.to_dict() for item in results]

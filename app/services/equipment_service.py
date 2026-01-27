@@ -141,7 +141,7 @@ class EquipmentService:
             Equipment.modelo.ilike(search_pattern),
             Equipment.encargado.ilike(search_pattern),
             Equipment.cliente.ilike(search_pattern)
-        )).limit(100).all()
+        )).all()
 
     @staticmethod
     def delete_equipment(equipment_id):
