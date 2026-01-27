@@ -812,7 +812,7 @@
                 else if (s.includes('pendiente de aprobacion') || s.includes('pendiente aprobacion')) {
                     if (isRec) {
                         actionsHtml += `<button class="btn btn-sm btn-success" onclick="updateStatus(${item.id}, 'Aprobado')">Aprobar</button>`;
-                        actionsHtml += `<button class="btn btn-sm btn-danger" onclick="updateStatus(${item.id}, 'Rechazado')">Rechazar</button>`;
+                        actionsHtml += `<button class="btn btn-sm btn-danger" onclick="updateStatus(${item.id}, 'Entregado - Devolucion')">Devolución</button>`;
                     }
                 }
                 else if (s === 'aprobado') {

@@ -37,6 +37,7 @@ class Equipment(db.Model):
         ESPERA_REPUESTOS = 'espera de repuestos'
         EN_SERVICIO = 'En servicio'
         ENTREGADO = 'Entregado'
+        ENTREGADO_DEVOLUCION = 'Entregado - Devolucion'
         RECHAZADO = 'Rechazado'
         REVISION = 'Revision'
 
