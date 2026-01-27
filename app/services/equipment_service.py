@@ -76,11 +76,9 @@ class EquipmentService:
         return stats
 
     @staticmethod
-    def _update_status_internal(equipment_id, new_status, user_name, encargado=None):
+    def _update_status_internal(equipment_id, new_status, user_name, additional_data=None):
         """
         Internal method to update equipment status and log history.
-        WARNING: This method does NOT validate transitions.
-        Use advance_to_next_state() for validated state changes.
         """
         equipment = Equipment.query.get(equipment_id)
         if not equipment:
@@ -88,8 +86,19 @@ class EquipmentService:
 
         prev_status = equipment.estado
         equipment.estado = new_status
-        if encargado:
-            equipment.encargado = encargado
+        
+        # Apply additional data if provided
+        if additional_data:
+            if 'encargado_diagnostico' in additional_data:
+                equipment.encargado_diagnostico = additional_data['encargado_diagnostico']
+            if 'numero_informe' in additional_data:
+                equipment.numero_informe = additional_data['numero_informe']
+            if 'encargado_mantenimiento' in additional_data:
+                equipment.encargado_mantenimiento = additional_data['encargado_mantenimiento']
+            if 'hora_inicio_mantenimiento' in additional_data:
+                equipment.hora_inicio_mantenimiento = additional_data['hora_inicio_mantenimiento']
+            if 'hora_inicio_diagnostico' in additional_data:
+                equipment.hora_inicio_diagnostico = additional_data['hora_inicio_diagnostico']
 
         # Log History
         history = StatusHistory(
@@ -139,7 +148,7 @@ class EquipmentService:
             Equipment.fr.ilike(search_pattern),
             Equipment.marca.ilike(search_pattern),
             Equipment.modelo.ilike(search_pattern),
-            Equipment.encargado.ilike(search_pattern),
+            Equipment.encargado_diagnostico.ilike(search_pattern),
             Equipment.cliente.ilike(search_pattern)
         )).all()
 
@@ -172,7 +181,7 @@ class EquipmentService:
         ).order_by(Equipment.fecha_ingreso.asc()).all()
     
     @staticmethod
-    def get_next_state_info(equipment_id, user):
+    def get_next_state_info(equipment_id, user, target_state=None):
         """
         Get information about the next possible state(s) for an equipment.
         
@@ -184,7 +193,7 @@ class EquipmentService:
             return None
         
         role = user.role.lower()
-        state_info = WorkflowEngine.get_state_info(equipment.estado, role)
+        state_info = WorkflowEngine.get_state_info(equipment.estado, role, target_state=target_state)
         
         return {
             'equipment_id': equipment_id,
@@ -192,22 +201,15 @@ class EquipmentService:
             'next_states': state_info['next_states'],
             'can_advance': state_info['can_advance'],
             'requires_decision': state_info['requires_decision'],
-            'is_terminal': state_info['is_terminal']
+            'is_terminal': state_info['is_terminal'],
+            'prompt_fields': state_info.get('prompt_fields', [])
         }
     
     @staticmethod
-    def advance_to_next_state(equipment_id, user, next_state=None):
+    def advance_to_next_state(equipment_id, user, next_state=None, additional_data=None):
         """
         Advance equipment to the next state in the workflow.
         Validates transitions and role permissions.
-        
-        Args:
-            equipment_id: ID of the equipment
-            user: User object performing the action
-            next_state: Specific next state (required if multiple options exist)
-            
-        Returns:
-            tuple: (success: bool, message: str, new_state: str or None)
         """
         equipment = Equipment.query.get(equipment_id)
         if not equipment:
@@ -222,20 +224,14 @@ class EquipmentService:
         if next_states is None:
             return False, "El equipo ya está en estado terminal (Entregado)", None
         
-        # Check if user can advance from current state
-        if not WorkflowEngine.can_advance(current_state, role):
-            return False, f"Tu rol ({user.role}) no puede avanzar equipos desde '{current_state}'", None
-        
         # Determine the target state
         if len(next_states) == 1:
-            # Only one option, use it
             target_state = next_states[0]
         elif len(next_states) > 1:
-            # Multiple options, user must specify
             if not next_state:
                 return False, "Debes seleccionar el siguiente estado", None
             if next_state not in next_states:
-                return False, f"Estado '{next_state}' no es una opción válida desde '{current_state}'", None
+                return False, f"Estado '{next_state}' no es una opción válida", None
             target_state = next_state
         else:
             return False, "No hay estados siguientes definidos", None
@@ -245,11 +241,22 @@ class EquipmentService:
         if not is_valid:
             return False, error_msg, None
         
-        # Perform the state change (internal method without validation)
+        # Handle Auto-fill fields if defined in workflow
+        target_info = WorkflowEngine.STATE_FLOW.get(target_state, {})
+        auto_fill = target_info.get('auto_fill', {})
+        if not additional_data:
+            additional_data = {}
+            
+        for field, value in auto_fill.items():
+            if value == 'now':
+                additional_data[field] = datetime.now().strftime('%Y-%m-%d %H:%M')
+        
+        # Perform the state change
         success, message = EquipmentService._update_status_internal(
             equipment_id,
             target_state,
-            user.username
+            user.username,
+            additional_data=additional_data
         )
         
         if success:
@@ -279,6 +286,9 @@ class EquipmentService:
             if 'fr' in data: 
                 val = get_val('fr')
                 eq.fr = val.upper() if val else None
+            if 'encargado_diagnostico' in data: 
+                val = get_val('encargado_diagnostico')
+                eq.encargado_diagnostico = val.upper() if val else None
             if 'marca' in data: 
                 val = get_val('marca')
                 eq.marca = val.upper() if val else None

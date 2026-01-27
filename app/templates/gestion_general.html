@@ -84,8 +84,8 @@
                                 id="editCliente">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label text-secondary">Encargado</label>
-                            <select class="form-select bg-dark text-light border-secondary" name="encargado"
+                            <label class="form-label text-secondary">Encargado Diagnóstico</label>
+                            <select class="form-select bg-dark text-light border-secondary" name="encargado_diagnostico"
                                 id="editEncargado">
                                 <option value="">No asignado</option>
                                 <option value="SERGIO">SERGIO</option>
@@ -402,7 +402,7 @@
         document.getElementById('editMarca').value = item.marca || '';
         document.getElementById('editModelo').value = item.modelo || '';
         document.getElementById('editCliente').value = item.cliente || '';
-        document.getElementById('editEncargado').value = item.encargado || '';
+        document.getElementById('editEncargado').value = item.encargado_diagnostico || '';
         document.getElementById('editObservaciones').value = item.observaciones || '';
         document.getElementById('editSerie').value = item.serie || '';
         document.getElementById('editEncMant').value = item.encargado_mantenimiento || '';

@@ -766,7 +766,7 @@
             return `<span class="badge ${badgeClass} text-uppercase"><i class="fas ${icon} me-1"></i> ${(status || '').toUpperCase()}</span>`;
         }
 
-        function createRow(item, isVisualizador = false) {
+        function createRow(item, isVisualizador = false, technicianType = 'diagnostico') {
             const today = new Date();
             const ingreso = new Date(item.fecha_ingreso);
             const diffDays = Math.ceil(Math.abs(today - ingreso) / (1000 * 60 * 60 * 24));
@@ -830,68 +830,40 @@
                 actionsHtml += infoBtn;
                 actionsHtml += `</div>`;
             } else {
-                // Visualizador Actions (Just Info Button)
                 actionsHtml = infoBtn;
             }
 
-            const frDisplay = item.fr || 'Sin FR';
+            const tech = technicianType === 'mantenimiento' ? (item.encargado_mantenimiento || 'Sin asignar') : (item.encargado_diagnostico || 'Sin asignar');
 
             if (isVisualizador) {
-                // Days logic for visualizador: Only for "En Diagnostico"
-                let daysCell = '';
-                // Check if table is "Diagnostico" type based on state content.
-                // We'll trust the caller passes items filtered. 
-                // But specifically, user asked for "Días" column only for "En diagnóstico".
-                // Since this function builds a row, we check the item state.
-
-                // However, we need to know if we should render the TD or not depending on the table header.
-                // The table headers are static in HTML. We need to match.
-                // 1. Diagnostico Table -> Has "Días"? No, header says specific cols.
-                // 2. Approved Table -> No days column requested?
-
-                // Actually, the request says "Añade una columna “Días” ... calcularse únicamente para equipos en estado “En diagnóstico”."
-                // This implies the Diagnostico table needs that column.
-                // The generic createRow returns a TR string. formatting must match the TABLE THEAD.
-
-                // Current Table 1 (Diag) Headers: FR, Marca/Modelo, Estado, Encargado, Fecha. (5 cols)
-                // We need to ADD "Días" header to table 1 HTML.
-                // And for other tables, we shouldn't show it? Or show it but empty?
-                // The cleanest way is to just render it for all tables in Visualizador mode, but only populate it for Diag items.
-                // BUT, HTML Thead must match.
-                // I will add "Días" header to ALL Visualizador tables for consistency, or dynamically.
-                // Let's assume I'll update the HTML headers to include "Días" for all 3 tables or just Diag.
-                // User said "Esta columna debe calcularse únicamente para equipos en estado “En diagnóstico”."
-                // If I add the column <td> to the row, I must add <th> to the table.
-
                 let daysValue = '-';
                 if (s.includes('diagnostico') && !s.includes('espera')) {
                     daysValue = `<span class="badge ${diffDays > 3 ? 'bg-danger' : 'bg-success'}">${diffDays} días</span>`;
                 }
 
-                // Assuming all Visualizador tables will have the 'Días' column added to THEAD
                 return `
                 <tr>
-                    <td class="ps-4 fw-bold text-info">${frDisplay}</td>
+                    <td class="ps-4 fw-bold text-info">${item.fr || 'Sin FR'}</td>
                     <td>${item.marca} ${item.modelo}</td>
                     <td>${getStatusBadge(item.estado)}</td>
-                    <td class="text-light">${item.encargado}</td>
+                    <td class="text-light">${tech}</td>
                     <td class="text-muted">${item.fecha_ingreso || 'N/A'}</td>
-                    <td class="text-center">${daysValue}</td> <!-- Days Column -->
-                    <td class="text-end pe-4">${actionsHtml}</td> <!-- Actions including Info -->
+                    <td class="text-center">${daysValue}</td>
+                    <td class="text-end pe-4">${actionsHtml}</td>
                 </tr>
-            `;
+                `;
             } else {
                 return `
                 <tr>
-                    <td class="ps-4 text-info fw-bold">${frDisplay}</td>
+                    <td class="ps-4 text-info fw-bold">${item.fr || 'Sin FR'}</td>
                     <td class="text-white">${item.marca} ${item.modelo}</td>
                     <td>${getStatusBadge(item.estado)}</td>
-                    <td class="text-sm text-light"><i class="fas fa-user-circle me-1 text-muted"></i> ${item.encargado}</td>
+                    <td class="text-sm text-light"><i class="fas fa-user-circle me-1 text-muted"></i> ${tech}</td>
                     <td class="text-sm text-muted">${item.fecha_ingreso || 'N/A'}</td>
                     <td><span class="badge ${diffDays > 5 ? 'bg-danger' : 'bg-success'} badge-pill">${diffDays} días</span></td>
                     <td class="text-end pe-4">${actionsHtml}</td>
                 </tr>
-            `;
+                `;
             }
         }
 
@@ -949,7 +921,7 @@
                 const pageData = filtered.slice(start, end);
 
                 if (tEntregados) {
-                    tEntregados.innerHTML = pageData.length ? pageData.map(i => createRow(i, true)).join('')
+                    tEntregados.innerHTML = pageData.length ? pageData.map(i => createRow(i, true, 'mantenimiento')).join('')
                         : '<tr><td colspan="6" class="text-center text-muted py-3">Sin equipos entregados</td></tr>';
                 }
 
@@ -972,7 +944,7 @@
         if (userRole === 'visualizador' || userRole === 'admin') {
             const ITEMS_PER_PAGE = 5;
 
-            function createRenderLogic(filterFn, tableId, searchId, paginationIds = null) {
+            function createRenderLogic(filterFn, tableId, searchId, paginationIds = null, techType = 'diagnostico') {
                 let sectionData = equipments.filter(item => filterFn(normalize(item.estado)));
                 const searchInput = document.getElementById(searchId);
                 let currentTerm = '';
@@ -990,13 +962,13 @@
                         if (pageState.page > totalPages) pageState.page = 1;
                         const start = (pageState.page - 1) * ITEMS_PER_PAGE;
                         const pageData = filtered.slice(start, start + ITEMS_PER_PAGE);
-                        document.getElementById(tableId).innerHTML = pageData.length ? pageData.map(i => createRow(i, userRole === 'visualizador')).join('')
+                        document.getElementById(tableId).innerHTML = pageData.length ? pageData.map(i => createRow(i, userRole === 'visualizador', techType)).join('')
                             : `<tr><td colspan="7" class="text-center text-muted py-3">Sin resultados</td></tr>`;
                         document.getElementById(paginationIds.info).innerText = `${pageState.page}/${totalPages}`;
                         document.getElementById(paginationIds.prev).disabled = (pageState.page === 1);
                         document.getElementById(paginationIds.next).disabled = (pageState.page === totalPages);
                     } else {
-                        document.getElementById(tableId).innerHTML = filtered.length ? filtered.map(i => createRow(i, userRole === 'visualizador')).join('')
+                        document.getElementById(tableId).innerHTML = filtered.length ? filtered.map(i => createRow(i, userRole === 'visualizador', techType)).join('')
                             : `<tr><td colspan="7" class="text-center text-muted py-3">Sin resultados</td></tr>`;
                     }
                 }
@@ -1012,10 +984,10 @@
                 render();
             }
 
-            createRenderLogic(s => (s.includes('diagnostico') && !s.includes('revision')) || s.includes('consumible') || (s.includes('repuesto') && !s.includes('repuestos')), 'tableDiagnostico', 'searchDiagnostico');
-            createRenderLogic(s => (s.includes('aprobado') || s.includes('servicio') || s.includes('repuestos')) && !s.includes('entregado') && !s.includes('culminado'), 'tableAprobado', 'searchAprobado', { prev: 'btnPrevAprobado', next: 'btnNextAprobado', info: 'pageInfoAprobado' });
-            createRenderLogic(s => s.includes('revision') || s.includes('reevaluacion'), 'tableRevision', 'searchRevision');
-            createRenderLogic(s => s.includes('pendiente') || s.includes('espera de aprobacion'), 'tablePendiente', 'searchPendiente', { prev: 'btnPrevPendiente', next: 'btnNextPendiente', info: 'pageInfoPendiente' });
+            createRenderLogic(s => (s.includes('diagnostico') && !s.includes('revision')) || s.includes('consumible') || (s.includes('repuesto') && !s.includes('repuestos')), 'tableDiagnostico', 'searchDiagnostico', null, 'diagnostico');
+            createRenderLogic(s => (s.includes('aprobado') || s.includes('servicio') || s.includes('repuestos')) && !s.includes('entregado') && !s.includes('culminado'), 'tableAprobado', 'searchAprobado', { prev: 'btnPrevAprobado', next: 'btnNextAprobado', info: 'pageInfoAprobado' }, 'mantenimiento');
+            createRenderLogic(s => s.includes('revision') || s.includes('reevaluacion'), 'tableRevision', 'searchRevision', null, 'mantenimiento');
+            createRenderLogic(s => s.includes('pendiente') || s.includes('espera de aprobacion'), 'tablePendiente', 'searchPendiente', { prev: 'btnPrevPendiente', next: 'btnNextPendiente', info: 'pageInfoPendiente' }, 'diagnostico');
 
         } else {
             // OPERATIONAL VIEW LOGIC (Individual tables with search/pagination like visualizador)
@@ -1037,7 +1009,7 @@
             }
 
             // Reusable render logic function (same as visualizador)
-            function createRenderLogicOp(filterFn, tableId, searchId, paginationIds = null) {
+            function createRenderLogicOp(filterFn, tableId, searchId, paginationIds = null, techType = 'diagnostico') {
                 let sectionData = equipments.filter(item => filterFn(normalize(item.estado)));
                 const searchInput = document.getElementById(searchId);
                 let currentTerm = '';
@@ -1055,13 +1027,13 @@
                         if (pageState.page > totalPages) pageState.page = 1;
                         const start = (pageState.page - 1) * ITEMS_PER_PAGE;
                         const pageData = filtered.slice(start, start + ITEMS_PER_PAGE);
-                        document.getElementById(tableId).innerHTML = pageData.length ? pageData.map(i => createRow(i, userRole === 'visualizador')).join('')
+                        document.getElementById(tableId).innerHTML = pageData.length ? pageData.map(i => createRow(i, userRole === 'visualizador', techType)).join('')
                             : `<tr><td colspan="7" class="text-center text-muted py-3">Sin resultados</td></tr>`;
                         document.getElementById(paginationIds.info).innerText = `${pageState.page}/${totalPages}`;
                         document.getElementById(paginationIds.prev).disabled = (pageState.page === 1);
                         document.getElementById(paginationIds.next).disabled = (pageState.page === totalPages);
                     } else {
-                        document.getElementById(tableId).innerHTML = filtered.length ? filtered.map(i => createRow(i, userRole === 'visualizador')).join('')
+                        document.getElementById(tableId).innerHTML = filtered.length ? filtered.map(i => createRow(i, userRole === 'visualizador', techType)).join('')
                             : `<tr><td colspan="7" class="text-center text-muted py-3">Sin resultados</td></tr>`;
                     }
                 }
@@ -1082,14 +1054,17 @@
                 s => s.includes('pendiente') && s.includes('aprobacion'),
                 'tablePendientesOp',
                 'searchPendientesOp',
-                { prev: 'btnPrevPendientesOp', next: 'btnNextPendientesOp', info: 'pageInfoPendientesOp' }
+                { prev: 'btnPrevPendientesOp', next: 'btnNextPendientesOp', info: 'pageInfoPendientesOp' },
+                'diagnostico'
             );
 
             // OPERACIONES: En Diagnóstico (with search)
             createRenderLogicOp(
                 s => (s.includes('diagnostico') && !s.includes('revision')) || s.includes('consumible') || s.includes('repuesto entregado'),
                 'tableDiagnosticoOp',
-                'searchDiagnosticoOp'
+                'searchDiagnosticoOp',
+                null,
+                'diagnostico'
             );
 
             // OPERACIONES: Aprobados / En Servicio (paginated)
@@ -1097,14 +1072,17 @@
                 s => (s.includes('aprobado') || s.includes('servicio') || s.includes('repuestos')) && !s.includes('culminado') && !s.includes('entregado'),
                 'tableAprobadosOp',
                 'searchAprobadosOp',
-                { prev: 'btnPrevAprobadosOp', next: 'btnNextAprobadosOp', info: 'pageInfoAprobadosOp' }
+                { prev: 'btnPrevAprobadosOp', next: 'btnNextAprobadosOp', info: 'pageInfoAprobadosOp' },
+                'mantenimiento'
             );
 
             // RECEPCIÓN: Servicio Culminado (listos para entregar)
             createRenderLogicOp(
                 s => s.includes('culminado'),
                 'tableCulminadosOp',
-                'searchCulminadosOp'
+                'searchCulminadosOp',
+                null,
+                'mantenimiento'
             );
 
             // ALMACÉN: Repuestos para Diagnóstico
@@ -1126,32 +1104,35 @@
 
         // Global Action wrappers
         window.startDiagnostics = function (id, status) {
-            const encargado = prompt("ASIGNACIÓN DE TÉCNICO:\nPor favor, ingrese el nombre del encargado:");
+            // This is now handled by workflow.js showAdvanceModal 
+            // but keeping this for legacy calls if any, using new field.
+            const encargado = prompt("ASIGNACIÓN DE TÉCNICO:\nPor favor, ingrese el nombre del encargado de diagnóstico:");
             if (encargado === null) return;
             if (!encargado.trim()) { alert("Debe asignar un encargado."); return; }
-            updateStatus(id, status, encargado.trim());
+            updateStatus(id, status, targetState = null, { encargado_diagnostico: encargado.trim() });
         };
 
-        window.updateStatus = async function (id, newStatus, newEncargado = null) {
+        window.updateStatus = async function (id, newStatus, targetState = null, additionalData = {}) {
             let msg = `¿Cambiar estado a: ${newStatus}?`;
-            if (newEncargado) msg += `\nAsignando a: ${newEncargado}`;
             if (!confirm(msg)) return;
 
-            const formData = new FormData();
-            formData.append('status', newStatus);
-            if (newEncargado) formData.append('encargado', newEncargado);
+            const payload = {
+                next_state: newStatus,
+                ...additionalData
+            };
 
-            // Use legacy endpoint which now validates workflow
             try {
                 const response = await fetch(`/api/equipment/${id}/update_status`, {
                     method: 'POST',
-                    body: formData
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
                 });
                 const data = await response.json();
 
                 if (data.success) location.reload();
                 else alert('Error: ' + data.error);
             } catch (err) {
+                console.error('Error updating status:', err);
                 alert('Error de red: ' + err);
             }
         };
@@ -1172,7 +1153,7 @@
             document.getElementById('infoFr').innerText = item.fr || 'N/A';
             document.getElementById('infoMarca').innerText = `${item.marca} ${item.modelo}`;
             document.getElementById('infoEstado').innerHTML = getStatusBadge(item.estado);
-            document.getElementById('infoEncargado').innerText = item.encargado || 'No Asignado';
+            document.getElementById('infoEncargado').innerText = item.encargado_diagnostico || 'No Asignado';
             document.getElementById('infoFecha').innerText = item.fecha_ingreso || 'N/A';
             document.getElementById('infoReporte').innerText = item.reporte_cliente || 'Sin reporte';
 

@@ -10,7 +10,7 @@ class Equipment(db.Model):
     reporte_cliente = db.Column(db.Text)
     estado = db.Column(db.String(255), index=True)
     condicion = db.Column(db.String(255))
-    encargado = db.Column(db.String(255))
+    encargado_diagnostico = db.Column(db.String(255))
     fecha_ingreso = db.Column(db.DateTime, default=datetime.utcnow)
     observaciones = db.Column(db.Text)
     cliente = db.Column(db.String(255))
@@ -47,7 +47,7 @@ class Equipment(db.Model):
             'estado': self.estado,
             'cliente': self.cliente,
             'fecha_ingreso': self.fecha_ingreso.strftime('%Y-%m-%d') if self.fecha_ingreso else None,
-            'encargado': self.encargado,
+            'encargado_diagnostico': self.encargado_diagnostico,
             'reporte_cliente': self.reporte_cliente,
             'observaciones': self.observaciones,
             'serie': self.serie,
