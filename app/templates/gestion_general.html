@@ -84,13 +84,25 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-secondary">Encargado</label>
-                            <input type="text" class="form-control bg-dark text-light border-secondary" name="encargado"
+                            <select class="form-select bg-dark text-light border-secondary" name="encargado"
                                 id="editEncargado">
+                                <option value="">No asignado</option>
+                                <option value="SERGIO">SERGIO</option>
+                                <option value="CARLOS">CARLOS</option>
+                                <option value="GERSSON">GERSSON</option>
+                                <option value="LUIS">LUIS</option>
+                            </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-secondary">Encargado Mantenimiento</label>
-                            <input type="text" class="form-control bg-dark text-light border-secondary"
+                            <select class="form-select bg-dark text-light border-secondary"
                                 name="encargado_mantenimiento" id="editEncMant">
+                                <option value="">No asignado</option>
+                                <option value="SERGIO">SERGIO</option>
+                                <option value="CARLOS">CARLOS</option>
+                                <option value="GERSSON">GERSSON</option>
+                                <option value="LUIS">LUIS</option>
+                            </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-secondary">No. Informe</label>
@@ -101,13 +113,13 @@
                         <!-- Fechas y Horas -->
                         <div class="col-md-6">
                             <label class="form-label text-secondary">Inicio Diagnóstico</label>
-                            <input type="text" class="form-control bg-dark text-light border-secondary"
-                                name="hora_inicio_diagnostico" id="editInicioDiag" placeholder="YYYY-MM-DD HH:MM">
+                            <input type="datetime-local" class="form-control bg-dark text-light border-secondary"
+                                name="hora_inicio_diagnostico" id="editInicioDiag">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-secondary">Inicio Mantenimiento</label>
-                            <input type="text" class="form-control bg-dark text-light border-secondary"
-                                name="hora_inicio_mantenimiento" id="editInicioMant" placeholder="YYYY-MM-DD HH:MM">
+                            <input type="datetime-local" class="form-control bg-dark text-light border-secondary"
+                                name="hora_inicio_mantenimiento" id="editInicioMant">
                         </div>
 
                         <div class="col-12">
@@ -331,8 +343,15 @@
         // New Fields
         document.getElementById('editEncMant').value = item.encargado_mantenimiento || '';
         document.getElementById('editInforme').value = item.numero_informe || '';
-        document.getElementById('editInicioDiag').value = item.hora_inicio_diagnostico || '';
-        document.getElementById('editInicioMant').value = item.hora_inicio_mantenimiento || '';
+
+        // Helper to format date "YYYY-MM-DD HH:MM" to "YYYY-MM-DDTHH:MM" for datetime-local
+        const formatDateForInput = (dateStr) => {
+            if (!dateStr) return '';
+            return dateStr.trim().replace(' ', 'T').substring(0, 16);
+        };
+
+        document.getElementById('editInicioDiag').value = formatDateForInput(item.hora_inicio_diagnostico);
+        document.getElementById('editInicioMant').value = formatDateForInput(item.hora_inicio_mantenimiento);
         document.getElementById('editObsDiag').value = item.observaciones_diagnostico || '';
         document.getElementById('editObsMant').value = item.observaciones_mantenimiento || '';
 

@@ -261,27 +261,61 @@ class EquipmentService:
             if not eq:
                 return False, "Equipo no encontrado"
 
+            # Helper to handle empty/trimmed strings
+            def get_val(key):
+                val = data.get(key)
+                if val is None: return None
+                val = val.strip()
+                return val if val != "" else None
+
             # Update uppercase fields
-            if 'fr' in data: eq.fr = data['fr'].upper()
-            if 'marca' in data: eq.marca = data['marca'].upper()
-            if 'modelo' in data: eq.modelo = data['modelo'].upper()
-            if 'cliente' in data: eq.cliente = data['cliente'].upper()
-            if 'serie' in data: eq.serie = data['serie'].upper()
-            if 'accesorios' in data: eq.accesorios = data['accesorios'].upper()
-            if 'reporte_cliente' in data: eq.reporte_cliente = data['reporte_cliente'].upper()
-            if 'observaciones' in data: eq.observaciones = data['observaciones'].upper()
-            if 'condicion' in data: eq.condicion = data['condicion']
-            if 'numero_informe' in data: eq.numero_informe = data['numero_informe']
+            if 'fr' in data: 
+                val = get_val('fr')
+                eq.fr = val.upper() if val else None
+            if 'marca' in data: 
+                val = get_val('marca')
+                eq.marca = val.upper() if val else None
+            if 'modelo' in data: 
+                val = get_val('modelo')
+                eq.modelo = val.upper() if val else None
+            if 'cliente' in data: 
+                val = get_val('cliente')
+                eq.cliente = val.upper() if val else None
+            if 'serie' in data: 
+                val = get_val('serie')
+                eq.serie = val.upper() if val else None
+            if 'accesorios' in data: 
+                val = get_val('accesorios')
+                eq.accesorios = val.upper() if val else None
+            if 'reporte_cliente' in data: 
+                val = get_val('reporte_cliente')
+                eq.reporte_cliente = val.upper() if val else None
+            if 'observaciones' in data: 
+                val = get_val('observaciones')
+                eq.observaciones = val.upper() if val else None
             
-            # New Excel Fields
-            if 'encargado_mantenimiento' in data: eq.encargado_mantenimiento = data['encargado_mantenimiento']
-            if 'hora_inicio_diagnostico' in data: eq.hora_inicio_diagnostico = data['hora_inicio_diagnostico']
-            if 'observaciones_diagnostico' in data: eq.observaciones_diagnostico = data['observaciones_diagnostico']
-            if 'hora_inicio_mantenimiento' in data: eq.hora_inicio_mantenimiento = data['hora_inicio_mantenimiento']
-            if 'observaciones_mantenimiento' in data: eq.observaciones_mantenimiento = data['observaciones_mantenimiento']
+            if 'condicion' in data: eq.condicion = get_val('condicion')
+            if 'numero_informe' in data: eq.numero_informe = get_val('numero_informe')
+            
+            # New Excel Fields (handled as strings, but we format the 'T' from datetime-local)
+            if 'encargado_mantenimiento' in data: eq.encargado_mantenimiento = get_val('encargado_mantenimiento')
+            
+            if 'hora_inicio_diagnostico' in data:
+                val = get_val('hora_inicio_diagnostico')
+                if val: val = val.replace('T', ' ')
+                eq.hora_inicio_diagnostico = val
+            
+            if 'observaciones_diagnostico' in data: eq.observaciones_diagnostico = get_val('observaciones_diagnostico')
+            
+            if 'hora_inicio_mantenimiento' in data:
+                val = get_val('hora_inicio_mantenimiento')
+                if val: val = val.replace('T', ' ')
+                eq.hora_inicio_mantenimiento = val
+            
+            if 'observaciones_mantenimiento' in data: eq.observaciones_mantenimiento = get_val('observaciones_mantenimiento')
             
             # Encargado can be updated here
-            if 'encargado' in data: eq.encargado = data['encargado']
+            if 'encargado' in data: eq.encargado = get_val('encargado')
 
             db.session.commit()
             return True, "Datos actualizados correctamente"
