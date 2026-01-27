@@ -5,6 +5,17 @@ from app.models.equipment import Equipment, StatusHistory
 from app.core.config import Config
 from app.core.workflow_engine import WorkflowEngine
 
+def parse_iso_datetime(val):
+    if not val or not isinstance(val, str): return None
+    # Handle 'YYYY-MM-DDTHH:MM' from datetime-local or 'YYYY-MM-DD HH:MM'
+    val = val.replace('T', ' ').strip()
+    try:
+        if len(val) == 10: # Just date
+            return datetime.strptime(val, '%Y-%m-%d')
+        return datetime.strptime(val[:16], '%Y-%m-%d %H:%M')
+    except:
+        return None
+
 class EquipmentService:
     @staticmethod
     def get_dashboard_config(user):
@@ -96,13 +107,9 @@ class EquipmentService:
             if 'encargado_mantenimiento' in additional_data:
                 equipment.encargado_mantenimiento = additional_data['encargado_mantenimiento']
             if 'hora_inicio_mantenimiento' in additional_data:
-                val = additional_data['hora_inicio_mantenimiento']
-                if val and isinstance(val, str): val = val.replace('T', ' ')
-                equipment.hora_inicio_mantenimiento = val
+                equipment.hora_inicio_mantenimiento = parse_iso_datetime(additional_data['hora_inicio_mantenimiento'])
             if 'hora_inicio_diagnostico' in additional_data:
-                val = additional_data['hora_inicio_diagnostico']
-                if val and isinstance(val, str): val = val.replace('T', ' ')
-                equipment.hora_inicio_diagnostico = val
+                equipment.hora_inicio_diagnostico = parse_iso_datetime(additional_data['hora_inicio_diagnostico'])
 
         # Log History
         history = StatusHistory(
@@ -322,16 +329,12 @@ class EquipmentService:
             if 'encargado_mantenimiento' in data: eq.encargado_mantenimiento = get_val('encargado_mantenimiento')
             
             if 'hora_inicio_diagnostico' in data:
-                val = get_val('hora_inicio_diagnostico')
-                if val: val = val.replace('T', ' ')
-                eq.hora_inicio_diagnostico = val
+                eq.hora_inicio_diagnostico = parse_iso_datetime(data['hora_inicio_diagnostico'])
             
             if 'observaciones_diagnostico' in data: eq.observaciones_diagnostico = get_val('observaciones_diagnostico')
             
             if 'hora_inicio_mantenimiento' in data:
-                val = get_val('hora_inicio_mantenimiento')
-                if val: val = val.replace('T', ' ')
-                eq.hora_inicio_mantenimiento = val
+                eq.hora_inicio_mantenimiento = parse_iso_datetime(data['hora_inicio_mantenimiento'])
             
             if 'observaciones_mantenimiento' in data: eq.observaciones_mantenimiento = get_val('observaciones_mantenimiento')
             

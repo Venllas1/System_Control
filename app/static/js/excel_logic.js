@@ -97,10 +97,25 @@ function setupEditableCells() {
 
             // Create input
             const input = document.createElement('input');
-            input.type = 'text';
-            input.value = currentText;
+
+            // USE DATETIME-LOCAL FOR TIME FIELDS
+            const isTimeField = field === 'hora_inicio_diagnostico' || field === 'hora_inicio_mantenimiento';
+            const isDateField = field === 'fecha_ingreso';
+
+            if (isTimeField) {
+                input.type = 'datetime-local';
+                // Format YYYY-MM-DD HH:MM to YYYY-MM-DDTHH:MM for input compatibility
+                input.value = currentText ? currentText.trim().replace(' ', 'T').substring(0, 16) : '';
+            } else if (isDateField) {
+                input.type = 'date';
+                input.value = currentText ? currentText.trim().substring(0, 10) : '';
+            } else {
+                input.type = 'text';
+                input.value = currentText;
+            }
+
             input.className = 'form-control form-control-sm bg-secondary text-white border-0 p-1';
-            input.style.minWidth = '100px';
+            input.style.minWidth = isTimeField ? '200px' : '100px';
 
             // Replace text with input
             this.innerText = '';

@@ -20,9 +20,9 @@ class Equipment(db.Model):
     
     # New Fields for Excel View
     encargado_mantenimiento = db.Column(db.String(255))
-    hora_inicio_diagnostico = db.Column(db.String(255)) # Storing as formatted string YYYY-MM-DD HH:MM
+    hora_inicio_diagnostico = db.Column(db.DateTime)
     observaciones_diagnostico = db.Column(db.Text)
-    hora_inicio_mantenimiento = db.Column(db.String(255))
+    hora_inicio_mantenimiento = db.Column(db.DateTime)
     observaciones_mantenimiento = db.Column(db.Text)
 
     class Status:
