@@ -799,7 +799,7 @@
                 else if (s.includes('diagnostico') && !s.includes('espera')) {
                     if (isOps) {
                         // Use workflow modal for finishing diagnostics to ensure report number is requested
-                        actionsHtml += `<button class="btn btn-sm btn-success" onclick="showAdvanceModal(${item.id})">Terminar Diag</button>`;
+                        actionsHtml += `<button class="btn btn-sm btn-success" onclick="showAdvanceModal(${item.id}, 'Pendiente de aprobacion')">Terminar Diag</button>`;
                         actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'espera de repuesto o consumible')">Pedir Repuestos</button>`;
                     }
                 }
@@ -807,7 +807,7 @@
                     if (isAlm) actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'Repuesto entregado')">Confirmar Llegada</button>`;
                 }
                 else if (s.includes('repuesto entregado')) {
-                    if (isOps) actionsHtml += `<button class="btn btn-sm btn-primary" onclick="updateStatus(${item.id}, 'Pendiente de aprobacion')">Continuar (Fin Diag)</button>`;
+                    if (isOps) actionsHtml += `<button class="btn btn-sm btn-primary" onclick="updateStatus(${item.id}, 'en Diagnostico')">Continuar (Fin Repuesto)</button>`;
                 }
                 else if (s.includes('pendiente de aprobacion') || s.includes('pendiente aprobacion')) {
                     if (isRec) {

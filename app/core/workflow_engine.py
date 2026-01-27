@@ -25,7 +25,6 @@ class WorkflowEngine:
             'allowed_roles': ['admin', 'operaciones'],
             'requires_decision': True,
             'enter_prompts': ['encargado_diagnostico'],
-            'exit_prompts': ['numero_informe'],
             'auto_fill': {'hora_inicio_diagnostico': 'now'}
         },
         'espera de repuesto o consumible': {
@@ -34,14 +33,15 @@ class WorkflowEngine:
             'requires_decision': False
         },
         'Repuesto entregado': {
-            'next': ['Aprobado'],
+            'next': ['en Diagnostico'],
             'allowed_roles': ['admin', 'operaciones'],
             'requires_decision': False
         },
         'Pendiente de aprobacion': {
             'next': ['Aprobado', 'Entregado - Devolucion'],
             'allowed_roles': ['admin', 'recepcion'],
-            'requires_decision': True
+            'requires_decision': True,
+            'enter_prompts': ['numero_informe']
         },
         'Aprobado': {
             'next': ['Inicio de Servicio'],

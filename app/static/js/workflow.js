@@ -102,7 +102,7 @@ function renderPendingTasks() {
 /**
  * Show modal to advance equipment to next state
  */
-async function showAdvanceModal(equipmentId) {
+async function showAdvanceModal(equipmentId, targetState = null) {
     try {
         const response = await fetch(`/api/equipment/${equipmentId}/next_state`);
         const result = await response.json();
@@ -124,15 +124,27 @@ async function showAdvanceModal(equipmentId) {
             return;
         }
 
-        // If requires decision, show decision modal
-        if (info.requires_decision && info.next_states.length > 1) {
-            showDecisionModal(equipmentId, info.current_state, info.next_states);
-        } else {
-            const nextState = info.next_states[0];
+        // If target state is forced, skip decision logic
+        let nextState = targetState;
 
-            // If data prompts are needed, show prompt modal
-            if (info.prompt_fields && info.prompt_fields.length > 0) {
-                showDataPromptModal(equipmentId, nextState, info.prompt_fields);
+        if (!nextState) {
+            // If requires decision and no target forced, show decision modal
+            if (info.requires_decision && info.next_states.length > 1) {
+                showDecisionModal(equipmentId, info.current_state, info.next_states);
+                return;
+            }
+            nextState = info.next_states[0];
+        }
+
+        // Check prompts for the chosen state (reload info if needed or use existing logic)
+        // Since we got next_states from info, we might need to check prompts for this SPECIFIC state
+        // The API /equipment/:id/next_state?target=STATE gives us the specific prompts
+        if (nextState) {
+            const specificRes = await fetch(`/api/equipment/${equipmentId}/next_state?target=${encodeURIComponent(nextState)}`);
+            const specificInfo = await specificRes.json();
+
+            if (specificInfo.success && specificInfo.data.prompt_fields && specificInfo.data.prompt_fields.length > 0) {
+                showDataPromptModal(equipmentId, nextState, specificInfo.data.prompt_fields);
             } else {
                 if (confirm(`¿Avanzar equipo de '${info.current_state}' a '${nextState}'?`)) {
                     await advanceEquipment(equipmentId, nextState);
