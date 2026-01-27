@@ -1,7 +1,11 @@
-"""
-Workflow Engine - State Machine for Equipment Flow
-Defines state transitions and role-based permissions for equipment workflow.
-"""
+import unicodedata
+
+def normalize_state_key(s):
+    if not s: return ""
+    # Remove accents and lowercase
+    s = str(s).lower()
+    return "".join(c for c in unicodedata.normalize('NFD', s)
+                  if unicodedata.category(c) != 'Mn')
 
 class WorkflowEngine:
     """
@@ -90,6 +94,15 @@ class WorkflowEngine:
     }
     
     @staticmethod
+    def _get_state_info_normalized(current_state):
+        """Helper to find state info by normalized key."""
+        target = normalize_state_key(current_state)
+        for key, info in WorkflowEngine.STATE_FLOW.items():
+            if normalize_state_key(key) == target:
+                return key, info
+        return None, None
+
+    @staticmethod
     def get_next_states(current_state):
         """
         Get the next possible state(s) for a given current state.
@@ -100,7 +113,7 @@ class WorkflowEngine:
         Returns:
             list or None: List of next possible states, or None if terminal state
         """
-        state_info = WorkflowEngine.STATE_FLOW.get(current_state)
+        _, state_info = WorkflowEngine._get_state_info_normalized(current_state)
         if not state_info:
             return None
         return state_info.get('next')
@@ -117,7 +130,7 @@ class WorkflowEngine:
         Returns:
             bool: True if user can advance, False otherwise
         """
-        state_info = WorkflowEngine.STATE_FLOW.get(current_state)
+        _, state_info = WorkflowEngine._get_state_info_normalized(current_state)
         if not state_info:
             return False
         
@@ -139,7 +152,7 @@ class WorkflowEngine:
         Returns:
             bool: True if user must choose between multiple options
         """
-        state_info = WorkflowEngine.STATE_FLOW.get(current_state)
+        _, state_info = WorkflowEngine._get_state_info_normalized(current_state)
         if not state_info:
             return False
         return state_info.get('requires_decision', False)
@@ -158,7 +171,7 @@ class WorkflowEngine:
             tuple: (is_valid: bool, error_message: str or None)
         """
         # Get state info
-        state_info = WorkflowEngine.STATE_FLOW.get(current_state)
+        canon_key, state_info = WorkflowEngine._get_state_info_normalized(current_state)
         if not state_info:
             return False, f"Estado actual '{current_state}' no reconocido en el flujo"
         
@@ -204,7 +217,8 @@ class WorkflowEngine:
         Returns:
             dict: State information including next states, permissions, etc.
         """
-        current_info = WorkflowEngine.STATE_FLOW.get(current_state, {})
+        canon_key, current_info = WorkflowEngine._get_state_info_normalized(current_state)
+        if not current_info: current_info = {}
         next_states = current_info.get('next')
         
         # Determine prompts needed
@@ -215,14 +229,16 @@ class WorkflowEngine:
             prompt_fields.extend(current_info.get('exit_prompts', []))
             
             # 2. Enter prompts for target state
-            target_info = WorkflowEngine.STATE_FLOW.get(target_state, {})
+            _, target_info = WorkflowEngine._get_state_info_normalized(target_state)
+            if not target_info: target_info = {}
             prompt_fields.extend(target_info.get('enter_prompts', []))
         
         # If no target state but only one possible next state, we can pre-calculate prompts
         elif next_states and len(next_states) == 1:
             target_state = next_states[0]
             prompt_fields.extend(current_info.get('exit_prompts', []))
-            target_info = WorkflowEngine.STATE_FLOW.get(target_state, {})
+            _, target_info = WorkflowEngine._get_state_info_normalized(target_state)
+            if not target_info: target_info = {}
             prompt_fields.extend(target_info.get('enter_prompts', []))
 
         return {
