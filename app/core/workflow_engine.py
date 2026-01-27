@@ -35,14 +35,19 @@ class WorkflowEngine:
             'requires_decision': False
         },
         'Pendiente de aprobacion': {
-            'next': ['Aprobado'],
+            'next': ['Aprobado', 'Rechazado'],
             'allowed_roles': ['admin', 'recepcion'],
-            'requires_decision': False
+            'requires_decision': True
         },
         'Aprobado': {
             'next': ['Inicio de Servicio'],
             'allowed_roles': ['admin', 'operaciones'],
             'requires_decision': False
+        },
+        'Rechazado': {
+            'next': ['en Diagnostico', 'Entregado'],
+            'allowed_roles': ['admin', 'recepcion'],
+            'requires_decision': True
         },
         'Inicio de Servicio': {
             'next': ['En servicio'],

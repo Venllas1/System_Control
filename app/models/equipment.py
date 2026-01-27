@@ -37,6 +37,8 @@ class Equipment(db.Model):
         EN_SERVICIO = 'En servicio'
         SERVICIO_CULMINADO = 'Servicio culminado'
         ENTREGADO = 'Entregado'
+        RECHAZADO = 'Rechazado'
+        REVISION = 'Revision'
 
     def to_dict(self):
         def parse_date(dt):

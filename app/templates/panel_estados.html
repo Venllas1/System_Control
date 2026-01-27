@@ -771,6 +771,7 @@
             const ingreso = new Date(item.fecha_ingreso);
             const diffDays = Math.ceil(Math.abs(today - ingreso) / (1000 * 60 * 60 * 24));
             const s = normalize(item.estado);
+            const frDisplay = item.fr || 'Sin FR';
 
             // Info Button (Universal)
             const infoBtn = `<button class="btn btn-sm btn-outline-info ms-1" onclick="showInfo(${item.id})" title="Ver Detalles"><i class="fas fa-eye"></i></button>`;
@@ -843,7 +844,7 @@
 
                 return `
                 <tr>
-                    <td class="ps-4 fw-bold text-info">${item.fr || 'Sin FR'}</td>
+                    <td class="ps-4 fw-bold text-info">${frDisplay}</td>
                     <td>${item.marca} ${item.modelo}</td>
                     <td>${getStatusBadge(item.estado)}</td>
                     <td class="text-light">${tech}</td>
@@ -986,7 +987,7 @@
 
             createRenderLogic(s => (s.includes('diagnostico') && !s.includes('revision')) || s.includes('consumible') || (s.includes('repuesto') && !s.includes('repuestos')), 'tableDiagnostico', 'searchDiagnostico', null, 'diagnostico');
             createRenderLogic(s => (s.includes('aprobado') || s.includes('servicio') || s.includes('repuestos')) && !s.includes('entregado') && !s.includes('culminado'), 'tableAprobado', 'searchAprobado', { prev: 'btnPrevAprobado', next: 'btnNextAprobado', info: 'pageInfoAprobado' }, 'mantenimiento');
-            createRenderLogic(s => s.includes('revision') || s.includes('reevaluacion'), 'tableRevision', 'searchRevision', null, 'mantenimiento');
+            createRenderLogic(s => s.includes('revision') || s.includes('reevaluacion') || s.includes('rechazado'), 'tableRevision', 'searchRevision', null, 'mantenimiento');
             createRenderLogic(s => s.includes('pendiente') || s.includes('espera de aprobacion'), 'tablePendiente', 'searchPendiente', { prev: 'btnPrevPendiente', next: 'btnNextPendiente', info: 'pageInfoPendiente' }, 'diagnostico');
 
         } else {
