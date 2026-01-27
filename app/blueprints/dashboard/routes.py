@@ -52,7 +52,7 @@ def panel():
 @dashboard_bp.route('/general')
 @login_required
 def panel_general():
-    return render_template('gestion_general.html')
+    return render_template('gestion_general.html', current_role=current_user.role)
 
 @dashboard_bp.route('/excel')
 @login_required

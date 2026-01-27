@@ -76,8 +76,12 @@ function renderPendingTasks() {
 
         return `
             <tr class="${diffDays > 5 ? 'table-warning' : ''}">
-                <td class="ps-4 fw-bold text-info">${frDisplay}</td>
-                <td class="text-white text-uppercase">${item.marca} ${item.modelo}</td>
+                <td class="ps-4">
+                    <div class="d-flex flex-column">
+                        <span class="fw-bold text-white text-uppercase">${item.marca} ${item.modelo}</span>
+                        <span class="text-xs text-info">${frDisplay}</span>
+                    </div>
+                </td>
                 <td>${getStatusBadge(item.estado)}</td>
                 <td class="text-sm text-light"><i class="fas fa-user-circle me-1 text-muted"></i> ${item.encargado}</td>
                 <td class="text-sm text-muted">${item.fecha_ingreso || 'N/A'}</td>
