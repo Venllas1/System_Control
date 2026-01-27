@@ -763,6 +763,31 @@
         // Helper to normalize strings (remove accents and lowercase)
         const normalize = str => (str || '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
+        // Robust date parsing for DD/MM/YYYY formats
+        function parseFormattedDate(dateStr) {
+            if (!dateStr || typeof dateStr !== 'string') return new Date();
+            if (dateStr.includes('/')) {
+                const parts = dateStr.split(' ');
+                const dateParts = parts[0].split('/');
+                const d = parseInt(dateParts[0]);
+                const m = parseInt(dateParts[1]) - 1;
+                const y = parseInt(dateParts[2]);
+
+                if (parts.length > 1) {
+                    const timeParts = parts[1].split(':');
+                    let h = parseInt(timeParts[0]);
+                    const min = parseInt(timeParts[1]);
+                    if (parts.length > 2) {
+                        if (parts[2].toUpperCase() === 'PM' && h < 12) h += 12;
+                        if (parts[2].toUpperCase() === 'AM' && h === 12) h = 0;
+                    }
+                    return new Date(y, m, d, h, min);
+                }
+                return new Date(y, m, d);
+            }
+            return new Date(dateStr);
+        }
+
         // Helper functions
         function getStatusBadge(status) {
             let badgeClass = 'bg-secondary';
@@ -780,7 +805,7 @@
 
         function createRow(item, isVisualizador = false, technicianType = 'diagnostico') {
             const today = new Date();
-            const ingreso = new Date(item.fecha_ingreso);
+            const ingreso = parseFormattedDate(item.fecha_ingreso);
             const diffDays = Math.ceil(Math.abs(today - ingreso) / (1000 * 60 * 60 * 24));
             const s = normalize(item.estado);
             const frDisplay = item.fr || 'Sin FR';

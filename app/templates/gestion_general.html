@@ -408,10 +408,29 @@
         document.getElementById('editEncMant').value = item.encargado_mantenimiento || '';
         document.getElementById('editInforme').value = item.numero_informe || '';
 
-        // Helper to format date "YYYY-MM-DD HH:MM" to "YYYY-MM-DDTHH:MM" for datetime-local
-        const formatDateForInput = (dateStr) => {
-            if (!dateStr) return '';
-            return dateStr.trim().replace(' ', 'T').substring(0, 16);
+        // Helper to convert "DD/MM/YYYY HH:MM AM/PM" to "YYYY-MM-DDTHH:MM" for datetime-local
+        const formatDateForInput = (currentText) => {
+            if (!currentText || !currentText.includes('/')) return '';
+            const parts = currentText.trim().split(' ');
+            const dateParts = parts[0].split('/');
+            const d = dateParts[0];
+            const m = dateParts[1];
+            const y = dateParts[2];
+
+            let hh = '00';
+            let mm = '00';
+
+            if (parts.length > 1) {
+                const timeParts = parts[1].split(':');
+                hh = timeParts[0];
+                mm = timeParts[1];
+                if (parts.length > 2) {
+                    const ampm = parts[2].toUpperCase();
+                    if (ampm === 'PM' && hh !== '12') hh = (parseInt(hh) + 12).toString();
+                    if (ampm === 'AM' && hh === '12') hh = '00';
+                }
+            }
+            return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}T${hh.padStart(2, '0')}:${mm.padStart(2, '0')}`;
         };
 
         document.getElementById('editInicioDiag').value = formatDateForInput(item.hora_inicio_diagnostico);

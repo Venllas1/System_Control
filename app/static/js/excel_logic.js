@@ -66,7 +66,7 @@ function renderExcelTable(data) {
             <td class="editable text-truncate" data-field="reporte_cliente" style="max-width: 250px;" title="${item.reporte_cliente || ''}">${item.reporte_cliente || ''}</td>
             <td class="text-info fst-italic bg-darker font-monospace" style="font-size: 0.8rem;">${(item.estado || '').toUpperCase()}</td>
             <td class="editable" data-field="condicion">${item.condicion || ''}</td>
-            <td class="editable" data-field="encargado">${item.encargado || ''}</td>
+            <td class="editable" data-field="encargado_diagnostico">${item.encargado_diagnostico || ''}</td>
             <td class="editable" data-field="fecha_ingreso">${item.fecha_ingreso || ''}</td>
             <td class="editable text-truncate" data-field="observaciones" style="max-width: 250px;" title="${item.observaciones || ''}">${item.observaciones || ''}</td>
             <td class="editable" data-field="cliente">${item.cliente || ''}</td>
@@ -104,11 +104,28 @@ function setupEditableCells() {
 
             if (isTimeField) {
                 input.type = 'datetime-local';
-                // Format YYYY-MM-DD HH:MM to YYYY-MM-DDTHH:MM for input compatibility
-                input.value = currentText ? currentText.trim().replace(' ', 'T').substring(0, 16) : '';
+
+                // Helper to convert DD/MM/YYYY HH:MM AM/PM back to YYYY-MM-DDTHH:MM
+                let val = '';
+                if (currentText && currentText.includes('/')) {
+                    const [datePart, timePart, ampm] = currentText.trim().split(' ');
+                    const [d, m, y] = datePart.split('/');
+                    let [hh, mm] = timePart.split(':');
+
+                    if (ampm === 'PM' && hh !== '12') hh = parseInt(hh) + 12;
+                    if (ampm === 'AM' && hh === '12') hh = '00';
+
+                    val = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}T${hh.toString().padStart(2, '0')}:${mm.padStart(2, '0')}`;
+                }
+                input.value = val;
             } else if (isDateField) {
                 input.type = 'date';
-                input.value = currentText ? currentText.trim().substring(0, 10) : '';
+                let val = '';
+                if (currentText && currentText.includes('/')) {
+                    const [d, m, y] = currentText.trim().split(' ')[0].split('/');
+                    val = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+                }
+                input.value = val;
             } else {
                 input.type = 'text';
                 input.value = currentText;
@@ -161,15 +178,15 @@ async function saveCell(cell, newValue, originalValue) {
         const result = await response.json();
 
         if (result.success) {
-            cell.innerText = newValue;
+            // Use server-formatted value (AM/PM)
+            cell.innerText = result.data[field] || '';
             cell.classList.add('bg-success', 'bg-opacity-25');
             setTimeout(() => cell.classList.remove('bg-success', 'bg-opacity-25'), 1000);
             showToast();
 
-            // Update local data store to reflect change for filtering
-            const item = allExcelData.find(i => i.id == id);
-            if (item) item[field] = newValue;
-
+            // Sync local data
+            const idx = allExcelData.findIndex(i => i.id == id);
+            if (idx !== -1) allExcelData[idx] = result.data;
         } else {
             cell.innerText = originalValue;
             alert('Error al guardar: ' + result.error);

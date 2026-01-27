@@ -195,10 +195,10 @@ def update_equipment_data(id):
     
     try:
         data = request.get_json(silent=True) or request.form
-        success, message = EquipmentService.update_equipment_data(id, data)
+        success, result = EquipmentService.update_equipment_data(id, data)
         
         if success:
-            return jsonify({'success': True, 'message': message})
-        return jsonify({'success': False, 'error': message}), 400
+            return jsonify({'success': True, 'data': result})
+        return jsonify({'success': False, 'error': result}), 400
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500

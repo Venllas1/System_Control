@@ -138,7 +138,6 @@ class EquipmentService:
                 modelo=get_val('modelo', '').upper() or None,
                 reporte_cliente=get_val('reporte_cliente', '').upper() or None,
                 observaciones=get_val('observaciones', '').upper() or None,
-                encargado=get_val('encargado', 'No asignado'),
                 cliente=get_val('cliente', '').upper() or None,
                 serie=get_val('serie', '').upper() or None,
                 accesorios=get_val('accesorios', '').upper() or None,
@@ -338,11 +337,8 @@ class EquipmentService:
             
             if 'observaciones_mantenimiento' in data: eq.observaciones_mantenimiento = get_val('observaciones_mantenimiento')
             
-            # Encargado can be updated here
-            if 'encargado' in data: eq.encargado = get_val('encargado')
-
             db.session.commit()
-            return True, "Datos actualizados correctamente"
+            return True, eq.to_dict()
         except Exception as e:
             db.session.rollback()
             return False, str(e)

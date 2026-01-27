@@ -39,7 +39,7 @@ registrados", now_func=none) %}
                         <td><span class="badge bg-secondary">{{ eq.estado }}</span></td>
                         {% if 'encargado_diagnostico' in actions_config.columns %}<td>{{ eq.encargado_diagnostico or
                             'N/A' }}</td>{% endif %}
-                        <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y') if eq.fecha_ingreso else 'N/A' }}</td>
+                        <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y %I:%M %p') if eq.fecha_ingreso else 'N/A' }}</td>
                         <td>
                             {% if eq.fecha_ingreso %}
                             {% set dias = ((now_func or now)() - eq.fecha_ingreso).days %}
@@ -56,7 +56,7 @@ registrados", now_func=none) %}
                                 <button class="btn btn-outline-info" onclick="showInfo(this)" data-id="{{ eq.id }}"
                                     data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
                                     data-estado="{{ eq.estado }}" data-encargado="{{ eq.encargado_diagnostico }}"
-                                    data-fecha="{{ eq.fecha_ingreso.strftime('%Y-%m-%d') if eq.fecha_ingreso else '' }}"
+                                    data-fecha="{{ eq.fecha_ingreso.strftime('%d/%m/%Y %I:%M %p') if eq.fecha_ingreso else '' }}"
                                     data-reporte="{{ eq.reporte_cliente | e }}" data-cliente="{{ eq.cliente | e }}"
                                     data-observaciones="{{ eq.observaciones | e }}" data-serie="{{ eq.serie | e }}"
                                     data-informe="{{ eq.numero_informe | e }}" data-accesorios="{{ eq.accesorios | e }}"

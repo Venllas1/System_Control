@@ -44,11 +44,9 @@ class Equipment(db.Model):
         def parse_date(dt):
             if not dt: return None
             if isinstance(dt, str): return dt
-            from datetime import datetime, time
             if isinstance(dt, datetime):
-                return dt.strftime('%Y-%m-%d %H:%M')
-            if isinstance(dt, time):
-                return dt.strftime('%H:%M')
+                # Format: DD/MM/YYYY HH:MM AM/PM
+                return dt.strftime('%d/%m/%Y %I:%M %p')
             return str(dt)
 
         return {
