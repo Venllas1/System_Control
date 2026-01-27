@@ -61,7 +61,14 @@ registrados", now_func=none) %}
                                     data-reporte="{{ eq.reporte_cliente | e }}" data-cliente="{{ eq.cliente | e }}"
                                     data-observaciones="{{ eq.observaciones | e }}" data-serie="{{ eq.serie | e }}"
                                     data-informe="{{ eq.numero_informe | e }}" data-accesorios="{{ eq.accesorios | e }}"
-                                    data-condicion="{{ eq.condicion | e }}">
+                                    data-condicion="{{ eq.condicion | e }}"
+                                    data-inicio-diag="{{ eq.hora_inicio_diagnostico.strftime('%d/%m/%Y %I:%M %p') if eq.fecha_ingreso else '' }}"
+                                    data-encargado-diag="{{ eq.encargado_diagnostico or '' }}"
+                                    data-obs-diag="{{ eq.observaciones_diagnostico or '' }}"
+                                    data-inicio-mant="{{ eq.hora_inicio_mantenimiento.strftime('%d/%m/%Y %I:%M %p') if eq.fecha_ingreso else '' }}"
+                                    data-encargado-mant="{{ eq.encargado_mantenimiento or '' }}"
+                                    data-obs-mant="{{ eq.observaciones_mantenimiento or '' }}"
+                                    data-aprobacion="{{ eq.hora_aprobacion.strftime('%d/%m/%Y %I:%M %p') if eq.fecha_ingreso else '' }}">
                                     <i class="fas fa-eye"></i>
                                 </button>
                                 {% if 'edit' in actions_config.actions %}

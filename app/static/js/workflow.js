@@ -164,9 +164,9 @@ function showDataPromptModal(equipmentId, nextState, fields) {
     const fieldDefinitions = {
         'encargado_diagnostico': {
             label: 'Encargado de Diagnóstico',
-            type: 'select',
+            type: 'text',
             required: true,
-            options: ['SERGIO', 'CARLOS', 'GERSSON', 'LUIS']
+            placeholder: 'Nombre del técnico'
         },
         'numero_informe': {
             label: 'Número de Informe',
@@ -176,9 +176,21 @@ function showDataPromptModal(equipmentId, nextState, fields) {
         },
         'encargado_mantenimiento': {
             label: 'Encargado de Mantenimiento',
-            type: 'select',
+            type: 'text',
             required: true,
-            options: ['SERGIO', 'CARLOS', 'GERSSON', 'LUIS']
+            placeholder: 'Nombre del técnico'
+        },
+        'observaciones_diagnostico': {
+            label: 'Observaciones de Diagnóstico',
+            type: 'textarea',
+            required: true,
+            placeholder: 'Detalles del diagnóstico...'
+        },
+        'observaciones_mantenimiento': {
+            label: 'Observaciones de Mantenimiento',
+            type: 'textarea',
+            required: true,
+            placeholder: 'Detalles del servicio...'
         }
     };
 
@@ -208,6 +220,15 @@ function showDataPromptModal(equipmentId, nextState, fields) {
                                             </select>
                                         </div>
                                     `;
+        }
+        if (def.type === 'textarea') {
+            return `
+                <div class="mb-3">
+                    <label class="form-label text-secondary">${def.label}</label>
+                    <textarea name="${fieldName}" class="form-control bg-dark text-light border-secondary" 
+                           placeholder="${def.placeholder || ''}" rows="3" ${def.required ? 'required' : ''}></textarea>
+                </div>
+            `;
         }
         return `
                                     <div class="mb-3">

@@ -28,25 +28,20 @@ class WorkflowEngine:
             'auto_fill': {'hora_inicio_diagnostico': 'now'}
         },
         'espera de repuesto o consumible': {
-            'next': ['Repuesto entregado'],
-            'allowed_roles': ['admin', 'almacen'],
-            'requires_decision': False
-        },
-        'Repuesto entregado': {
             'next': ['en Diagnostico'],
-            'allowed_roles': ['admin', 'operaciones'],
+            'allowed_roles': ['admin', 'almacen'],
             'requires_decision': False
         },
         'Pendiente de aprobacion': {
             'next': ['Aprobado', 'Entregado - Devolucion'],
             'allowed_roles': ['admin', 'recepcion'],
             'requires_decision': True,
-            'enter_prompts': ['numero_informe']
+            'enter_prompts': ['numero_informe', 'observaciones_diagnostico']
         },
         'Aprobado': {
-            'next': ['Inicio de Servicio'],
+            'next': ['Inicio de Servicio', 'espera de repuestos'],
             'allowed_roles': ['admin', 'operaciones'],
-            'requires_decision': False,
+            'requires_decision': True,
             'auto_fill': {'hora_aprobacion': 'now'}
         },
         'Rechazado': {
@@ -64,7 +59,8 @@ class WorkflowEngine:
         'En servicio': {
             'next': ['espera de repuestos', 'Entregado'],
             'allowed_roles': ['admin', 'operaciones'],
-            'requires_decision': True
+            'requires_decision': True,
+            'enter_prompts': ['observaciones_mantenimiento']
         },
         'espera de repuestos': {
             'next': ['En servicio'],
@@ -74,7 +70,8 @@ class WorkflowEngine:
         'Entregado': {
             'next': None,  # Terminal state
             'allowed_roles': [],
-            'requires_decision': False
+            'requires_decision': False,
+            'enter_prompts': ['observaciones_mantenimiento']
         },
         'Entregado - Devolucion': {
             'next': None,  # Terminal state
@@ -86,7 +83,7 @@ class WorkflowEngine:
     # Pending tasks logic: states that require action from each role
     PENDING_LOGIC = {
         'recepcion': ['Pendiente de aprobacion'],
-        'operaciones': ['Espera de Diagnostico', 'en Diagnostico', 'Repuesto entregado', 
+        'operaciones': ['Espera de Diagnostico', 'en Diagnostico', 
                         'Aprobado', 'Inicio de Servicio', 'En servicio'],
         'almacen': ['espera de repuesto o consumible', 'espera de repuestos'],
         'admin': [],  # Admin sees all but doesn't have specific "pending" states

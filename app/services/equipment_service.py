@@ -110,6 +110,10 @@ class EquipmentService:
                 equipment.hora_inicio_mantenimiento = parse_iso_datetime(additional_data['hora_inicio_mantenimiento'])
             if 'hora_inicio_diagnostico' in additional_data:
                 equipment.hora_inicio_diagnostico = parse_iso_datetime(additional_data['hora_inicio_diagnostico'])
+            if 'observaciones_diagnostico' in additional_data:
+                equipment.observaciones_diagnostico = additional_data['observaciones_diagnostico']
+            if 'observaciones_mantenimiento' in additional_data:
+                equipment.observaciones_mantenimiento = additional_data['observaciones_mantenimiento']
 
         # Log History
         history = StatusHistory(
@@ -205,6 +209,13 @@ class EquipmentService:
         role = user.role.lower()
         state_info = WorkflowEngine.get_state_info(equipment.estado, role, target_state=target_state)
         
+        # Filter conditional prompts
+        prompts = state_info.get('prompt_fields', [])
+        
+        # Condition: Only ask for observations_mantenimiento if empty
+        if 'observaciones_mantenimiento' in prompts and equipment.observaciones_mantenimiento:
+            prompts.remove('observaciones_mantenimiento')
+            
         return {
             'equipment_id': equipment_id,
             'current_state': equipment.estado,
@@ -212,7 +223,7 @@ class EquipmentService:
             'can_advance': state_info['can_advance'],
             'requires_decision': state_info['requires_decision'],
             'is_terminal': state_info['is_terminal'],
-            'prompt_fields': state_info.get('prompt_fields', [])
+            'prompt_fields': prompts
         }
     
     @staticmethod

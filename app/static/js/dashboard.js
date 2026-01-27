@@ -82,6 +82,17 @@ window.showInfo = function (btn) {
         infoEstado.innerHTML = `<span class="badge bg-secondary">${d.state || d.estado}</span>`;
     }
 
+    set('infoInicioDiag', d.inicio_diag);
+    set('infoEncargadoDiag', d.encargado_diag);
+    set('infoObsDiag', d.obs_diag);
+
+    set('infoInicioMant', d.inicio_mant);
+    set('infoEncargadoMant', d.encargado_mant);
+    set('infoObsMant', d.obs_mant);
+
+    set('infoInforme', d.informe);
+    set('infoHoraAprobacion', d.aprobacion);
+
     const modal = new bootstrap.Modal(document.getElementById('detailedInfoModal'));
     modal.show();
 };

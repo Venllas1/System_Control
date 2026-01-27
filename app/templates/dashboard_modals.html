@@ -46,108 +46,142 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer border-secondary">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- CREATE MODAL -->
-<div class="modal fade" id="createEquipmentModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content bg-dark text-light border-secondary">
-            <div class="modal-header border-secondary">
-                <h5 class="modal-title"><i class="fas fa-file-medical me-2 text-success"></i> Registrar Equipo</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <form id="createEquipmentForm">
-                <div class="modal-body">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Número de FR</label>
-                            <input type="text" name="fr" class="form-control bg-dark text-light border-secondary"
-                                placeholder="Ej: 100-1">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Cliente *</label>
-                            <input type="text" name="cliente" class="form-control bg-dark text-light border-secondary"
-                                required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Marca *</label>
-                            <input type="text" name="marca" class="form-control bg-dark text-light border-secondary"
-                                required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Modelo *</label>
-                            <input type="text" name="modelo" class="form-control bg-dark text-light border-secondary"
-                                required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Fecha y Hora de Ingreso *</label>
-                            <input type="datetime-local" name="fecha_ingreso"
-                                class="form-control bg-dark text-light border-secondary" required
-                                id="create_fecha_ingreso">
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Reporte del Cliente *</label>
-                            <textarea name="reporte_cliente" class="form-control bg-dark text-light border-secondary"
-                                rows="3" required></textarea>
-                        </div>
+                <hr class="border-secondary">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="text-muted small text-uppercase">Inicio Diagnóstico</label>
+                        <div id="infoInicioDiag"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small text-uppercase">Encargado Diagnóstico</label>
+                        <div id="infoEncargadoDiag"></div>
+                    </div>
+                    <div class="col-12">
+                        <label class="text-muted small text-uppercase">Observaciones Diagnóstico</label>
+                        <div id="infoObsDiag" class="bg-black bg-opacity-25 p-2 rounded border border-secondary"></div>
+                    </div>
+                </div>
+                <hr class="border-secondary">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="text-muted small text-uppercase">Inicio Mantenimiento</label>
+                        <div id="infoInicioMant"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small text-uppercase">Encargado Mantenimiento</label>
+                        <div id="infoEncargadoMant"></div>
+                    </div>
+                    <div class="col-12">
+                        <label class="text-muted small text-uppercase">Observaciones Mantenimiento</label>
+                        <div id="infoObsMant" class="bg-black bg-opacity-25 p-2 rounded border border-secondary"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small text-uppercase">Número de Informe</label>
+                        <div id="infoInforme"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="text-muted small text-uppercase">Aprobación Cliente</label>
+                        <div id="infoHoraAprobacion"></div>
                     </div>
                 </div>
                 <div class="modal-footer border-secondary">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success">Guardar Equipo</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- UPDATE STATUS MODAL -->
-<div class="modal fade" id="updateStatusModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content bg-dark text-light border-secondary">
-            <div class="modal-header border-secondary">
-                <h5 class="modal-title">Actualizar Estado</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form id="updateStatusForm">
-                <input type="hidden" name="equipment_id" id="update_id">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Nuevo Estado</label>
-                        <select name="status" class="form-select bg-dark text-light border-secondary"
-                            id="update_status_select">
-                            <option value="Espera de Diagnostico">Espera de Diagnostico</option>
-                            <option value="en Diagnostico">en Diagnostico</option>
-                            <option value="Pendiente de aprobacion">Pendiente de aprobacion</option>
-                            <option value="Aprobado">Aprobado</option>
-                            <option value="Inicio de Servicio">Inicio de Servicio</option>
-                            <option value="En servicio">En servicio</option>
-                            <option value="Entregado text-success">Entregado</option>
-                            <option value="Entregado - Devolucion text-danger">Entregado - Devolucion</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Asignar Encargado</label>
-                        <select name="encargado" class="form-select bg-dark text-light border-secondary">
-                            <option value="">No asignado</option>
-                            <option value="SERGIO">SERGIO</option>
-                            <option value="CARLOS">CARLOS</option>
-                            <option value="GERSSON">GERSSON</option>
-                            <option value="LUIS">LUIS</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer border-secondary">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Actualizar</button>
-                </div>
-            </form>
         </div>
     </div>
-</div>
+
+    <!-- CREATE MODAL -->
+    <div class="modal fade" id="createEquipmentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content bg-dark text-light border-secondary">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title"><i class="fas fa-file-medical me-2 text-success"></i> Registrar Equipo</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="createEquipmentForm">
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Número de FR</label>
+                                <input type="text" name="fr" class="form-control bg-dark text-light border-secondary"
+                                    placeholder="Ej: 100-1">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Cliente *</label>
+                                <input type="text" name="cliente"
+                                    class="form-control bg-dark text-light border-secondary" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Marca *</label>
+                                <input type="text" name="marca" class="form-control bg-dark text-light border-secondary"
+                                    required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Modelo *</label>
+                                <input type="text" name="modelo"
+                                    class="form-control bg-dark text-light border-secondary" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Fecha y Hora de Ingreso *</label>
+                                <input type="datetime-local" name="fecha_ingreso"
+                                    class="form-control bg-dark text-light border-secondary" required
+                                    id="create_fecha_ingreso">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Reporte del Cliente *</label>
+                                <textarea name="reporte_cliente"
+                                    class="form-control bg-dark text-light border-secondary" rows="3"
+                                    required></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-secondary">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Guardar Equipo</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- UPDATE STATUS MODAL -->
+    <div class="modal fade" id="updateStatusModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark text-light border-secondary">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title">Actualizar Estado</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="updateStatusForm">
+                    <input type="hidden" name="equipment_id" id="update_id">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Nuevo Estado</label>
+                            <select name="status" class="form-select bg-dark text-light border-secondary"
+                                id="update_status_select">
+                                <option value="Espera de Diagnostico">Espera de Diagnostico</option>
+                                <option value="en Diagnostico">en Diagnostico</option>
+                                <option value="Pendiente de aprobacion">Pendiente de aprobacion</option>
+                                <option value="Aprobado">Aprobado</option>
+                                <option value="Inicio de Servicio">Inicio de Servicio</option>
+                                <option value="En servicio">En servicio</option>
+                                <option value="Entregado text-success">Entregado</option>
+                                <option value="Entregado - Devolucion text-danger">Entregado - Devolucion</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Asignar Encargado</label>
+                            <label class="form-label">Asignar Encargado</label>
+                            <input type="text" name="encargado" class="form-control bg-dark text-light border-secondary"
+                                placeholder="Nombre del encargado">
+                        </div>
+                    </div>
+                    <div class="modal-footer border-secondary">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Actualizar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>

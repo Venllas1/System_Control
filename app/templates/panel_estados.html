@@ -804,10 +804,8 @@
                     }
                 }
                 else if (s.includes('consumible') || (s.includes('repuesto') && !s.includes('repuestos'))) {
-                    if (isAlm) actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'Repuesto entregado')">Confirmar Llegada</button>`;
-                }
-                else if (s.includes('repuesto entregado')) {
-                    if (isOps) actionsHtml += `<button class="btn btn-sm btn-primary" onclick="updateStatus(${item.id}, 'en Diagnostico')">Continuar (Fin Repuesto)</button>`;
+                    // Direct to 'en Diagnostico'
+                    if (isAlm) actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'en Diagnostico')">Confirmar Llegada</button>`;
                 }
                 else if (s.includes('pendiente de aprobacion') || s.includes('pendiente aprobacion')) {
                     if (isRec) {
@@ -816,7 +814,10 @@
                     }
                 }
                 else if (s === 'aprobado') {
-                    if (isOps) actionsHtml += `<button class="btn btn-sm btn-primary" onclick="startMaintenance(${item.id}, 'Inicio de Servicio')">Iniciar Mantenimiento</button>`;
+                    if (isOps) {
+                        actionsHtml += `<button class="btn btn-sm btn-primary" onclick="startMaintenance(${item.id}, 'Inicio de Servicio')">Iniciar Mantenimiento</button>`;
+                        actionsHtml += `<button class="btn btn-sm btn-warning ms-1" onclick="updateStatus(${item.id}, 'espera de repuestos')">Pedir Repuestos</button>`;
+                    }
                 }
                 else if (s.includes('inicio de servicio') || s.includes('en servicio')) {
                     if (isOps) {
