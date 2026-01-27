@@ -105,16 +105,23 @@ class EquipmentService:
     @staticmethod
     def create_equipment(data):
         try:
+            # Helper to handle empty/trimmed strings
+            def get_val(key, default=None):
+                val = data.get(key)
+                if val is None: return default
+                val = val.strip()
+                return val if val != "" else default
+
             new_eq = Equipment(
-                fr=data.get('fr', '').upper(),
-                marca=data.get('marca', '').upper(),
-                modelo=data.get('modelo', '').upper(),
-                reporte_cliente=data.get('reporte_cliente', '').upper(),
-                observaciones=data.get('observaciones', '').upper(),
-                encargado=data.get('encargado', 'No asignado'),
-                cliente=data.get('cliente', '').upper(),
-                serie=data.get('serie', '').upper(),
-                accesorios=data.get('accesorios', '').upper(),
+                fr=get_val('fr', '').upper() or None,
+                marca=get_val('marca', '').upper() or None,
+                modelo=get_val('modelo', '').upper() or None,
+                reporte_cliente=get_val('reporte_cliente', '').upper() or None,
+                observaciones=get_val('observaciones', '').upper() or None,
+                encargado=get_val('encargado', 'No asignado'),
+                cliente=get_val('cliente', '').upper() or None,
+                serie=get_val('serie', '').upper() or None,
+                accesorios=get_val('accesorios', '').upper() or None,
                 fecha_ingreso=datetime.strptime(data['fecha_ingreso'], '%Y-%m-%d') if data.get('fecha_ingreso') else datetime.now(),
                 estado=Equipment.Status.ESPERA_DIAGNOSTICO
             )
