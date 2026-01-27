@@ -40,7 +40,8 @@
 </div>
 
 <!-- DATA CONTAINER -->
-<div id="allEquipmentsData" data-url="{{ url_for('api.search') }}?q=%" style="display:none;"></div>
+<div id="allEquipmentsData" data-url="{{ url_for('api.search') }}?q=%" data-user-role="{{ current_role }}"
+    style="display:none;"></div>
 
 <!-- EDIT MODAL (Simplified for Data Only) -->
 <div class="modal fade" id="editDataModal" tabindex="-1" aria-hidden="true">
@@ -340,6 +341,10 @@
     }
 
     function createRowHTML(item) {
+        const dataEl = document.getElementById('allEquipmentsData');
+        const userRole = dataEl.dataset.userRole ? dataEl.dataset.userRole.toLowerCase() : '';
+        const isAdmin = userRole === 'admin' || userRole === 'venllas';
+
         return `
             <tr>
                 <td class="ps-4 text-info fw-bold">${item.fr || '-'}</td>
@@ -354,12 +359,41 @@
                 <td class="text-light font-monospace small">${item.serie || '-'}</td>
                 <td class="small text-muted">${item.fecha_ingreso || '-'}</td>
                 <td class="text-end pe-4">
-                    <button class="btn btn-sm btn-outline-warning" onclick='openEditModal(${JSON.stringify(item).replace(/'/g, "&#39;")})'>
-                        <i class="fas fa-edit"></i>
-                    </button>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-warning" onclick='openEditModal(${JSON.stringify(item).replace(/'/g, "&#39;")})' title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        ${isAdmin ? `
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteEquipment(${item.id}, '${item.fr || item.marca}')" title="Eliminar">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        ` : ''}
+                    </div>
                 </td>
             </tr>
         `;
+    }
+
+    window.deleteEquipment = async function (id, label) {
+        if (!confirm(`¿Estás seguro de eliminar el equipo "${label}"? Esta acción no se puede deshacer.`)) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/equipment/${id}/delete`, {
+                method: 'POST'
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                location.reload();
+            } else {
+                alert('Error al eliminar: ' + (result.error || 'Error desconocido'));
+            }
+        } catch (error) {
+            console.error('Delete error:', error);
+            alert('Error de conexión al intentar eliminar');
+        }
     }
 
     window.openEditModal = function (item) {
