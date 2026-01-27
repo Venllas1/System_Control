@@ -141,7 +141,7 @@ class EquipmentService:
                 cliente=get_val('cliente', '').upper() or None,
                 serie=get_val('serie', '').upper() or None,
                 accesorios=get_val('accesorios', '').upper() or None,
-                fecha_ingreso=datetime.strptime(data['fecha_ingreso'], '%Y-%m-%d') if data.get('fecha_ingreso') else datetime.now(),
+                fecha_ingreso=parse_iso_datetime(data.get('fecha_ingreso')) or datetime.now(),
                 estado=Equipment.Status.ESPERA_DIAGNOSTICO
             )
             db.session.add(new_eq)

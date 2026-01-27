@@ -80,4 +80,4 @@ class StatusHistory(db.Model):
     changed_by = db.Column(db.String(80))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
-    equipment = db.relationship('Equipment', backref=db.backref('history', lazy=True))
+    equipment = db.relationship('Equipment', backref=db.backref('history', lazy=True, cascade='all, delete-orphan'))

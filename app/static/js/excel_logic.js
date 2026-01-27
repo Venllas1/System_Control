@@ -99,8 +99,8 @@ function setupEditableCells() {
             const input = document.createElement('input');
 
             // USE DATETIME-LOCAL FOR TIME FIELDS
-            const isTimeField = field === 'hora_inicio_diagnostico' || field === 'hora_inicio_mantenimiento';
-            const isDateField = field === 'fecha_ingreso';
+            const isTimeField = field === 'hora_inicio_diagnostico' || field === 'hora_inicio_mantenimiento' || field === 'fecha_ingreso';
+            const isDateField = false; // fecha_ingreso is now a time field
 
             if (isTimeField) {
                 input.type = 'datetime-local';

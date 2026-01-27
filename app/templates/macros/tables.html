@@ -64,8 +64,7 @@ registrados", now_func=none) %}
                                     <i class="fas fa-eye"></i>
                                 </button>
                                 {% if 'edit' in actions_config.actions %}
-                                <button class="btn btn-outline-primary"
-                                    onclick="showEditStatusModal({{ eq.id }}, '{{ eq.estado }}')">
+                                <button class="btn btn-outline-primary" onclick="showAdvanceModal({{ eq.id }})">
                                     <i class="fas fa-edit"></i>
                                 </button>
                                 {% endif %}

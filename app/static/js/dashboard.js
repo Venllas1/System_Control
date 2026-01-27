@@ -12,6 +12,23 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
 
+        // Auto-fill Current Date/Time on show
+        const createModal = document.getElementById('createEquipmentModal');
+        createModal.addEventListener('show.bs.modal', function () {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+
+            const formattedDate = `${year}-${month}-${day}T${hours}:${minutes}`;
+            const fechaInput = document.getElementById('create_fecha_ingreso');
+            if (fechaInput && !fechaInput.value) {
+                fechaInput.value = formattedDate;
+            }
+        });
+
         // 2. Submit New Equipment
         form.addEventListener('submit', function (e) {
             e.preventDefault();
