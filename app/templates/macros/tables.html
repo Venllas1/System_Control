@@ -39,10 +39,11 @@ registrados", now_func=none) %}
                         <td><span class="badge bg-secondary">{{ eq.estado }}</span></td>
                         {% if 'encargado_diagnostico' in actions_config.columns %}<td>{{ eq.encargado_diagnostico or
                             'N/A' }}</td>{% endif %}
-                        <td>{{ eq.fecha_ingreso.strftime('%d/%m/%Y %I:%M %p') if eq.fecha_ingreso else 'N/A' }}</td>
+                        {% set base_date = eq.hora_aprobacion if eq.hora_aprobacion else eq.fecha_ingreso %}
+                        <td>{{ base_date.strftime('%d/%m/%Y %I:%M %p') if base_date else 'N/A' }}</td>
                         <td>
-                            {% if eq.fecha_ingreso %}
-                            {% set dias = ((now_func or now)() - eq.fecha_ingreso).days %}
+                            {% if base_date %}
+                            {% set dias = ((now_func or now)() - base_date).days %}
                             <span
                                 class="badge {% if dias > 7 %}bg-danger{% elif dias > 5 %}bg-warning{% else %}bg-success{% endif %}">
                                 {{ dias }}

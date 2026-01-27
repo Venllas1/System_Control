@@ -39,8 +39,7 @@ class Config:
             'columns': ['encargado_diagnostico'],
             'relevant_statuses': [
                 'Espera de Diagnostico',
-                'Pendiente de aprobacion',
-                'Servicio culminado'
+                'Pendiente de aprobacion'
             ],
             'actions': ['view', 'edit']
         },

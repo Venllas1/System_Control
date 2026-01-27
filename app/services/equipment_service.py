@@ -337,6 +337,12 @@ class EquipmentService:
             
             if 'observaciones_mantenimiento' in data: eq.observaciones_mantenimiento = get_val('observaciones_mantenimiento')
             
+            if 'fecha_ingreso' in data:
+                eq.fecha_ingreso = parse_iso_datetime(data['fecha_ingreso'])
+
+            if 'hora_aprobacion' in data:
+                eq.hora_aprobacion = parse_iso_datetime(data['hora_aprobacion'])
+            
             db.session.commit()
             return True, eq.to_dict()
         except Exception as e:

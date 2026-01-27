@@ -123,6 +123,17 @@
                                 name="hora_inicio_mantenimiento" id="editInicioMant">
                         </div>
 
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary">Fecha Ingreso</label>
+                            <input type="datetime-local" class="form-control bg-dark text-light border-secondary"
+                                name="fecha_ingreso" id="editFechaIngreso">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary">Hora Aprobación</label>
+                            <input type="datetime-local" class="form-control bg-dark text-light border-secondary"
+                                name="hora_aprobacion" id="editHoraAprob">
+                        </div>
+
                         <div class="col-12">
                             <label class="form-label text-secondary">Observaciones</label>
                             <textarea class="form-control bg-dark text-light border-secondary" name="observaciones"
@@ -235,7 +246,7 @@
             },
             {
                 name: 'Entregados y Otros',
-                states: ['Servicio culminado', 'Entregado'],
+                states: ['Entregado'],
                 isDefault: true,
                 color: 'secondary'
             }
@@ -313,12 +324,13 @@
                         <table class="table table-dark table-hover mb-0 align-middle">
                             <thead class="bg-dark text-secondary text-uppercase text-xs">
                                 <tr>
-                                    <th class="ps-4" style="width: 15%">FR</th>
-                                    <th style="width: 25%">Equipo</th>
-                                    <th style="width: 20%">Estado</th>
-                                    <th style="width: 20%">Cliente</th>
+                                    <th class="ps-4" style="width: 10%">FR</th>
+                                    <th style="width: 20%">Equipo</th>
+                                    <th style="width: 15%">Estado</th>
+                                    <th style="width: 15%">Cliente</th>
                                     <th style="width: 10%">Serie</th>
-                                    <th style="width: 10%">Fecha</th>
+                                    <th style="width: 10%">Fecha Ing.</th>
+                                    <th style="width: 10%">Fecha Aprob.</th>
                                     <th class="text-end pe-4">Acciones</th>
                                 </tr>
                             </thead>
@@ -358,6 +370,7 @@
                 <td>${item.cliente || '-'}</td>
                 <td class="text-light font-monospace small">${item.serie || '-'}</td>
                 <td class="small text-muted">${item.fecha_ingreso || '-'}</td>
+                <td class="small text-success">${item.hora_aprobacion || '-'}</td>
                 <td class="text-end pe-4">
                     <div class="btn-group">
                         <button class="btn btn-sm btn-outline-warning" onclick='openEditModal(${JSON.stringify(item).replace(/'/g, "&#39;")})' title="Editar">
@@ -435,6 +448,9 @@
 
         document.getElementById('editInicioDiag').value = formatDateForInput(item.hora_inicio_diagnostico);
         document.getElementById('editInicioMant').value = formatDateForInput(item.hora_inicio_mantenimiento);
+        document.getElementById('editFechaIngreso').value = formatDateForInput(item.fecha_ingreso);
+        document.getElementById('editHoraAprob').value = formatDateForInput(item.hora_aprobacion);
+
         document.getElementById('editObsDiag').value = item.observaciones_diagnostico || '';
         document.getElementById('editObsMant').value = item.observaciones_mantenimiento || '';
 

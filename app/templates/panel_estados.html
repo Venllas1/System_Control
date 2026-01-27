@@ -430,38 +430,7 @@
             </div>
         </div>
 
-        <!-- RECEPCIÓN: Servicio Culminado (Listos para Entregar) -->
-        <div class="col-12" id="cardCulminadosOp">
-            <div class="card bg-dark-card border-secondary shadow-sm">
-                <div
-                    class="card-header border-secondary d-flex justify-content-between align-items-center bg-primary bg-opacity-10">
-                    <h5 class="mb-0 text-primary fw-bold"><i class="fas fa-flag-checkered me-2"></i> Servicio Culminado
-                        (Listos para Entregar)</h5>
-                    <div class="input-group input-group-sm w-25">
-                        <input type="text" id="searchCulminadosOp"
-                            class="form-control bg-dark text-light border-secondary" placeholder="Filtrar...">
-                    </div>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-dark table-hover mb-0 align-middle">
-                            <thead class="text-secondary text-uppercase text-xs">
-                                <tr>
-                                    <th class="ps-4">FR</th>
-                                    <th>Marca/Modelo</th>
-                                    <th>Estado</th>
-                                    <th>Encargado</th>
-                                    <th>Fecha</th>
-                                    <th class="text-center">Días</th>
-                                    <th class="text-end pe-4">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tableCulminadosOp"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+
 
         <!-- ALMACÉN: Repuestos para Diagnóstico -->
         <div class="col-12 d-none" id="cardRepDiag">
@@ -805,8 +774,9 @@
 
         function createRow(item, isVisualizador = false, technicianType = 'diagnostico') {
             const today = new Date();
-            const ingreso = parseFormattedDate(item.fecha_ingreso);
-            const diffDays = Math.ceil(Math.abs(today - ingreso) / (1000 * 60 * 60 * 24));
+            const baseDateStr = item.hora_aprobacion || item.fecha_ingreso;
+            const refDate = parseFormattedDate(baseDateStr);
+            const diffDays = Math.ceil(Math.abs(today - refDate) / (1000 * 60 * 60 * 24));
             const s = normalize(item.estado);
             const frDisplay = item.fr || 'Sin FR';
 
@@ -850,15 +820,12 @@
                 }
                 else if (s.includes('inicio de servicio') || s.includes('en servicio')) {
                     if (isOps) {
-                        actionsHtml += `<button class="btn btn-sm btn-success" onclick="updateStatus(${item.id}, 'Servicio culminado')">Terminar Mantenimiento</button>`;
+                        actionsHtml += `<button class="btn btn-sm btn-success" onclick="updateStatus(${item.id}, 'Entregado')">Terminar Mantenimiento</button>`;
                         actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'espera de repuestos')">Pedir Repuestos</button>`;
                     }
                 }
                 else if (s.includes('espera de repuestos')) {
                     if (isAlm) actionsHtml += `<button class="btn btn-sm btn-primary" onclick="updateStatus(${item.id}, 'En servicio')">Confirmar Llegada (Serv)</button>`;
-                }
-                else if (s.includes('servicio culminado')) {
-                    if (isRec) actionsHtml += `<button class="btn btn-sm btn-info" onclick="updateStatus(${item.id}, 'Entregado')">Entregar Cliente</button>`;
                 }
 
                 if (isAdmin) {
@@ -886,7 +853,7 @@
                     <td>${item.marca} ${item.modelo}</td>
                     <td>${getStatusBadge(item.estado)}</td>
                     <td class="text-light">${tech}</td>
-                    <td class="text-muted">${item.fecha_ingreso || 'N/A'}</td>
+                    <td class="text-muted">${baseDateStr || 'N/A'}</td>
                     <td class="text-center">${daysValue}</td>
                     <td class="text-end pe-4">${actionsHtml}</td>
                 </tr>
@@ -898,7 +865,7 @@
                     <td class="text-white">${item.marca} ${item.modelo}</td>
                     <td>${getStatusBadge(item.estado)}</td>
                     <td class="text-sm text-light"><i class="fas fa-user-circle me-1 text-muted"></i> ${tech}</td>
-                    <td class="text-sm text-muted">${item.fecha_ingreso || 'N/A'}</td>
+                    <td class="text-sm text-muted">${baseDateStr || 'N/A'}</td>
                     <td class="text-center"><span class="badge ${diffDays > 5 ? 'bg-danger' : 'bg-success'} badge-pill">${diffDays} días</span></td>
                     <td class="text-end pe-4">${actionsHtml}</td>
                 </tr>
@@ -913,7 +880,7 @@
             if (s.includes('revision') || s.includes('reevaluacion')) countRev++;
             else if (s.includes('diagnostico')) countDiag++;
             else if (s.includes('pendiente') || s.includes('espera de aprobacion')) countPend++;
-            else if ((s.includes('aprobado') || s.includes('servicio') || s.includes('repuesto')) && !s.includes('culminado') && !s.includes('entregado')) countApro++;
+            else if ((s.includes('aprobado') || s.includes('servicio') || s.includes('repuesto')) && !s.includes('entregado')) countApro++;
         });
 
         if (document.getElementById('kpiTotal')) document.getElementById('kpiTotal').innerText = equipments.length;
@@ -1024,7 +991,7 @@
             }
 
             createRenderLogic(s => (s.includes('diagnostico') && !s.includes('revision')) || s.includes('consumible') || (s.includes('repuesto') && !s.includes('repuestos')), 'tableDiagnostico', 'searchDiagnostico', null, 'diagnostico');
-            createRenderLogic(s => (s.includes('aprobado') || s.includes('servicio') || s.includes('repuestos')) && !s.includes('entregado') && !s.includes('culminado'), 'tableAprobado', 'searchAprobado', { prev: 'btnPrevAprobado', next: 'btnNextAprobado', info: 'pageInfoAprobado' }, 'mantenimiento');
+            createRenderLogic(s => (s.includes('aprobado') || s.includes('servicio') || s.includes('repuestos')) && !s.includes('entregado'), 'tableAprobado', 'searchAprobado', { prev: 'btnPrevAprobado', next: 'btnNextAprobado', info: 'pageInfoAprobado' }, 'mantenimiento');
             createRenderLogic(s => s.includes('revision') || s.includes('reevaluacion') || s.includes('rechazado'), 'tableRevision', 'searchRevision', null, 'mantenimiento');
             createRenderLogic(s => s.includes('pendiente') || s.includes('espera de aprobacion'), 'tablePendiente', 'searchPendiente', { prev: 'btnPrevPendiente', next: 'btnNextPendiente', info: 'pageInfoPendiente' }, 'diagnostico');
 
@@ -1037,14 +1004,12 @@
                 document.getElementById('cardPendientesOp').classList.add('d-none');
                 document.getElementById('cardDiagnosticoOp').classList.add('d-none');
                 document.getElementById('cardAprobadosOp').classList.add('d-none');
-                document.getElementById('cardCulminadosOp').classList.add('d-none');
                 document.getElementById('cardRepDiag').classList.remove('d-none');
                 document.getElementById('cardRepServ').classList.remove('d-none');
             } else {
                 document.getElementById('cardPendientesOp').classList.remove('d-none');
                 document.getElementById('cardDiagnosticoOp').classList.remove('d-none');
                 document.getElementById('cardAprobadosOp').classList.remove('d-none');
-                document.getElementById('cardCulminadosOp').classList.remove('d-none');
             }
 
             // Reusable render logic function (same as visualizador)
@@ -1108,21 +1073,14 @@
 
             // OPERACIONES: Aprobados / En Servicio (paginated)
             createRenderLogicOp(
-                s => (s.includes('aprobado') || s.includes('servicio') || s.includes('repuestos')) && !s.includes('culminado') && !s.includes('entregado'),
+                s => (s.includes('aprobado') || s.includes('servicio') || s.includes('repuestos')) && !s.includes('entregado'),
                 'tableAprobadosOp',
                 'searchAprobadosOp',
                 { prev: 'btnPrevAprobadosOp', next: 'btnNextAprobadosOp', info: 'pageInfoAprobadosOp' },
                 'mantenimiento'
             );
 
-            // RECEPCIÓN: Servicio Culminado (listos para entregar)
-            createRenderLogicOp(
-                s => s.includes('culminado'),
-                'tableCulminadosOp',
-                'searchCulminadosOp',
-                null,
-                'mantenimiento'
-            );
+
 
             // ALMACÉN: Repuestos para Diagnóstico
             if (isAlmacenRole) {

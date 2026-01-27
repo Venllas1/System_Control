@@ -42,7 +42,8 @@ class WorkflowEngine:
         'Aprobado': {
             'next': ['Inicio de Servicio'],
             'allowed_roles': ['admin', 'operaciones'],
-            'requires_decision': False
+            'requires_decision': False,
+            'auto_fill': {'hora_aprobacion': 'now'}
         },
         'Rechazado': {
             'next': ['en Diagnostico', 'Entregado'],
@@ -57,18 +58,13 @@ class WorkflowEngine:
             'auto_fill': {'hora_inicio_mantenimiento': 'now'} # Auto-fill timestamp
         },
         'En servicio': {
-            'next': ['espera de repuestos', 'Servicio culminado'],
+            'next': ['espera de repuestos', 'Entregado'],
             'allowed_roles': ['admin', 'operaciones'],
             'requires_decision': True
         },
         'espera de repuestos': {
             'next': ['En servicio'],
             'allowed_roles': ['admin', 'almacen'],
-            'requires_decision': False
-        },
-        'Servicio culminado': {
-            'next': ['Entregado'],
-            'allowed_roles': ['admin', 'recepcion'],
             'requires_decision': False
         },
         'Entregado': {
@@ -80,7 +76,7 @@ class WorkflowEngine:
     
     # Pending tasks logic: states that require action from each role
     PENDING_LOGIC = {
-        'recepcion': ['Pendiente de aprobacion', 'Servicio culminado'],
+        'recepcion': ['Pendiente de aprobacion'],
         'operaciones': ['Espera de Diagnostico', 'en Diagnostico', 'Repuesto entregado', 
                         'Aprobado', 'Inicio de Servicio', 'En servicio'],
         'almacen': ['espera de repuesto o consumible', 'espera de repuestos'],

@@ -78,6 +78,7 @@ function renderExcelTable(data) {
             <td class="editable" data-field="hora_inicio_diagnostico">${item.hora_inicio_diagnostico || ''}</td>
             <td class="editable text-truncate" data-field="observaciones_diagnostico" style="max-width: 200px;" title="${item.observaciones_diagnostico || ''}">${item.observaciones_diagnostico || ''}</td>
             <td class="editable" data-field="hora_inicio_mantenimiento">${item.hora_inicio_mantenimiento || ''}</td>
+            <td class="editable" data-field="hora_aprobacion">${item.hora_aprobacion || ''}</td>
             <td class="editable text-truncate" data-field="observaciones_mantenimiento" style="max-width: 200px;" title="${item.observaciones_mantenimiento || ''}">${item.observaciones_mantenimiento || ''}</td>
         </tr>
     `).join('');
@@ -99,7 +100,7 @@ function setupEditableCells() {
             const input = document.createElement('input');
 
             // USE DATETIME-LOCAL FOR TIME FIELDS
-            const isTimeField = field === 'hora_inicio_diagnostico' || field === 'hora_inicio_mantenimiento' || field === 'fecha_ingreso';
+            const isTimeField = field === 'hora_inicio_diagnostico' || field === 'hora_inicio_mantenimiento' || field === 'fecha_ingreso' || field === 'hora_aprobacion';
             const isDateField = false; // fecha_ingreso is now a time field
 
             if (isTimeField) {

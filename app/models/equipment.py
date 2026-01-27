@@ -23,6 +23,7 @@ class Equipment(db.Model):
     hora_inicio_diagnostico = db.Column(db.DateTime)
     observaciones_diagnostico = db.Column(db.Text)
     hora_inicio_mantenimiento = db.Column(db.DateTime)
+    hora_aprobacion = db.Column(db.DateTime)
     observaciones_mantenimiento = db.Column(db.Text)
 
     class Status:
@@ -35,7 +36,6 @@ class Equipment(db.Model):
         INICIO_SERVICIO = 'Inicio de Servicio'
         ESPERA_REPUESTOS = 'espera de repuestos'
         EN_SERVICIO = 'En servicio'
-        SERVICIO_CULMINADO = 'Servicio culminado'
         ENTREGADO = 'Entregado'
         RECHAZADO = 'Rechazado'
         REVISION = 'Revision'
@@ -68,6 +68,7 @@ class Equipment(db.Model):
             'hora_inicio_diagnostico': parse_date(self.hora_inicio_diagnostico),
             'observaciones_diagnostico': self.observaciones_diagnostico,
             'hora_inicio_mantenimiento': parse_date(self.hora_inicio_mantenimiento),
+            'hora_aprobacion': parse_date(self.hora_aprobacion),
             'observaciones_mantenimiento': self.observaciones_mantenimiento
         }
 
