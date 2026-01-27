@@ -185,6 +185,8 @@
     });
 
     let allData = [];
+    let groupPages = {}; // Store current page for each group
+    const ITEMS_PER_PAGE = 10;
 
     async function loadAllEquipment() {
         try {
@@ -193,7 +195,7 @@
 
             if (result.success) {
                 allData = result.data;
-                renderGroupedTables(allData);
+                renderGroupedTables();
             } else {
                 console.error('Error loading data');
             }
@@ -202,12 +204,12 @@
         }
     }
 
-    function renderGroupedTables(data) {
+    function renderGroupedTables() {
         const container = document.getElementById('tablesContainer');
         const count = document.getElementById('recordCount');
         container.innerHTML = '';
 
-        // NEW ORDER & GROUPING
+        // NEW ORDER & GROUPING (Synchronized with panel_estados)
         const groupsConfig = [
             {
                 name: 'Diagnóstico',
@@ -220,13 +222,19 @@
                 color: 'success'
             },
             {
+                name: 'Reevaluación / Revisión',
+                states: ['Revision', 'Reevaluacion'],
+                color: 'primary'
+            },
+            {
                 name: 'Pendiente de Aprobación',
-                states: ['Pendiente de aprobacion'],
+                // Synchronized with panel_estados logic: anything with "pendiente" or "espera de aprobacion"
+                states: ['Pendiente', 'Espera de aprobacion'],
                 color: 'warning'
             },
             {
                 name: 'Entregados y Otros',
-                states: ['Servicio culminado', 'Entregado'], // Others will be added here
+                states: ['Servicio culminado', 'Entregado'],
                 isDefault: true,
                 color: 'secondary'
             }
@@ -234,18 +242,19 @@
 
         // Initialize Buckets
         const buckets = {};
-        groupsConfig.forEach(g => buckets[g.name] = []);
+        groupsConfig.forEach(g => {
+            buckets[g.name] = [];
+            if (!groupPages[g.name]) groupPages[g.name] = 1;
+        });
 
         // Distribute Data
-        data.forEach(item => {
+        allData.forEach(item => {
             let placed = false;
             const itemState = (item.estado || '').toLowerCase().trim();
 
             for (const group of groupsConfig) {
-                // Check for exact match or partial match in normalized states
                 const matches = group.states.some(s => {
                     const normS = s.toLowerCase().trim();
-                    // Basic match or if the item state contains the configured state keyword
                     return itemState === normS || itemState.includes(normS);
                 });
 
@@ -256,27 +265,47 @@
                 }
             }
             if (!placed) {
-                // Find the default group (Entregados y Otros)
                 const defaultGroup = groupsConfig.find(g => g.isDefault);
                 buckets[defaultGroup.name].push(item);
             }
         });
 
-        // Render Groups in specific ORDER
+        // Render Groups
         let totalCount = 0;
         groupsConfig.forEach(group => {
             const items = buckets[group.name];
-            if (items.length === 0 && !group.isDefault) return; // Skip empty except maybe others?
             if (items.length === 0) return;
 
             totalCount += items.length;
+
+            // Pagination Logic
+            const totalPages = Math.ceil(items.length / ITEMS_PER_PAGE);
+            if (groupPages[group.name] > totalPages) groupPages[group.name] = 1;
+
+            const start = (groupPages[group.name] - 1) * ITEMS_PER_PAGE;
+            const pageData = items.slice(start, start + ITEMS_PER_PAGE);
 
             const card = document.createElement('div');
             card.className = 'card bg-dark-card border-secondary shadow-sm mb-4';
             card.innerHTML = `
                 <div class="card-header border-secondary d-flex justify-content-between align-items-center">
                     <h5 class="mb-0 text-white border-start border-4 border-${group.color} ps-3">${group.name}</h5>
-                    <span class="badge bg-${group.color} bg-opacity-25 text-${group.color}">${items.length} equipos</span>
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="badge bg-${group.color} bg-opacity-25 text-${group.color}">${items.length} equipos</span>
+                        ${totalPages > 1 ? `
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-secondary" onclick="changePage('${group.name}', -1)" ${groupPages[group.name] === 1 ? 'disabled' : ''}>
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <span class="btn btn-outline-secondary disabled text-light border-secondary">
+                                    ${groupPages[group.name]}/${totalPages}
+                                </span>
+                                <button class="btn btn-outline-secondary" onclick="changePage('${group.name}', 1)" ${groupPages[group.name] === totalPages ? 'disabled' : ''}>
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -293,7 +322,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                ${items.map(item => createRowHTML(item)).join('')}
+                                ${pageData.map(item => createRowHTML(item)).join('')}
                             </tbody>
                         </table>
                     </div>
@@ -305,6 +334,11 @@
         count.innerText = `${totalCount} registros totales`;
     }
 
+    window.changePage = function (groupName, delta) {
+        groupPages[groupName] += delta;
+        renderGroupedTables();
+    }
+
     function createRowHTML(item) {
         return `
             <tr>
@@ -312,13 +346,13 @@
                 <td>
                     <div class="d-flex flex-column">
                         <span class="fw-bold text-white">${item.marca}</span>
-                        <small class="text-white">${item.modelo}</small>
+                        <small class="text-secondary">${item.modelo}</small>
                     </div>
                 </td>
-                <td><span class="badge bg-secondary font-monospace" style="font-size: 0.75rem;">${(item.estado || '').toUpperCase()}</span></td>
+                <td><span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary font-monospace" style="font-size: 0.7rem;">${(item.estado || '').toUpperCase()}</span></td>
                 <td>${item.cliente || '-'}</td>
-                <td class="text-light font-monospace">${item.serie || '-'}</td> <!-- SERIE COLUMN -->
-                <td>${item.fecha_ingreso || '-'}</td>
+                <td class="text-light font-monospace small">${item.serie || '-'}</td>
+                <td class="small text-muted">${item.fecha_ingreso || '-'}</td>
                 <td class="text-end pe-4">
                     <button class="btn btn-sm btn-outline-warning" onclick='openEditModal(${JSON.stringify(item).replace(/'/g, "&#39;")})'>
                         <i class="fas fa-edit"></i>
@@ -336,11 +370,7 @@
         document.getElementById('editCliente').value = item.cliente || '';
         document.getElementById('editEncargado').value = item.encargado || '';
         document.getElementById('editObservaciones').value = item.observaciones || '';
-
-        // Added Serie POPULATION
         document.getElementById('editSerie').value = item.serie || '';
-
-        // New Fields
         document.getElementById('editEncMant').value = item.encargado_mantenimiento || '';
         document.getElementById('editInforme').value = item.numero_informe || '';
 
@@ -358,7 +388,6 @@
         new bootstrap.Modal(document.getElementById('editDataModal')).show();
     }
 
-    // saveEquipmentData remains the same...
     window.saveEquipmentData = async function () {
         const id = document.getElementById('editId').value;
         const form = document.getElementById('editDataForm');
@@ -374,7 +403,7 @@
 
             const result = await response.json();
             if (result.success) {
-                alert('Datos actualizados');
+                //alert('Datos actualizados');
                 location.reload();
             } else {
                 alert('Error: ' + result.error);
