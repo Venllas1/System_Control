@@ -96,9 +96,13 @@ class EquipmentService:
             if 'encargado_mantenimiento' in additional_data:
                 equipment.encargado_mantenimiento = additional_data['encargado_mantenimiento']
             if 'hora_inicio_mantenimiento' in additional_data:
-                equipment.hora_inicio_mantenimiento = additional_data['hora_inicio_mantenimiento']
+                val = additional_data['hora_inicio_mantenimiento']
+                if val and isinstance(val, str): val = val.replace('T', ' ')
+                equipment.hora_inicio_mantenimiento = val
             if 'hora_inicio_diagnostico' in additional_data:
-                equipment.hora_inicio_diagnostico = additional_data['hora_inicio_diagnostico']
+                val = additional_data['hora_inicio_diagnostico']
+                if val and isinstance(val, str): val = val.replace('T', ' ')
+                equipment.hora_inicio_diagnostico = val
 
         # Log History
         history = StatusHistory(

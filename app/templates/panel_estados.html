@@ -557,8 +557,20 @@
                         </div>
 
                         <div class="col-md-6">
+                            <small class="text-secondary text-uppercase">Encargado Diagnóstico</small>
+                            <p id="infoEncDiag" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
+                        </div>
+                        <div class="col-md-6">
                             <small class="text-secondary text-uppercase">Encargado Mantenimiento</small>
-                            <p id="infoEncargado" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
+                            <p id="infoEncMant" class="fw-bold text-light mb-0 border-bottom border-dark pb-1"></p>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-secondary text-uppercase">Inicio Diagnóstico</small>
+                            <p id="infoHoraDiag" class="fw-bold text-info mb-0 border-bottom border-dark pb-1"></p>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-secondary text-uppercase">Inicio Mantenimiento</small>
+                            <p id="infoHoraMant" class="fw-bold text-success mb-0 border-bottom border-dark pb-1"></p>
                         </div>
                         <div class="col-md-6">
                             <small class="text-secondary text-uppercase">Accesorios</small>
@@ -1154,7 +1166,10 @@
             document.getElementById('infoFr').innerText = item.fr || 'N/A';
             document.getElementById('infoMarca').innerText = `${item.marca} ${item.modelo}`;
             document.getElementById('infoEstado').innerHTML = getStatusBadge(item.estado);
-            document.getElementById('infoEncargado').innerText = item.encargado_diagnostico || 'No Asignado';
+            document.getElementById('infoEncDiag').innerText = item.encargado_diagnostico || 'No Asignado';
+            document.getElementById('infoEncMant').innerText = item.encargado_mantenimiento || 'No Asignado';
+            document.getElementById('infoHoraDiag').innerText = item.hora_inicio_diagnostico || 'N/A';
+            document.getElementById('infoHoraMant').innerText = item.hora_inicio_mantenimiento || 'N/A';
             document.getElementById('infoFecha').innerText = item.fecha_ingreso || 'N/A';
             document.getElementById('infoReporte').innerText = item.reporte_cliente || 'Sin reporte';
 
