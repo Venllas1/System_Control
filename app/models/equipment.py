@@ -39,6 +39,16 @@ class Equipment(db.Model):
         ENTREGADO = 'Entregado'
 
     def to_dict(self):
+        def parse_date(dt):
+            if not dt: return None
+            if isinstance(dt, str): return dt
+            from datetime import datetime, time
+            if isinstance(dt, datetime):
+                return dt.strftime('%Y-%m-%d %H:%M')
+            if isinstance(dt, time):
+                return dt.strftime('%H:%M')
+            return str(dt)
+
         return {
             'id': self.id,
             'fr': self.fr,
@@ -46,7 +56,7 @@ class Equipment(db.Model):
             'modelo': self.modelo,
             'estado': self.estado,
             'cliente': self.cliente,
-            'fecha_ingreso': self.fecha_ingreso.strftime('%Y-%m-%d') if self.fecha_ingreso else None,
+            'fecha_ingreso': parse_date(self.fecha_ingreso),
             'encargado_diagnostico': self.encargado_diagnostico,
             'reporte_cliente': self.reporte_cliente,
             'observaciones': self.observaciones,
@@ -55,9 +65,9 @@ class Equipment(db.Model):
             'condicion': self.condicion,
             'numero_informe': self.numero_informe,
             'encargado_mantenimiento': self.encargado_mantenimiento,
-            'hora_inicio_diagnostico': self.hora_inicio_diagnostico,
+            'hora_inicio_diagnostico': parse_date(self.hora_inicio_diagnostico),
             'observaciones_diagnostico': self.observaciones_diagnostico,
-            'hora_inicio_mantenimiento': self.hora_inicio_mantenimiento,
+            'hora_inicio_mantenimiento': parse_date(self.hora_inicio_mantenimiento),
             'observaciones_mantenimiento': self.observaciones_mantenimiento
         }
 

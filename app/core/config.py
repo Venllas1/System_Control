@@ -28,7 +28,7 @@ class Config:
             'can_edit': True,
             'stats_visible': True,
             'tables': ['active', 'history'],
-            'columns': ['encargado'],
+            'columns': ['encargado_diagnostico'],
             'actions': ['view', 'edit', 'delete']
         },
         'recepcion': {
@@ -36,7 +36,7 @@ class Config:
             'can_edit': True,
             'stats_visible': False,
             'tables': ['relevant', 'history'],
-            'columns': ['encargado'],
+            'columns': ['encargado_diagnostico'],
             'relevant_statuses': [
                 'Espera de Diagnostico',
                 'Pendiente de aprobacion',
@@ -49,7 +49,7 @@ class Config:
             'can_edit': True,
             'stats_visible': False,
             'tables': ['relevant', 'history'],
-            'columns': ['encargado'],
+            'columns': ['encargado_diagnostico'],
             'relevant_statuses': [
                 'Espera de Diagnostico',
                 'en Diagnostico',
@@ -67,7 +67,7 @@ class Config:
             'can_edit': True,
             'stats_visible': False,
             'tables': ['relevant'],
-            'columns': ['encargado'],
+            'columns': ['encargado_diagnostico'],
             'relevant_statuses': [
                 'espera de repuestos',
                 'espera de repuesto o consumible'
