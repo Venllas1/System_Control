@@ -38,26 +38,17 @@ def update_status(id):
         # Accept both JSON and form data
         data = request.get_json(silent=True) or request.form
         new_status = data.get('status') or data.get('next_state')
-        new_encargado = data.get('encargado')
         
         if not new_status:
             return jsonify({'success': False, 'error': 'Falta el estado'}), 400
         
-        # Use workflow-validated method
+        # Use workflow-validated method, passing the entire data dict for additional fields
         success, message, final_state = EquipmentService.advance_to_next_state(
             id, 
             current_user, 
-            new_status
+            new_status,
+            additional_data=data
         )
-        
-        # Update encargado if provided
-        if success and new_encargado:
-            from app.models.equipment import Equipment
-            from app.extensions import db
-            equipment = Equipment.query.get(id)
-            if equipment:
-                equipment.encargado = new_encargado
-                db.session.commit()
         
         if success:
             return jsonify({
@@ -180,7 +171,8 @@ def get_next_state(id):
     Includes current state, next states, and user permissions.
     """
     try:
-        info = EquipmentService.get_next_state_info(id, current_user)
+        target = request.args.get('target')
+        info = EquipmentService.get_next_state_info(id, current_user, target_state=target)
         if not info:
             return jsonify({'success': False, 'error': 'Equipo no encontrado'}), 404
         

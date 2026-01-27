@@ -19,7 +19,10 @@ class WorkflowEngine:
         'en Diagnostico': {
             'next': ['espera de repuesto o consumible', 'Pendiente de aprobacion'],
             'allowed_roles': ['admin', 'operaciones'],
-            'requires_decision': True  # User chooses between two paths
+            'requires_decision': True,
+            'enter_prompts': ['encargado_diagnostico'],
+            'exit_prompts': ['numero_informe'],
+            'auto_fill': {'hora_inicio_diagnostico': 'now'}
         },
         'espera de repuesto o consumible': {
             'next': ['Repuesto entregado'],
@@ -44,7 +47,9 @@ class WorkflowEngine:
         'Inicio de Servicio': {
             'next': ['En servicio'],
             'allowed_roles': ['admin', 'operaciones'],
-            'requires_decision': False
+            'requires_decision': False,
+            'enter_prompts': ['encargado_mantenimiento'], # Prompt when entering
+            'auto_fill': {'hora_inicio_mantenimiento': 'now'} # Auto-fill timestamp
         },
         'En servicio': {
             'next': ['espera de repuestos', 'Servicio culminado'],
@@ -179,27 +184,47 @@ class WorkflowEngine:
             list: List of states that require action from this role
         """
         return WorkflowEngine.PENDING_LOGIC.get(role.lower(), [])
-    
+
     @staticmethod
-    def get_state_info(current_state, user_role):
+    def get_state_info(current_state, user_role, target_state=None):
         """
         Get comprehensive information about a state for a specific user.
         
         Args:
             current_state (str): Current equipment state
             user_role (str): User's role
+            target_state (str, optional): Potential next state
             
         Returns:
             dict: State information including next states, permissions, etc.
         """
-        state_info = WorkflowEngine.STATE_FLOW.get(current_state, {})
-        next_states = state_info.get('next')
+        current_info = WorkflowEngine.STATE_FLOW.get(current_state, {})
+        next_states = current_info.get('next')
         
+        # Determine prompts needed
+        prompt_fields = []
+        
+        # 1. Exit prompts from current state (only if we are moving)
+        if target_state:
+            prompt_fields.extend(current_info.get('exit_prompts', []))
+            
+            # 2. Enter prompts for target state
+            target_info = WorkflowEngine.STATE_FLOW.get(target_state, {})
+            prompt_fields.extend(target_info.get('enter_prompts', []))
+        
+        # If no target state but only one possible next state, we can pre-calculate prompts
+        elif next_states and len(next_states) == 1:
+            target_state = next_states[0]
+            prompt_fields.extend(current_info.get('exit_prompts', []))
+            target_info = WorkflowEngine.STATE_FLOW.get(target_state, {})
+            prompt_fields.extend(target_info.get('enter_prompts', []))
+
         return {
             'current_state': current_state,
             'next_states': next_states if next_states else [],
             'can_advance': WorkflowEngine.can_advance(current_state, user_role),
             'requires_decision': WorkflowEngine.requires_decision(current_state),
             'is_terminal': next_states is None,
-            'allowed_roles': state_info.get('allowed_roles', [])
+            'allowed_roles': current_info.get('allowed_roles', []),
+            'prompt_fields': list(set(prompt_fields)) # Unique fields
         }

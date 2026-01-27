@@ -83,7 +83,7 @@ function renderPendingTasks() {
                     </div>
                 </td>
                 <td>${getStatusBadge(item.estado)}</td>
-                <td class="text-sm text-light"><i class="fas fa-user-circle me-1 text-muted"></i> ${item.encargado}</td>
+                <td class="text-sm text-light"><i class="fas fa-user-circle me-1 text-muted"></i> ${item.encargado_diagnostico || 'N/A'}</td>
                 <td class="text-sm text-muted">${item.fecha_ingreso || 'N/A'}</td>
                 <td><span class="badge ${diffDays > 5 ? 'bg-danger' : 'bg-success'} badge-pill">${diffDays} días</span></td>
                 <td class="text-end pe-4">
@@ -104,7 +104,6 @@ function renderPendingTasks() {
  */
 async function showAdvanceModal(equipmentId) {
     try {
-        // Get next state info
         const response = await fetch(`/api/equipment/${equipmentId}/next_state`);
         const result = await response.json();
 
@@ -115,26 +114,29 @@ async function showAdvanceModal(equipmentId) {
 
         const info = result.data;
 
-        // Check if can advance
         if (!info.can_advance) {
             showError(`Tu rol (${currentUserRole}) no puede avanzar equipos desde '${info.current_state}'`);
             return;
         }
 
-        // Check if terminal state
         if (info.is_terminal) {
             showError('El equipo ya está en estado terminal (Entregado)');
             return;
         }
 
-        // If requires decision (multiple next states), show decision modal
+        // If requires decision, show decision modal
         if (info.requires_decision && info.next_states.length > 1) {
             showDecisionModal(equipmentId, info.current_state, info.next_states);
         } else {
-            // Single next state, confirm and advance
             const nextState = info.next_states[0];
-            if (confirm(`¿Avanzar equipo de '${info.current_state}' a '${nextState}'?`)) {
-                await advanceEquipment(equipmentId, nextState);
+
+            // If data prompts are needed, show prompt modal
+            if (info.prompt_fields && info.prompt_fields.length > 0) {
+                showDataPromptModal(equipmentId, nextState, info.prompt_fields);
+            } else {
+                if (confirm(`¿Avanzar equipo de '${info.current_state}' a '${nextState}'?`)) {
+                    await advanceEquipment(equipmentId, nextState);
+                }
             }
         }
     } catch (error) {
@@ -144,10 +146,102 @@ async function showAdvanceModal(equipmentId) {
 }
 
 /**
+ * Show modal to collect additional data before advancing
+ */
+function showDataPromptModal(equipmentId, nextState, fields) {
+    const fieldDefinitions = {
+        'encargado_diagnostico': {
+            label: 'Encargado de Diagnóstico',
+            type: 'select',
+            required: true,
+            options: ['SERGIO', 'CARLOS', 'GERSSON', 'LUIS']
+        },
+        'numero_informe': {
+            label: 'Número de Informe',
+            type: 'text',
+            required: true,
+            placeholder: 'Ej: INF-2024-001'
+        },
+        'encargado_mantenimiento': {
+            label: 'Encargado de Mantenimiento',
+            type: 'select',
+            required: true,
+            options: ['SERGIO', 'CARLOS', 'GERSSON', 'LUIS']
+        }
+    };
+
+    const modalHtml = `
+        <div class="modal fade" id="promptModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content bg-dark-card border-secondary text-light">
+                    <div class="modal-header border-secondary">
+                        <h5 class="modal-title">
+                            <i class="fas fa-edit text-info me-2"></i>
+                            Información Requerida
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form id="promptForm">
+                        <div class="modal-body">
+                            <p class="text-white mb-3">Para avanzar a <strong class="text-success">${nextState}</strong>, completa los siguientes datos:</p>
+                            ${fields.map(fieldName => {
+        const def = fieldDefinitions[fieldName] || { label: fieldName, type: 'text' };
+        if (def.type === 'select') {
+            return `
+                                        <div class="mb-3">
+                                            <label class="form-label text-secondary">${def.label}</label>
+                                            <select name="${fieldName}" class="form-select bg-dark text-light border-secondary" required>
+                                                <option value="">Seleccione encargado...</option>
+                                                ${def.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                                            </select>
+                                        </div>
+                                    `;
+        }
+        return `
+                                    <div class="mb-3">
+                                        <label class="form-label text-secondary">${def.label}</label>
+                                        <input type="${def.type}" name="${fieldName}" class="form-control bg-dark text-light border-secondary" 
+                                               placeholder="${def.placeholder || ''}" ${def.required ? 'required' : ''}>
+                                    </div>
+                                `;
+    }).join('')}
+                        </div>
+                        <div class="modal-footer border-secondary">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Continuar y Avanzar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Remove existing
+    const existing = document.getElementById('promptModal');
+    if (existing) existing.remove();
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    const modal = new bootstrap.Modal(document.getElementById('promptModal'));
+    modal.show();
+
+    // Form submission
+    document.getElementById('promptForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+
+        modal.hide();
+        await advanceEquipment(equipmentId, nextState, data);
+    });
+}
+
+/**
  * Show decision modal when multiple next states are available
  */
 function showDecisionModal(equipmentId, currentState, nextStates) {
-    // Create modal HTML
+    // Note: If multiple states exist, we only show buttons. 
+    // If a button is clicked and THAT state needs prompts, showAdvanceModal will handle it
+    // if recursively called or we can just call it again.
     const modalHtml = `
         <div class="modal fade" id="decisionModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -164,7 +258,7 @@ function showDecisionModal(equipmentId, currentState, nextStates) {
                         <p class="mb-3">Selecciona el siguiente estado para este equipo:</p>
                         <div class="d-grid gap-2">
                             ${nextStates.map(state => `
-                                <button class="btn btn-outline-primary btn-lg" onclick="advanceEquipment(${equipmentId}, '${state}'); bootstrap.Modal.getInstance(document.getElementById('decisionModal')).hide();">
+                                <button class="btn btn-outline-primary btn-lg" onclick="handleDecisionClick(${equipmentId}, '${state}')">
                                     <i class="fas fa-arrow-right me-2"></i> ${state}
                                 </button>
                             `).join('')}
@@ -178,43 +272,47 @@ function showDecisionModal(equipmentId, currentState, nextStates) {
         </div>
     `;
 
-    // Remove existing modal if any
-    const existingModal = document.getElementById('decisionModal');
-    if (existingModal) {
-        existingModal.remove();
-    }
+    const existing = document.getElementById('decisionModal');
+    if (existing) existing.remove();
 
-    // Add modal to body
     document.body.insertAdjacentHTML('beforeend', modalHtml);
-
-    // Show modal
     const modal = new bootstrap.Modal(document.getElementById('decisionModal'));
     modal.show();
 
-    // Clean up on hide
-    document.getElementById('decisionModal').addEventListener('hidden.bs.modal', function () {
-        this.remove();
-    });
+    window.handleDecisionClick = async (id, state) => {
+        modal.hide();
+        // Re-check for prompts for the specific selected target state
+        const response = await fetch(`/api/equipment/${id}/next_state?target=${encodeURIComponent(state)}`);
+        const result = await response.json();
+
+        if (result.success && result.data.prompt_fields && result.data.prompt_fields.length > 0) {
+            showDataPromptModal(id, state, result.data.prompt_fields);
+        } else {
+            if (confirm(`¿Avanzar equipo a '${state}'?`)) {
+                await advanceEquipment(id, state);
+            }
+        }
+    };
 }
 
 /**
  * Advance equipment to next state
  */
-async function advanceEquipment(equipmentId, nextState = null) {
+async function advanceEquipment(equipmentId, nextState = null, additionalData = {}) {
     try {
+        const payload = { next_state: nextState, ...additionalData };
         const response = await fetch(`/api/equipment/${equipmentId}/update_status`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ next_state: nextState })
+            body: JSON.stringify(payload)
         });
 
         const result = await response.json();
 
         if (result.success) {
             showSuccess(result.message || 'Equipo avanzado correctamente');
-            // Reload page to reflect changes
             setTimeout(() => location.reload(), 1000);
         } else {
             showError(result.error || 'Error al avanzar equipo');
