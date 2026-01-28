@@ -96,14 +96,8 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-secondary">Encargado Mantenimiento</label>
-                            <select class="form-select bg-dark text-light border-secondary"
-                                name="encargado_mantenimiento" id="editEncMant">
-                                <option value="">No asignado</option>
-                                <option value="SERGIO">SERGIO</option>
-                                <option value="CARLOS">CARLOS</option>
-                                <option value="GERSSON">GERSSON</option>
-                                <option value="LUIS">LUIS</option>
-                            </select>
+                            <input type="text" class="form-control bg-dark text-light border-secondary"
+                                name="encargado_mantenimiento" id="editEncMant" placeholder="Nombre del técnico">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-secondary">No. Informe</label>
@@ -129,9 +123,10 @@
                                 name="fecha_ingreso" id="editFechaIngreso">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label text-secondary">Hora Aprobación</label>
+                            <label class="form-label text-secondary">Hora Aprobación (Auto)</label>
                             <input type="datetime-local" class="form-control bg-dark text-light border-secondary"
-                                name="hora_aprobacion" id="editHoraAprob">
+                                name="hora_aprobacion" id="editHoraAprob" readonly>
+                            <small class="text-muted">Se registra automáticamente al aprobar el equipo</small>
                         </div>
 
                         <div class="col-12">

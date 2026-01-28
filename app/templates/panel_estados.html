@@ -10,23 +10,9 @@
             <p class="text-muted mb-0">Panel de Control: {{ current_role|title }}</p>
         </div>
 
-        <div class="d-flex gap-2">
-            {% if current_role != 'visualizador' %}
-            <div class="input-group">
-                <span class="input-group-text bg-dark border-secondary text-secondary">
-                    <i class="fas fa-search"></i>
-                </span>
-                <input type="text" id="searchInput" class="form-control bg-dark text-light border-secondary"
-                    placeholder="Buscar equipo...">
-            </div>
-            {% endif %}
-            <!-- Excel Sync Disabled (Native DB Mode)
-            <button class="btn btn-outline-light refresh-btn" title="Refrescar Datos">
-                <i class="fas fa-sync-alt"></i>
-            </button>
-            -->
-            <!-- Export Button is enough -->
-            <div class="ms-2">
+
+        <div class="d-flex gap-2 justify-content-end">
+            <div>
                 {% if current_role == 'visualizador' or current_role == 'admin' %}
                 <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createEquipmentModal">
                     <i class="fas fa-plus me-1"></i> Agregar Equipo
