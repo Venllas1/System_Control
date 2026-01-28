@@ -16,6 +16,11 @@ def parse_iso_datetime(val):
     except:
         return None
 
+def get_local_now():
+    """Returns the current time in UTC-5 (Peru Time)."""
+    from datetime import timezone
+    return datetime.now(timezone(timedelta(hours=-5))).replace(tzinfo=None)
+
 class EquipmentService:
     @staticmethod
     def get_dashboard_config(user):
@@ -101,14 +106,11 @@ class EquipmentService:
         # Apply additional data if provided
         if additional_data:
             if 'encargado_diagnostico' in additional_data:
-                val = additional_data['encargado_diagnostico']
-                equipment.encargado_diagnostico = val.upper() if val and isinstance(val, str) else val
+                equipment.encargado_diagnostico = additional_data['encargado_diagnostico']
             if 'numero_informe' in additional_data:
-                val = additional_data['numero_informe']
-                equipment.numero_informe = val.upper() if val and isinstance(val, str) else val
+                equipment.numero_informe = additional_data['numero_informe']
             if 'encargado_mantenimiento' in additional_data:
-                val = additional_data['encargado_mantenimiento']
-                equipment.encargado_mantenimiento = val.upper() if val and isinstance(val, str) else val
+                equipment.encargado_mantenimiento = additional_data['encargado_mantenimiento']
             if 'hora_inicio_mantenimiento' in additional_data:
                 equipment.hora_inicio_mantenimiento = parse_iso_datetime(additional_data['hora_inicio_mantenimiento'])
             if 'hora_inicio_diagnostico' in additional_data:
@@ -116,11 +118,9 @@ class EquipmentService:
             if 'hora_aprobacion' in additional_data:
                 equipment.hora_aprobacion = parse_iso_datetime(additional_data['hora_aprobacion'])
             if 'observaciones_diagnostico' in additional_data:
-                val = additional_data['observaciones_diagnostico']
-                equipment.observaciones_diagnostico = val.upper() if val and isinstance(val, str) else val
+                equipment.observaciones_diagnostico = additional_data['observaciones_diagnostico']
             if 'observaciones_mantenimiento' in additional_data:
-                val = additional_data['observaciones_mantenimiento']
-                equipment.observaciones_mantenimiento = val.upper() if val and isinstance(val, str) else val
+                equipment.observaciones_mantenimiento = additional_data['observaciones_mantenimiento']
 
         # Log History
         history = StatusHistory(
@@ -152,19 +152,9 @@ class EquipmentService:
                 cliente=get_val('cliente', '').upper() or None,
                 serie=get_val('serie', '').upper() or None,
                 accesorios=get_val('accesorios', '').upper() or None,
-                fecha_ingreso=None, # Set below
+                fecha_ingreso=parse_iso_datetime(data.get('fecha_ingreso')) or datetime.now(),
                 estado=Equipment.Status.ESPERA_DIAGNOSTICO
             )
-
-            # Handle fecha_ingreso: Use user provided date + current time
-            provided_date = parse_iso_datetime(data.get('fecha_ingreso'))
-            if provided_date:
-                now = datetime.now()
-                # Combine date from input with time from now
-                new_eq.fecha_ingreso = provided_date.replace(hour=now.hour, minute=now.minute, second=now.second)
-            else:
-                new_eq.fecha_ingreso = datetime.now()
-
             db.session.add(new_eq)
             db.session.commit()
             return True, new_eq
@@ -349,37 +339,24 @@ class EquipmentService:
                 val = get_val('observaciones')
                 eq.observaciones = val.upper() if val else None
             
-            if 'condicion' in data: 
-                val = get_val('condicion')
-                eq.condicion = val.upper() if val else None
-            if 'numero_informe' in data: 
-                val = get_val('numero_informe')
-                eq.numero_informe = val.upper() if val else None
+            if 'condicion' in data: eq.condicion = get_val('condicion')
+            if 'numero_informe' in data: eq.numero_informe = get_val('numero_informe')
             
             # New Excel Fields (handled as strings, but we format the 'T' from datetime-local)
-            if 'encargado_mantenimiento' in data: 
-                val = get_val('encargado_mantenimiento')
-                eq.encargado_mantenimiento = val.upper() if val else None
+            if 'encargado_mantenimiento' in data: eq.encargado_mantenimiento = get_val('encargado_mantenimiento')
             
             if 'hora_inicio_diagnostico' in data:
                 eq.hora_inicio_diagnostico = parse_iso_datetime(data['hora_inicio_diagnostico'])
             
-            if 'observaciones_diagnostico' in data: 
-                val = get_val('observaciones_diagnostico')
-                eq.observaciones_diagnostico = val.upper() if val else None
+            if 'observaciones_diagnostico' in data: eq.observaciones_diagnostico = get_val('observaciones_diagnostico')
             
             if 'hora_inicio_mantenimiento' in data:
                 eq.hora_inicio_mantenimiento = parse_iso_datetime(data['hora_inicio_mantenimiento'])
             
-            if 'observaciones_mantenimiento' in data: 
-                val = get_val('observaciones_mantenimiento')
-                eq.observaciones_mantenimiento = val.upper() if val else None
+            if 'observaciones_mantenimiento' in data: eq.observaciones_mantenimiento = get_val('observaciones_mantenimiento')
             
             if 'fecha_ingreso' in data:
-                provided_date = parse_iso_datetime(data['fecha_ingreso'])
-                if provided_date:
-                    now = datetime.now()
-                    eq.fecha_ingreso = provided_date.replace(hour=now.hour, minute=now.minute, second=now.second)
+                eq.fecha_ingreso = parse_iso_datetime(data['fecha_ingreso'])
 
             if 'hora_aprobacion' in data:
                 eq.hora_aprobacion = parse_iso_datetime(data['hora_aprobacion'])

@@ -850,20 +850,24 @@
 
             const tech = technicianType === 'mantenimiento' ? (item.encargado_mantenimiento || 'Sin asignar') : (item.encargado_diagnostico || 'Sin asignar');
 
-            if (isVisualizador) {
-                let daysValue = '-';
-                if (s.includes('diagnostico') && !s.includes('espera')) {
-                    daysValue = `<span class="badge ${diffDays > 3 ? 'bg-danger' : 'bg-success'}">${diffDays} días</span>`;
-                }
+            // Logic for Date shown in Table:
+            // For general tables, use the best reference (Approval or Entry)
+            // But for "ENTREGADOS", user specifically requested Entry Date (fecha_ingreso)
+            const isEntregado = s.includes('entregado');
+            const dateToDisplay = isEntregado ? item.fecha_ingreso : (item.hora_aprobacion || item.fecha_ingreso);
 
+            // Unified Days Badge (style like Admin)
+            const daysBadge = `<span class="badge ${diffDays > 5 ? 'bg-danger' : 'bg-success'} badge-pill">${diffDays} días</span>`;
+
+            if (isVisualizador) {
                 return `
                 <tr>
                     <td class="ps-4 fw-bold text-info">${frDisplay}</td>
                     <td>${item.marca} ${item.modelo}</td>
                     <td>${getStatusBadge(item.estado)}</td>
                     <td class="text-light">${tech}</td>
-                    <td class="text-muted">${baseDateStr || 'N/A'}</td>
-                    <td class="text-center">${daysValue}</td>
+                    <td class="text-muted">${dateToDisplay || 'N/A'}</td>
+                    <td class="text-center">${daysBadge}</td>
                     <td class="text-end pe-4">${actionsHtml}</td>
                 </tr>
                 `;
@@ -874,8 +878,8 @@
                     <td class="text-white">${item.marca} ${item.modelo}</td>
                     <td>${getStatusBadge(item.estado)}</td>
                     <td class="text-sm text-light"><i class="fas fa-user-circle me-1 text-muted"></i> ${tech}</td>
-                    <td class="text-sm text-muted">${baseDateStr || 'N/A'}</td>
-                    <td class="text-center"><span class="badge ${diffDays > 5 ? 'bg-danger' : 'bg-success'} badge-pill">${diffDays} días</span></td>
+                    <td class="text-sm text-muted">${dateToDisplay || 'N/A'}</td>
+                    <td class="text-center">${daysBadge}</td>
                     <td class="text-end pe-4">${actionsHtml}</td>
                 </tr>
                 `;
