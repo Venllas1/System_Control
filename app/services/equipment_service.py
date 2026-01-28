@@ -101,11 +101,14 @@ class EquipmentService:
         # Apply additional data if provided
         if additional_data:
             if 'encargado_diagnostico' in additional_data:
-                equipment.encargado_diagnostico = additional_data['encargado_diagnostico']
+                val = additional_data['encargado_diagnostico']
+                equipment.encargado_diagnostico = val.upper() if val and isinstance(val, str) else val
             if 'numero_informe' in additional_data:
-                equipment.numero_informe = additional_data['numero_informe']
+                val = additional_data['numero_informe']
+                equipment.numero_informe = val.upper() if val and isinstance(val, str) else val
             if 'encargado_mantenimiento' in additional_data:
-                equipment.encargado_mantenimiento = additional_data['encargado_mantenimiento']
+                val = additional_data['encargado_mantenimiento']
+                equipment.encargado_mantenimiento = val.upper() if val and isinstance(val, str) else val
             if 'hora_inicio_mantenimiento' in additional_data:
                 equipment.hora_inicio_mantenimiento = parse_iso_datetime(additional_data['hora_inicio_mantenimiento'])
             if 'hora_inicio_diagnostico' in additional_data:
@@ -113,9 +116,11 @@ class EquipmentService:
             if 'hora_aprobacion' in additional_data:
                 equipment.hora_aprobacion = parse_iso_datetime(additional_data['hora_aprobacion'])
             if 'observaciones_diagnostico' in additional_data:
-                equipment.observaciones_diagnostico = additional_data['observaciones_diagnostico']
+                val = additional_data['observaciones_diagnostico']
+                equipment.observaciones_diagnostico = val.upper() if val and isinstance(val, str) else val
             if 'observaciones_mantenimiento' in additional_data:
-                equipment.observaciones_mantenimiento = additional_data['observaciones_mantenimiento']
+                val = additional_data['observaciones_mantenimiento']
+                equipment.observaciones_mantenimiento = val.upper() if val and isinstance(val, str) else val
 
         # Log History
         history = StatusHistory(
@@ -147,9 +152,19 @@ class EquipmentService:
                 cliente=get_val('cliente', '').upper() or None,
                 serie=get_val('serie', '').upper() or None,
                 accesorios=get_val('accesorios', '').upper() or None,
-                fecha_ingreso=parse_iso_datetime(data.get('fecha_ingreso')) or datetime.now(),
+                fecha_ingreso=None, # Set below
                 estado=Equipment.Status.ESPERA_DIAGNOSTICO
             )
+
+            # Handle fecha_ingreso: Use user provided date + current time
+            provided_date = parse_iso_datetime(data.get('fecha_ingreso'))
+            if provided_date:
+                now = datetime.now()
+                # Combine date from input with time from now
+                new_eq.fecha_ingreso = provided_date.replace(hour=now.hour, minute=now.minute, second=now.second)
+            else:
+                new_eq.fecha_ingreso = datetime.now()
+
             db.session.add(new_eq)
             db.session.commit()
             return True, new_eq
@@ -334,24 +349,37 @@ class EquipmentService:
                 val = get_val('observaciones')
                 eq.observaciones = val.upper() if val else None
             
-            if 'condicion' in data: eq.condicion = get_val('condicion')
-            if 'numero_informe' in data: eq.numero_informe = get_val('numero_informe')
+            if 'condicion' in data: 
+                val = get_val('condicion')
+                eq.condicion = val.upper() if val else None
+            if 'numero_informe' in data: 
+                val = get_val('numero_informe')
+                eq.numero_informe = val.upper() if val else None
             
             # New Excel Fields (handled as strings, but we format the 'T' from datetime-local)
-            if 'encargado_mantenimiento' in data: eq.encargado_mantenimiento = get_val('encargado_mantenimiento')
+            if 'encargado_mantenimiento' in data: 
+                val = get_val('encargado_mantenimiento')
+                eq.encargado_mantenimiento = val.upper() if val else None
             
             if 'hora_inicio_diagnostico' in data:
                 eq.hora_inicio_diagnostico = parse_iso_datetime(data['hora_inicio_diagnostico'])
             
-            if 'observaciones_diagnostico' in data: eq.observaciones_diagnostico = get_val('observaciones_diagnostico')
+            if 'observaciones_diagnostico' in data: 
+                val = get_val('observaciones_diagnostico')
+                eq.observaciones_diagnostico = val.upper() if val else None
             
             if 'hora_inicio_mantenimiento' in data:
                 eq.hora_inicio_mantenimiento = parse_iso_datetime(data['hora_inicio_mantenimiento'])
             
-            if 'observaciones_mantenimiento' in data: eq.observaciones_mantenimiento = get_val('observaciones_mantenimiento')
+            if 'observaciones_mantenimiento' in data: 
+                val = get_val('observaciones_mantenimiento')
+                eq.observaciones_mantenimiento = val.upper() if val else None
             
             if 'fecha_ingreso' in data:
-                eq.fecha_ingreso = parse_iso_datetime(data['fecha_ingreso'])
+                provided_date = parse_iso_datetime(data['fecha_ingreso'])
+                if provided_date:
+                    now = datetime.now()
+                    eq.fecha_ingreso = provided_date.replace(hour=now.hour, minute=now.minute, second=now.second)
 
             if 'hora_aprobacion' in data:
                 eq.hora_aprobacion = parse_iso_datetime(data['hora_aprobacion'])
