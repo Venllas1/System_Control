@@ -39,9 +39,9 @@ class WorkflowEngine:
             'enter_prompts': ['numero_informe', 'observaciones_diagnostico']
         },
         'Aprobado': {
-            'next': ['Inicio de Servicio', 'espera de repuestos'],
+            'next': ['Inicio de Servicio'],
             'allowed_roles': ['admin', 'operaciones'],
-            'requires_decision': True,
+            'requires_decision': False,
             'auto_fill': {'hora_aprobacion': 'now'}
         },
         'Rechazado': {
@@ -60,7 +60,7 @@ class WorkflowEngine:
             'next': ['espera de repuestos', 'Entregado'],
             'allowed_roles': ['admin', 'operaciones'],
             'requires_decision': True,
-            'enter_prompts': ['observaciones_mantenimiento']
+            'exit_prompts': ['observaciones_mantenimiento']
         },
         'espera de repuestos': {
             'next': ['En servicio'],
@@ -70,8 +70,7 @@ class WorkflowEngine:
         'Entregado': {
             'next': None,  # Terminal state
             'allowed_roles': [],
-            'requires_decision': False,
-            'enter_prompts': ['observaciones_mantenimiento']
+            'requires_decision': False
         },
         'Entregado - Devolucion': {
             'next': None,  # Terminal state

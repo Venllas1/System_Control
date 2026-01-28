@@ -65,20 +65,22 @@
 │  PostgreSQL (Producción) / SQLite (Desarrollo)              │
 └─────────────────────────────────────────────────────────────┘
 ### Estructura de Carpetas
-System_Control/
+Pizarra Virtual/
 ├── app/                          # Aplicación principal
 │   ├── __init__.py              # Factory de aplicación Flask
 │   ├── extensions.py            # Inicialización de extensiones (db, login_manager)
 │   │
 │   ├── blueprints/              # Módulos de rutas
+│   │   ├── __init__.py
 │   │   ├── auth/                # Autenticación y gestión de usuarios
 │   │   │   └── routes.py        # Login, registro, admin de usuarios
 │   │   ├── api/                 # Endpoints REST
 │   │   │   └── routes.py        # CRUD equipos, búsqueda, exportación
 │   │   └── dashboard/           # Vistas principales
-│   │       └── routes.py        # Dashboard, panel de estados
+│   │       └── routes.py        # Dashboard, panel de estados, gestión general
 │   │
 │   ├── models/                  # Modelos de datos (ORM)
+│   │   ├── __init__.py
 │   │   ├── equipment.py         # Modelo Equipment + StatusHistory
 │   │   └── user.py              # Modelo User + UserRoles
 │   │
@@ -87,25 +89,42 @@ System_Control/
 │   │
 │   ├── core/                    # Configuración y utilidades
 │   │   ├── config.py            # Configuración por roles (DASHBOARD_ROLES)
-│   │   └── permissions.py       # Decoradores de permisos
+│   │   ├── permissions.py       # Decoradores de permisos
+│   │   └── workflow_engine.py   # Motor de flujo de trabajo (máquina de estados)
 │   │
 │   ├── templates/               # Plantillas HTML (Jinja2)
 │   │   ├── base.html            # Plantilla base
 │   │   ├── dashboard.html       # Dashboard principal
 │   │   ├── panel_estados.html   # Panel de estados
 │   │   ├── dashboard_modals.html # Modales de edición
-│   │   └── auth/                # Plantillas de autenticación
+│   │   ├── gestion_general.html # Panel de gestión general
+│   │   ├── gestion_excel.html   # Panel de gestión Excel
+│   │   ├── auth/                # Plantillas de autenticación
+│   │   │   ├── login.html
+│   │   │   ├── register.html
+│   │   │   ├── admin_users.html
+│   │   │   └── change_password.html
+│   │   └── macros/              # Macros reutilizables
 │   │
 │   └── static/                  # Recursos estáticos
 │       ├── css/                 # Estilos
 │       ├── js/                  # Scripts JavaScript
 │       └── img/                 # Imágenes
 │
-├── manage.py                    # Punto de entrada principal
-├── wsgi.py                      # Entrada para servidores WSGI
+├── scripts/                     # Scripts de utilidad
+│   ├── add_missing_columns.py   # Script de migración de columnas
+│   └── migrate_to_timestamp.py  # Script de migración de timestamps
+│
+├── manage.py                    # Punto de entrada para desarrollo local
+├── wsgi.py                      # Entrada para servidores WSGI (Vercel)
 ├── requirements.txt             # Dependencias Python
-├── vercel.json                  # Configuración de despliegue
-└── cabelab.db                   # Base de datos SQLite (local)
+├── vercel.json                  # Configuración de despliegue Vercel
+├── diagnostico_vercel.py        # Script de diagnóstico
+├── ARQUITECTURA_DEL_SISTEMA.md  # Este documento
+├── README.md                    # Documentación principal
+├── DEPLOY_GUIA.md              # Guía de despliegue
+├── GUIA_DESARROLLO.md          # Guía de desarrollo
+└── cabelab.db                   # Base de datos SQLite (solo desarrollo local)
 ---
 
 ## ⚡ WorkflowEngine - Motor de Flujo de Trabajo
@@ -786,11 +805,13 @@ json
  |------|--------|-------------|
  | / | GET | Dashboard principal |
  | /panel | GET | Panel de estados |
+ | /general | GET | Panel de gestión general |
+ | /excel | GET | Panel de gestión Excel |
  | /admin/db/backup | GET | Descargar backup de BD (admin) |
  | /admin/import_informes | POST | Importar números de informe desde CSV (admin) |
  
  **Lógica del Dashboard** (/):
- - Visualizadores son redirigidos a /panel
+ - Visualizadores y Admin son redirigidos a /panel
  - Carga equipos según rol del usuario
  - Muestra estadísticas si stats_visible=True
  - Muestra historial si 'history' in tables
@@ -800,6 +821,14 @@ json
  - Carga equipos con include_delivered=True
  - Convierte a JSON para manipulación en frontend
  - Permite filtrado dinámico por estado en JavaScript
+ 
+ **Panel de Gestión General** (/general):
+ - Vista de gestión general del sistema
+ - Accesible para usuarios autenticados
+ 
+ **Panel de Gestión Excel** (/excel):
+ - Vista de gestión de datos Excel
+ - Accesible para usuarios autenticados
  
  **Importación de informes**:
  - Formato CSV con delimitador ;
@@ -932,22 +961,26 @@ EquipmentService.create_equipment(data)
 Retorna ID del equipo creado
     ↓
 Frontend recarga página
-### 2. Cambio de Estado
+### 2. Cambio de Estado (Con Validación)
 Usuario (con can_edit) → [POST] /api/equipment/<id>/update_status
     ↓
 API valida permisos (can_perform_action)
     ↓
-EquipmentService.update_status(id, new_status, username, encargado)
+EquipmentService.advance_to_next_state(id, user, new_status, additional_data)
     ↓
-- Busca equipo por ID
-- Guarda estado anterior
-- Actualiza estado y encargado
-- Crea registro en StatusHistory
-- Commit
+WorkflowEngine.validate_transition(current_state, new_status, user.role)
     ↓
-Retorna success
+Si es válida:
+    - Actualiza estado del equipo
+    - Actualiza campos adicionales (encargado, observaciones, etc.)
+    - Crea registro en StatusHistory
+    - Commit a BD
+Si no es válida:
+    - Retorna error con mensaje descriptivo
     ↓
-Frontend recarga página
+Retorna (success, message, new_state)
+    ↓
+Frontend recarga página o muestra error
 ### 3. Visualización por Rol
 Usuario autenticado → [GET] /
     ↓
@@ -1124,6 +1157,7 @@ Usuario puede hacer login (si aprobado y no expirado)
  ## 📚 Dependencias Externas
  
  ### Dependencias Python (requirements.txt)
+```
 Flask==3.0.0                # Framework web
 Flask-Login==0.6.3          # Gestión de sesiones
 Flask-SQLAlchemy==3.1.1     # ORM
@@ -1131,10 +1165,12 @@ Werkzeug==3.0.1             # Utilidades (hashing de passwords)
 pandas>=2.0.0               # Procesamiento de datos / exportación
 openpyxl>=3.1.0             # Exportación a Excel
 python-dateutil>=2.8.2      # Manipulación de fechas (relativedelta)
-gspread>=5.10.0             # Integración con Google Sheets (no usado actualmente)
-oauth2client>=4.1.3         # OAuth para Google (no usado actualmente)
+gspread>=5.10.0             # Integración con Google Sheets
+oauth2client>=4.1.3         # OAuth para Google
 psycopg2-binary>=2.9.9      # Driver PostgreSQL
-**Nota**: gspread y oauth2client están en requirements pero no se usan en el código actual (posible funcionalidad futura o legacy).
+```
+
+**Nota**: `gspread` y `oauth2client` están incluidas en requirements.txt pero actualmente no se utilizan en el código. Estas dependencias pueden ser para funcionalidad futura o legacy que se mantuvo por compatibilidad.
  
  ---
  
@@ -1262,6 +1298,6 @@ if __name__ == "__main__":
  
  ---
  
- **Documento generado**: 2026-01-19 
- **Versión del sistema**: 2.0.0 
- **Autor**: Análisis automatizado del código fuente si
+ **Documento actualizado**: 2026-01-28
+ **Versión del sistema**: 2.0.0
+ **Autor**: Análisis automatizado del código fuente real

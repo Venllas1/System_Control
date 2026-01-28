@@ -1,32 +1,35 @@
-# 🏥 CABELAB 2025 - Sistema de Control de Equipos
+# 🏥 Sistema de Control de Equipos CABELAB
 
-Sistema profesional de gestión y control de equipos con sistema de licencias integrado.
+Sistema web profesional de gestión y seguimiento de equipos de motosoldadoras con control de flujo operativo entre diferentes áreas de la empresa.
 
-## 🚀 Características
+## 🚀 Características Principales
 
-- ✅ **Dashboard interactivo** con estadísticas en tiempo real
-- ✅ **Sistema de licencias** híbrido (local + online)
-- ✅ **Control remoto** de licencias desde panel admin
-- ✅ **Exportación** de datos (CSV, Excel)
-- ✅ **Búsqueda avanzada** y filtros
-- ✅ **Tema dark** profesional y responsive
+- ✅ **Sistema de roles y permisos** - Control de acceso granular (Admin, Recepción, Operaciones, Almacén, Visualizador)
+- ✅ **Flujo de trabajo validado** - Máquina de estados que garantiza transiciones correctas
+- ✅ **Dashboard interactivo** - Visualización diferenciada según rol del usuario
+- ✅ **Panel de estados** - Seguimiento detallado del ciclo de vida de equipos
+- ✅ **Historial completo** - Auditoría de todos los cambios de estado
+- ✅ **Gestión de usuarios** - Sistema de aprobación y permisos temporales/permanentes
+- ✅ **Exportación de datos** - CSV y Excel con filtros personalizados
+- ✅ **Búsqueda avanzada** - Búsqueda por múltiples criterios
+- ✅ **Tema dark profesional** - Interfaz moderna y responsive
 
 ---
 
 ## 📋 Requisitos
 
 - Python 3.8 o superior
-- Conexión a internet (opcional - funciona offline 24h)
+- PostgreSQL (producción) o SQLite (desarrollo)
 - Navegador web moderno
 
 ---
 
-## ⚡ Instalación Rápida
+## ⚡ Instalación y Configuración
 
 ### 1. Clonar/Descargar el proyecto
 
 ```bash
-cd CABELAB_2025
+cd "Pizarra Virtual"
 ```
 
 ### 2. Crear entorno virtual
@@ -47,154 +50,298 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. Configurar Firebase (opcional - para licencias online)
+### 4. Configurar base de datos
 
-Ver: `docs/FIREBASE_SETUP.md`
+**Desarrollo (SQLite - automático):**
+No requiere configuración adicional. Se creará automáticamente `cabelab.db`.
+
+**Producción (PostgreSQL):**
+Configurar variable de entorno:
+```bash
+# Windows
+set POSTGRES_URL=postgresql://usuario:password@host:puerto/database
+
+# Linux/Mac
+export POSTGRES_URL=postgresql://usuario:password@host:puerto/database
+```
 
 ### 5. Ejecutar aplicación
 
 ```bash
-python app.py
+python manage.py
 ```
 
 Acceder a: `http://localhost:5000`
 
 ---
 
-## 🔐 Sistema de Licencias
+## 🔐 Usuarios por Defecto
 
-### Para Usuarios (Clientes)
+El sistema crea automáticamente dos usuarios administradores:
 
-1. **Obtener Hardware ID:**
-   - Ejecutar la app por primera vez
-   - Ir a: `http://localhost:5000/license/activate`
-   - Copiar Hardware ID
-   - Enviar al administrador
+| Usuario | Contraseña | Rol |
+|---------|------------|-----|
+| admin | admin123 | Administrador |
+| Venllas | Venllas2025 | Super Administrador |
 
-2. **Activar Licencia:**
-   - Recibir clave de licencia del administrador
-   - Pegar en formulario de activación
-   - ¡Listo! Ya puedes usar la app
+⚠️ **IMPORTANTE**: Cambiar estas contraseñas en producción.
 
-### Para Administradores
+---
 
-#### Opción A: Panel Web (Online - Recomendado)
+## 👥 Sistema de Roles
 
-```bash
-python admin/admin_panel.py
-```
+### Roles Disponibles
 
-Acceder a: `http://localhost:5001/admin`  
-Password: `admin123` (cambiar en producción)
+1. **Admin** - Acceso total al sistema
+   - Ve todos los equipos
+   - Gestiona usuarios
+   - Exporta datos
+   - Elimina equipos
 
-#### Opción B: Script CLI (Local)
+2. **Recepción** - Gestión de ingreso y entrega
+   - Registra nuevos equipos
+   - Gestiona aprobaciones de clientes
+   - Entrega equipos culminados
 
-```bash
-python scripts/generate_license.py
-```
+3. **Operaciones** - Diagnóstico y reparación
+   - Realiza diagnósticos
+   - Ejecuta reparaciones
+   - Solicita repuestos
+   - Actualiza estado de servicio
+
+4. **Almacén** - Gestión de repuestos
+   - Ve equipos que requieren repuestos
+   - Registra entrega de materiales
+
+5. **Visualizador** - Solo lectura
+   - Visualiza información sin editar
+   - Acceso completo a consultas
+
+### Gestión de Usuarios
+
+**Para Usuarios Nuevos:**
+1. Registrarse en `/auth/register`
+2. Esperar aprobación del administrador
+3. Recibir notificación de acceso aprobado
+
+**Para Administradores:**
+1. Acceder a `/auth/admin/users`
+2. Aprobar usuarios pendientes
+3. Asignar rol operativo
+4. Configurar acceso:
+   - **PERMANENT**: Acceso permanente
+   - **BLOCK**: Bloquear usuario
+   - **Nh** (ej: 24h): N horas de acceso
+   - **N** (ej: 6): N meses de acceso
+
+---
+
+## 🔄 Flujo de Trabajo de Equipos
+
+### Estados del Ciclo de Vida
+
+1. **Espera de Diagnostico** → Equipo recién ingresado
+2. **en Diagnostico** → Técnico evaluando
+3. **espera de repuesto o consumible** → Requiere materiales
+4. **Repuesto entregado** → Almacén entregó materiales
+5. **Pendiente de aprobacion** → Esperando aprobación del cliente
+6. **Aprobado** → Cliente aprobó el servicio
+7. **Inicio de Servicio** → Comienza reparación
+8. **espera de repuestos** → Requiere más repuestos
+9. **En servicio** → Reparación en curso
+10. **Servicio culminado** → Reparación completada
+11. **Entregado** → Equipo devuelto al cliente (estado final)
+
+### Validación de Transiciones
+
+El sistema implementa un **WorkflowEngine** que:
+- ✅ Valida todas las transiciones de estado
+- ✅ Verifica permisos por rol
+- ✅ Previene saltos de estados
+- ✅ Registra historial completo
+- ✅ Protege estados terminales
 
 ---
 
 ## 📁 Estructura del Proyecto
 
 ```
-CABELAB_2025/
-├── app.py                    # Servidor principal
-├── config.py                 # Configuración
-├── requirements.txt          # Dependencias
-├── utils/                    # Módulos Python
-├── static/                   # CSS, JS, imágenes
-├── templates/                # HTML
-├── admin/                    # Panel administrador
-├── scripts/                  # Scripts utilidad
-├── keys/                     # Claves RSA
-├── logs/                     # Logs de sistema
-└── exports/                  # Exportaciones
+Pizarra Virtual/
+├── app/                    # Aplicación principal
+│   ├── blueprints/        # Módulos de rutas (auth, api, dashboard)
+│   ├── models/            # Modelos de datos (Equipment, User)
+│   ├── services/          # Lógica de negocio (EquipmentService)
+│   ├── core/              # Configuración y WorkflowEngine
+│   ├── templates/         # Plantillas HTML
+│   └── static/            # CSS, JS, imágenes
+├── scripts/               # Scripts de utilidad
+├── manage.py              # Punto de entrada desarrollo
+├── wsgi.py                # Punto de entrada producción
+├── requirements.txt       # Dependencias
+└── vercel.json            # Configuración Vercel
 ```
 
 ---
 
-## ⚙️ Configuración
+## 🎨 Características del Frontend
 
-### Editar ruta del Excel
-
-`config.py` línea 16:
-```python
-EXCEL_PATH = r"C:\ruta\a\tu\archivo.xlsx"
-```
-
-### Cambiar puerto
-
-`app.py` línea 362:
-```python
-app.run(port=5000)  # Cambiar 5000 por tu puerto
-```
-
-### Configurar Firebase
-
-`utils/firebase_license.py` líneas 22-23:
-```python
-self.firebase_url = "https://tu-proyecto.firebaseio.com"
-self.api_key = "TU_API_KEY"
-```
+- **Templates**: Jinja2
+- **CSS**: Vanilla CSS (sin frameworks)
+- **JavaScript**: Vanilla JS
+- **Diseño**: Responsive y tema dark
+- **Componentes**:
+  - Dashboard con estadísticas
+  - Panel de estados con pestañas
+  - Modales de edición
+  - Búsqueda en tiempo real
+  - Tablas dinámicas
 
 ---
 
-## 🎨 Personalización
-
-### Cambiar colores
-
-`static/css/dashboard.css` líneas 11-20:
-```css
-:root {
-    --primary: #6366f1;    /* Tu color */
-    --secondary: #8b5cf6;
-}
-```
-
-### Cambiar logo
-
-`templates/dashboard.html` línea 19:
-```html
-<i class="fas fa-tu-icono"></i>
-```
-
-O usar imagen:
-```html
-<img src="{{ url_for('static', filename='img/logo.png') }}" height="60">
-```
-
----
-
-## 📊 Uso
+## 📊 Uso del Sistema
 
 ### Dashboard Principal
 
-- **Estadísticas:** 5 métricas principales
-- **Tablas:** Equipos por estado
-- **Pestañas:** Resumen, Detalle, Herramientas
-- **Exportar:** CSV o Excel desde pestaña Herramientas
+**Acceso**: `/`
 
-### Panel Administrador
+- Muestra equipos según rol del usuario
+- Estadísticas del sistema (solo admin)
+- Tabla de equipos activos
+- Historial de entregados
+- Botones de acción según permisos
 
-- **Ver todas las licencias** activas
-- **Aprobar solicitudes** pendientes
-- **Revocar acceso** instantáneamente
-- **Renovar licencias** con 1 click
-- **Estadísticas** en tiempo real
+### Panel de Estados
+
+**Acceso**: `/panel`
+
+- Vista completa por estados
+- Pestañas dinámicas
+- Filtrado en tiempo real
+- Búsqueda avanzada
+- Gestión de equipos
+
+### Panel de Gestión General
+
+**Acceso**: `/general`
+
+- Vista de gestión general del sistema
+- Herramientas administrativas
+
+### Panel de Gestión Excel
+
+**Acceso**: `/excel`
+
+- Gestión de datos Excel
+- Importación de informes
+
+### Gestión de Usuarios (Admin)
+
+**Acceso**: `/auth/admin/users`
+
+- Lista de todos los usuarios
+- Aprobación de usuarios nuevos
+- Asignación de roles
+- Configuración de accesos temporales
+- Eliminación de usuarios
 
 ---
 
-## 🔧 Solución de Problemas
+## 🔧 API REST
 
-### Error: "Archivo Excel no encontrado"
-**Solución:** Verificar ruta en `config.py`
+### Endpoints Principales
 
-### Error: "Licencia no válida"
-**Solución:** Activar licencia en `/license/activate`
+| Endpoint | Método | Descripción |
+|----------|--------|-------------|
+| `/api/stats` | GET | Estadísticas del sistema |
+| `/api/equipment/create` | POST | Crear nuevo equipo |
+| `/api/equipment/<id>/update_status` | POST | Cambiar estado (validado) |
+| `/api/equipment/<id>/update_data` | POST | Actualizar datos generales |
+| `/api/equipment/<id>/details` | GET | Detalles de equipo |
+| `/api/equipment/<id>/delete` | POST | Eliminar equipo (admin) |
+| `/api/equipment/<id>/next_state` | GET | Info de siguiente estado |
+| `/api/search?q=<query>` | GET | Búsqueda de equipos |
+| `/api/export/<formato>` | GET | Exportar datos (csv/xlsx) |
+| `/api/pending_tasks` | GET | Tareas pendientes del usuario |
+
+---
+
+## 🚀 Despliegue
+
+### Desarrollo Local
+
+```bash
+python manage.py
+```
+
+### Producción (Vercel)
+
+1. Configurar variables de entorno:
+   - `POSTGRES_URL` o `DATABASE_URL`
+   - `SECRET_KEY` (opcional)
+
+2. Desplegar:
+```bash
+vercel --prod
+```
+
+El archivo `vercel.json` ya está configurado para usar `wsgi.py` como punto de entrada.
+
+---
+
+## � Seguridad
+
+### Buenas Prácticas Implementadas
+
+- ✅ Contraseñas hasheadas con Werkzeug
+- ✅ Autenticación con Flask-Login
+- ✅ Protección de rutas con decoradores
+- ✅ Validación de permisos por rol
+- ✅ Sistema de aprobación de usuarios
+- ✅ Accesos temporales con expiración
+- ✅ Usuarios protegidos (no eliminables)
+
+### Recomendaciones
+
+- Cambiar contraseñas por defecto
+- Usar HTTPS en producción
+- Configurar SECRET_KEY fuerte
+- Revisar accesos periódicamente
+- Mantener dependencias actualizadas
+
+---
+
+## 📝 Mantenimiento
+
+### Backup de Base de Datos
+
+**SQLite (desarrollo):**
+```bash
+# Descargar desde la interfaz
+/admin/db/backup
+```
+
+**PostgreSQL (producción):**
+```bash
+pg_dump -U usuario -h host database > backup.sql
+```
+
+### Importar Números de Informe
+
+1. Preparar CSV con formato:
+```
+FR;No DIAG
+FR001;DIAG-2024-001
+FR002;DIAG-2024-002
+```
+
+2. Importar desde `/admin/import_informes`
+
+---
+
+## � Solución de Problemas
 
 ### Error: "Puerto ya en uso"
-**Solución:** Cambiar puerto en `app.py` o matar proceso:
+
 ```bash
 # Windows
 netstat -ano | findstr :5000
@@ -204,91 +351,57 @@ taskkill /PID <PID> /F
 lsof -ti:5000 | xargs kill -9
 ```
 
-### La app no se conecta a Firebase
-**Solución:** Verificar URL y reglas en Firebase Console
+### Error: "Base de datos no encontrada"
+
+Verificar que la aplicación se ejecutó al menos una vez para crear las tablas automáticamente.
+
+### Error: "Licencia no válida" / "Permiso denegado"
+
+Verificar que el usuario esté aprobado y su acceso no haya expirado.
 
 ---
 
-## 🛡️ Seguridad
+## � Documentación Adicional
 
-### Archivos NUNCA compartir:
-- ❌ `keys/private.pem`
-- ❌ `license.dat`
-- ❌ Archivos `.log`
-
-### Cambiar contraseña admin:
-`admin/admin_panel.py` línea 14:
-```python
-ADMIN_PASSWORD = "tu_password_seguro"
-```
+- **ARQUITECTURA_DEL_SISTEMA.md** - Documentación técnica completa
+- **DEPLOY_GUIA.md** - Guía de despliegue
+- **GUIA_DESARROLLO.md** - Guía para desarrolladores
 
 ---
 
-## 📝 Logs
+## � Changelog
 
-### Ver logs de la app:
-```bash
-cat logs/cabelab.log
-```
-
-### Ver intentos de licencia:
-```bash
-cat logs/license_attempts.log
-```
-
----
-
-## 🔄 Actualización
-
-```bash
-# Activar entorno virtual
-venv\Scripts\activate
-
-# Actualizar dependencias
-pip install --upgrade -r requirements.txt
-
-# Reiniciar app
-python app.py
-```
+### v2.0.0 (2026-01-28)
+- ✅ Sistema de roles y permisos completo
+- ✅ WorkflowEngine para validación de estados
+- ✅ Panel de estados mejorado
+- ✅ Gestión de usuarios con accesos temporales
+- ✅ Exportación de datos
+- ✅ Búsqueda avanzada
+- ✅ Tema dark profesional
+- ✅ Despliegue en Vercel con PostgreSQL
 
 ---
 
-## 📞 Soporte
+## 👨‍💻 Desarrollado para
 
-Para problemas o consultas:
-- 📧 Email: soporte@cabelab.com
-- 📱 WhatsApp: +51 XXX XXX XXX
+**CABELAB**  
+Sistema de Control de Equipos de Motosoldadoras
 
 ---
 
 ## 📄 Licencia
 
-Uso exclusivo de CABELAB 2025.  
+Uso exclusivo de CABELAB.  
 Prohibida la distribución sin autorización.
 
 ---
 
-## 👨‍💻 Desarrollado por
+## 📞 Soporte Técnico
 
-**CABELAB 2025**  
-Sistema de Control de Equipos v2.0
+Para consultas sobre el sistema, contactar al administrador del sistema.
 
 ---
 
-## 📅 Changelog
-
-### v2.0.0 (2025-05-12)
-- ✅ Sistema de licencias online con Firebase
-- ✅ Panel de administración web
-- ✅ Tema dark profesional
-- ✅ Exportación de datos
-- ✅ Búsqueda avanzada
-
-### v1.0.0 (2025-01-15)
-- ✅ Versión inicial
-- ✅ Dashboard básico
-- ✅ Lectura de Excel
-
-
-### Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
-### .\sourceVenllas\Scripts\Activate
+**Última actualización**: 2026-01-28  
+**Versión**: 2.0.0
