@@ -56,7 +56,6 @@ class Config:
                 'espera de repuesto o consumible',
                 'Repuesto entregado',
                 'Aprobado',
-                'Inicio de Servicio',
                 'En servicio'
             ],
             'actions': ['view', 'edit']

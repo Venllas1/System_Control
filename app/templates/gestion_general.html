@@ -85,14 +85,8 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-secondary">Encargado Diagnóstico</label>
-                            <select class="form-select bg-dark text-light border-secondary" name="encargado_diagnostico"
-                                id="editEncargado">
-                                <option value="">No asignado</option>
-                                <option value="SERGIO">SERGIO</option>
-                                <option value="CARLOS">CARLOS</option>
-                                <option value="GERSSON">GERSSON</option>
-                                <option value="LUIS">LUIS</option>
-                            </select>
+                            <input type="text" class="form-control bg-dark text-light border-secondary"
+                                name="encargado_diagnostico" id="editEncargado" placeholder="Nombre del técnico">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-secondary">Encargado Mantenimiento</label>
@@ -225,7 +219,7 @@
             },
             {
                 name: 'Aprobado',
-                states: ['Aprobado', 'Inicio de Servicio', 'En servicio', 'espera de repuestos'],
+                states: ['Aprobado', 'En servicio', 'espera de repuestos'],
                 color: 'success'
             },
             {

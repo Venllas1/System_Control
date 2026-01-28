@@ -39,27 +39,17 @@ class WorkflowEngine:
             'enter_prompts': ['numero_informe', 'observaciones_diagnostico']
         },
         'Aprobado': {
-            'next': ['Inicio de Servicio'],
-            'allowed_roles': ['admin', 'operaciones'],
-            'requires_decision': False,
-            'auto_fill': {'hora_aprobacion': 'now'}
-        },
-        'Rechazado': {
-            'next': ['en Diagnostico', 'Entregado - Devolucion'],
-            'allowed_roles': ['admin', 'recepcion'],
-            'requires_decision': True
-        },
-        'Inicio de Servicio': {
             'next': ['En servicio'],
             'allowed_roles': ['admin', 'operaciones'],
             'requires_decision': False,
-            'enter_prompts': ['encargado_mantenimiento'], # Prompt when entering
-            'auto_fill': {'hora_inicio_mantenimiento': 'now'} # Auto-fill timestamp
+            'auto_fill': {'hora_aprobacion': 'now'}
         },
         'En servicio': {
             'next': ['espera de repuestos', 'Entregado'],
             'allowed_roles': ['admin', 'operaciones'],
             'requires_decision': True,
+            'enter_prompts': ['encargado_mantenimiento'],
+            'auto_fill': {'hora_inicio_mantenimiento': 'now'},
             'exit_prompts': ['observaciones_mantenimiento']
         },
         'espera de repuestos': {
@@ -83,7 +73,7 @@ class WorkflowEngine:
     PENDING_LOGIC = {
         'recepcion': ['Pendiente de aprobacion'],
         'operaciones': ['Espera de Diagnostico', 'en Diagnostico', 
-                        'Aprobado', 'Inicio de Servicio', 'En servicio'],
+                        'Aprobado', 'En servicio'],
         'almacen': ['espera de repuesto o consumible', 'espera de repuestos'],
         'admin': [],  # Admin sees all but doesn't have specific "pending" states
         'visualizador': []  # Read-only role

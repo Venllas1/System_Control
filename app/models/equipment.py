@@ -33,7 +33,7 @@ class Equipment(db.Model):
         REPUESTO_ENTREGADO = 'Repuesto entregado'
         PENDIENTE_APROBACION = 'Pendiente de aprobacion'
         APROBADO = 'Aprobado'
-        INICIO_SERVICIO = 'Inicio de Servicio'
+
         ESPERA_REPUESTOS = 'espera de repuestos'
         EN_SERVICIO = 'En servicio'
         ENTREGADO = 'Entregado'

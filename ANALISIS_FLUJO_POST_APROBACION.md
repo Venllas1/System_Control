@@ -19,7 +19,7 @@ Este documento describe el flujo de trabajo del sistema **después de que un equ
 
 ```python
 'Aprobado': {
-    'next': ['Inicio de Servicio'],
+    'next': ['En servicio'],
     'allowed_roles': ['admin', 'operaciones'],
     'requires_decision': False,
     'auto_fill': {'hora_aprobacion': 'now'}
@@ -28,18 +28,15 @@ Este documento describe el flujo de trabajo del sistema **después de que un equ
 
 ### Características del Estado "Aprobado":
 
-1. **Siguiente estado único**: `'Inicio de Servicio'`
+1. **Siguiente estado único**: `'En servicio'`
    - No hay decisión que tomar (requires_decision: False)
    - Solo existe un camino posible
 
 2. **Auto-fill automático**:
    - El campo `hora_aprobacion` se registra automáticamente con la hora actual
-   - Implementado en `app/services/equipment_service.py` (líneas 265-273)
 
 3. **Roles con control**:
-   - **Admin**: Control total
-   - **Operaciones**: Control total
-   - Otros roles: Solo visualización
+   - **Admin y Operaciones**: Control total
 
 ---
 
@@ -47,79 +44,41 @@ Este documento describe el flujo de trabajo del sistema **después de que un equ
 
 ### Análisis de Permisos por Rol
 
-#### 1. **Rol: Admin**
+#### 1. **Rol: Admin / Operaciones**
 **Permisos**:
-- ✅ Puede avanzar el equipo de "Aprobado" a "Inicio de Servicio"
+- ✅ Puede avanzar el equipo de "Aprobado" a "En servicio"
 - ✅ Puede editar datos del equipo
-- ✅ Puede eliminar el equipo
-- ✅ Visualiza todos los equipos
 
-**Acciones disponibles** (panel_estados.html, líneas 816-820):
+**Acciones disponibles** (panel_estados.html, líneas 825-829):
 ```javascript
 if (s === 'aprobado') {
-    if (isOps) {  // isOps incluye admin
-        actionsHtml += `<button onclick="startMaintenance(...)">Iniciar Mantenimiento</button>`;
+    if (isOps) {
+        actionsHtml += `<button onclick="showAdvanceModal(..., 'En servicio')">Iniciar Servicio</button>`;
     }
 }
 ```
-
-#### 2. **Rol: Operaciones**
-**Permisos**:
-- ✅ Puede avanzar el equipo de "Aprobado" a "Inicio de Servicio"
-- ✅ Puede editar datos del equipo (según configuración)
-- ❌ No puede eliminar equipos
-- ✅ Visualiza equipos relevantes a su área
-
-**Acciones disponibles**: Idénticas a Admin para este estado
-
-#### 3. **Rol: Recepción**
-**Permisos**:
-- ❌ No puede avanzar el equipo desde "Aprobado"
-- ❌ No tiene control sobre el equipo en este estado
-- ✅ Solo visualización (si el equipo está en su lista)
-
-**Razón**: El estado "Aprobado" solo permite roles 'admin' y 'operaciones' (workflow_engine.py)
-
-#### 4. **Rol: Almacén**
-**Permisos**:
-- ❌ No puede avanzar el equipo desde "Aprobado"
-- ❌ No tiene control sobre el equipo en este estado
-- ✅ Solo visualización
-
-#### 5. **Rol: Visualizador**
-**Permisos**:
-- ❌ No puede realizar ninguna acción
-- ✅ Solo visualización completa
+*Nota: Se usa `showAdvanceModal` para activar los prompts de entrada (encargado) definidos en el estado destino.*
 
 ---
 
-## 🎯 Acción Única Disponible: "Iniciar Mantenimiento"
+## 🎯 Acción Única Disponible: "Iniciar Servicio"
 
 ### Implementación
 
-**Frontend** (panel_estados.html, línea 818):
-```javascript
-actionsHtml += `<button class="btn btn-sm btn-primary" 
-                onclick="startMaintenance(${item.id}, 'Inicio de Servicio')">
-                Iniciar Mantenimiento
-                </button>`;
-```
+**Frontend**:
+- Botón "Iniciar Servicio" en estado Aprobado.
+- Llama a `showAdvanceModal`.
 
-**Función startMaintenance** (panel_estados.html, líneas 1113-1118):
-```javascript
-window.startMaintenance = function (id, status) {
-    const encargado = prompt("ASIGNACIÓN DE TÉCNICO:\nPor favor, ingrese el nombre del encargado de mantenimiento:");
-    if (encargado === null) return;
-    if (!encargado.trim()) { alert("Debe asignar un encargado."); return; }
-    updateStatus(id, status, null, { encargado_mantenimiento: encargado.trim() });
-};
-```
+**Backend (WorkflowEngine)**:
+- Estado destino "En servicio" tiene `enter_prompts: ['encargado_mantenimiento']`.
+- Esto obliga al usuario a ingresar el nombre del técnico antes de cambiar de estado.
+- Auto-fill de `hora_inicio_mantenimiento` al entrar a "En servicio".
 
 ### Validaciones Aplicadas
 
-1. **Solicitud de encargado**: El sistema solicita obligatoriamente el nombre del técnico
-2. **Validación de campo vacío**: No permite continuar sin asignar un encargado
-3. **Transición validada**: WorkflowEngine verifica que la transición sea válida
+1. **Solicitud de encargado**: Obligatorio por `enter_prompts`.
+2. **Hora de Aprobación**: Se guarda automáticamente al ENTRAR a "Aprobado".
+3. **Hora Inicio Mantenimiento**: Se guarda automáticamente al ENTRAR a "En servicio".
 
 ---
 
@@ -128,30 +87,20 @@ window.startMaintenance = function (id, status) {
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ ESTADO: "Aprobado"                                          │
-│ - hora_aprobacion se registra automáticamente               │
+│ - hora_aprobacion registrada automáticamente                │
 │ - Control: Admin y Operaciones                              │
 └─────────────────────────────────────────────────────────────┘
                             │
-                            │ ÚNICA ACCIÓN DISPONIBLE
-                            │ "Iniciar Mantenimiento"
-                            │ (requiere asignar encargado)
+                            │ ÚNICA ACCIÓN: "Iniciar Servicio"
+                            │ (Prompt: encargado_mantenimiento)
                             ↓
 ┌─────────────────────────────────────────────────────────────┐
-│ ESTADO: "Inicio de Servicio"                                │
-│ - encargado_mantenimiento se registra                        │
-│ - hora_inicio_mantenimiento se registra automáticamente      │
+│ ESTADO: "En servicio"                                       │
+│ - hora_inicio_mantenimiento registrada automáticamente      │
 │ - Control: Admin y Operaciones                              │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                            │ TRANSICIÓN AUTOMÁTICA
-                            │ (no requiere decisión)
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│ ESTADO: "En servicio"                                        │
-│ - Control: Admin y Operaciones                              │
-│ - Opciones:                                                  │
+│ - Opciones:                                                 │
 │   1. "Terminar Mantenimiento" → "Entregado"                 │
-│      (requiere observaciones_mantenimiento)                  │
+│      (Prompt: observaciones_mantenimiento)                  │
 │   2. "Pedir Repuestos" → "espera de repuestos"              │
 └─────────────────────────────────────────────────────────────┘
 ```

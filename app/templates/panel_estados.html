@@ -637,6 +637,12 @@
                             <textarea name="reporte_cliente" class="form-control bg-dark text-light border-secondary"
                                 rows="3" required placeholder="Describa el problema o solicitud del cliente"></textarea>
                         </div>
+                        <div class="col-12">
+                            <label class="form-label text-secondary small text-uppercase fw-bold">Observaciones
+                                Generales</label>
+                            <textarea name="observaciones" class="form-control bg-dark text-light border-secondary"
+                                rows="2" placeholder="Observaciones adicionales (opcional)"></textarea>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -818,10 +824,10 @@
                 }
                 else if (s === 'aprobado') {
                     if (isOps) {
-                        actionsHtml += `<button class="btn btn-sm btn-primary" onclick="startMaintenance(${item.id}, 'Inicio de Servicio')">Iniciar Mantenimiento</button>`;
+                        actionsHtml += `<button class="btn btn-sm btn-primary" onclick="showAdvanceModal(${item.id}, 'En servicio')">Iniciar Servicio</button>`;
                     }
                 }
-                else if (s.includes('inicio de servicio') || s.includes('en servicio')) {
+                else if (s.includes('en servicio')) {
                     if (isOps) {
                         actionsHtml += `<button class="btn btn-sm btn-success" onclick="showAdvanceModal(${item.id}, 'Entregado')">Terminar Mantenimiento</button>`;
                         actionsHtml += `<button class="btn btn-sm btn-warning" onclick="updateStatus(${item.id}, 'espera de repuestos')">Pedir Repuestos</button>`;
