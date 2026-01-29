@@ -33,7 +33,7 @@ class WorkflowEngine:
             'requires_decision': False
         },
         'Pendiente de aprobacion': {
-            'next': ['Aprobado', 'Entregado - Devolucion'],
+            'next': ['Aprobado', 'Entregado - Devolucion', 'Revision'],
             'allowed_roles': ['admin', 'recepcion'],
             'requires_decision': True,
             'enter_prompts': ['numero_informe', 'observaciones_diagnostico']
@@ -41,7 +41,7 @@ class WorkflowEngine:
         'Aprobado': {
             'next': ['En servicio'],
             'allowed_roles': ['admin', 'operaciones'],
-            'requires_decision': False,
+            'requires_decision': True,
             'auto_fill': {'hora_aprobacion': 'now'}
         },
         'En servicio': {
@@ -56,6 +56,11 @@ class WorkflowEngine:
             'next': ['En servicio'],
             'allowed_roles': ['admin', 'almacen'],
             'requires_decision': False
+        },
+        'Revision': {
+            'next': ['en Diagnostico', 'Entregado - Devolucion'],
+            'allowed_roles': ['admin', 'operaciones'],
+            'requires_decision': True
         },
         'Entregado': {
             'next': None,  # Terminal state

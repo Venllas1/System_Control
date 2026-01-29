@@ -153,7 +153,7 @@ class EquipmentService:
                 serie=get_val('serie', '').upper() or None,
                 accesorios=get_val('accesorios', '').upper() or None,
                 fecha_ingreso=parse_iso_datetime(data.get('fecha_ingreso')) or datetime.now(),
-                estado=Equipment.Status.ESPERA_DIAGNOSTICO
+                estado=data.get('estado') or Equipment.Status.ESPERA_DIAGNOSTICO
             )
             db.session.add(new_eq)
             db.session.commit()
