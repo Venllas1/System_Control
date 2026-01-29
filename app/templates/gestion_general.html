@@ -18,6 +18,9 @@
                 <input type="text" id="generalSearch" class="form-control bg-dark text-light border-secondary"
                     placeholder="Buscar en todo...">
             </div>
+            <a href="{{ url_for('api.export_data', formato='xlsx') }}?estado=all" class="btn btn-success">
+                <i class="fas fa-file-excel me-2"></i> Exportar a Excel
+            </a>
             <button class="btn btn-outline-info" onclick="location.reload()">
                 <i class="fas fa-sync-alt"></i>
             </button>

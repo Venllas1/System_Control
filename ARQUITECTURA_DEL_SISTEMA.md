@@ -19,6 +19,8 @@
  - **Base de datos**: PostgreSQL (producción) / SQLite (desarrollo)
  - **Procesamiento de datos**: Pandas, OpenPyXL
  - **Frontend**: HTML, CSS, JavaScript (vanilla)
+- **Configuración Regional**: Zona Horaria `America/Lima` (Perú) para todo el sistema
+- **Manejo de Errores**: Página 500 personalizada con auto-recarga operativa
  
  ---
  
@@ -319,7 +321,8 @@ Equipo actual: "espera de repuesto o consumible"
  - fecha_ingreso: Fecha de registro (para cálculo de atrasos)
  - reporte_cliente: Descripción del problema reportado
  - observaciones: Notas adicionales
- - serie, accesorios: Información complementaria
+ - serie, accesorios: Información complementaria (Serie tiene columna propia en tabla)
+ - cliente: Propietario del equipo (Columna propia en tabla para visibilidad)
  - numero_informe: Número de diagnóstico asignado
  - condicion: Estado físico del equipo
  
@@ -430,8 +433,11 @@ Equipo actual: "espera de repuesto o consumible"
                         │
                         ▼
             ┌─────────────────────────┐
-            │     Entregado           │ ← Estado final
+            │     Entregado           │ ← Estado final (Terminal)
             └─────────────────────────┘
+            
+### Optimización del Flujo (Enero 2026)
+Se eliminó la opción de **Reevaluación** desde los estados `Aprobado` y `En servicio` para garantizar un camino crítico directo hacia la entrega final, evitando bucles administrativos innecesarios.
 ### Reglas de Transición
  
  ✅ **VALIDACIÓN IMPLEMENTADA**: El sistema valida todas las transiciones de estado a través del `WorkflowEngine`. Solo se permiten transiciones válidas según el flujo definido y los permisos del rol del usuario.
@@ -1298,6 +1304,6 @@ if __name__ == "__main__":
  
  ---
  
- **Documento actualizado**: 2026-01-28
- **Versión del sistema**: 2.0.0
- **Autor**: Análisis automatizado del código fuente real
+ **Documento actualizado**: 2026-01-29
+**Versión del sistema**: 2.1.0
+**Autor**: Antigravity (Advanced Agentic AI Coding Assistant)
