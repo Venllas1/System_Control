@@ -115,7 +115,8 @@
                                     <th class="ps-4 text-start">FR</th>
                                     <th>Equipo</th>
                                     <th>Serie</th>
-                                    <th>Estado/Cliente</th>
+                                    <th>Cliente</th>
+                                    <th>Estado</th>
                                     <th>Encargado</th>
                                     <th>Fecha</th>
                                     <th>Días</th>
@@ -159,7 +160,8 @@
                                     <th class="ps-4 text-start">FR</th>
                                     <th>Equipo</th>
                                     <th>Serie</th>
-                                    <th>Estado/Cliente</th>
+                                    <th>Cliente</th>
+                                    <th>Estado</th>
                                     <th>Encargado</th>
                                     <th>Fecha</th>
                                     <th>Días</th>
@@ -192,7 +194,8 @@
                                     <th class="ps-4 text-start">FR</th>
                                     <th>Equipo</th>
                                     <th>Serie</th>
-                                    <th>Estado/Cliente</th>
+                                    <th>Cliente</th>
+                                    <th>Estado</th>
                                     <th>Encargado</th>
                                     <th>Fecha</th>
                                     <th>Días</th>
@@ -236,7 +239,8 @@
                                     <th class="ps-4 text-start">FR</th>
                                     <th>Equipo</th>
                                     <th>Serie</th>
-                                    <th>Estado/Cliente</th>
+                                    <th>Cliente</th>
+                                    <th>Estado</th>
                                     <th>Encargado</th>
                                     <th>Fecha</th>
                                     <th>Días</th>
@@ -285,7 +289,8 @@
                                     <th class="ps-4 text-start">FR</th>
                                     <th>Equipo</th>
                                     <th>Serie</th>
-                                    <th>Estado/Cliente</th>
+                                    <th>Cliente</th>
+                                    <th>Estado</th>
                                     <th>Encargado</th>
                                     <th>Fecha</th>
                                     <th>Días</th>
@@ -332,7 +337,8 @@
                                     <th class="ps-4 text-start">FR</th>
                                     <th>Equipo</th>
                                     <th>Serie</th>
-                                    <th>Estado/Cliente</th>
+                                    <th>Cliente</th>
+                                    <th>Estado</th>
                                     <th>Encargado</th>
                                     <th>Fecha</th>
                                     <th>Días</th>
@@ -365,7 +371,8 @@
                                     <th class="ps-4 text-start">FR</th>
                                     <th>Equipo</th>
                                     <th>Serie</th>
-                                    <th>Estado/Cliente</th>
+                                    <th>Cliente</th>
+                                    <th>Estado</th>
                                     <th>Encargado</th>
                                     <th>Fecha</th>
                                     <th>Días</th>
@@ -409,7 +416,8 @@
                                     <th class="ps-4 text-start">FR</th>
                                     <th>Equipo</th>
                                     <th>Serie</th>
-                                    <th>Estado/Cliente</th>
+                                    <th>Cliente</th>
+                                    <th>Estado</th>
                                     <th>Encargado</th>
                                     <th>Fecha</th>
                                     <th>Días</th>
@@ -440,7 +448,8 @@
                                     <th class="ps-4 text-start">FR</th>
                                     <th>Equipo</th>
                                     <th>Serie</th>
-                                    <th>Estado/Cliente</th>
+                                    <th>Cliente</th>
+                                    <th>Estado</th>
                                     <th>Encargado</th>
                                     <th>Fecha</th>
                                     <th>Días</th>
@@ -468,7 +477,8 @@
                                     <th class="ps-4 text-start">FR</th>
                                     <th>Equipo</th>
                                     <th>Serie</th>
-                                    <th>Estado/Cliente</th>
+                                    <th>Cliente</th>
+                                    <th>Estado</th>
                                     <th>Encargado</th>
                                     <th>Fecha</th>
                                     <th>Días</th>
@@ -692,7 +702,9 @@
                         <tr class="text-secondary text-xs text-uppercase">
                             <th class="ps-4">FR</th>
                             <th>Marca/Modelo</th>
-                            <th>Estado</th>
+                            <th>Serie</th>
+                            <th>Cliente</th>
+                                    <th>Estado</th>
                             <th>Encargado</th>
                             <th>Fecha</th>
                             <th class="text-end pe-4">Acción</th>
@@ -894,11 +906,11 @@
                 <td class="text-center">
                     <span class="badge bg-dark border border-info text-info" style="font-size: 0.7rem;">${item.serie || '-'}</span>
                 </td>
+                <td class="text-center">
+                    <small class="text-white text-uppercase" style="font-size: 0.75rem;">${item.cliente || '-'}</small>
+                </td>
                 <td>
-                    <div class="d-flex flex-column align-items-center gap-1">
-                        ${getStatusBadge(item.estado)}
-                        <small class="text-muted text-uppercase" style="font-size: 0.65rem; line-height: 1;">${item.cliente || 'Sin cliente'}</small>
-                    </div>
+                    ${getStatusBadge(item.estado)}
                 </td>
                 <td class="text-light small">
                     <i class="fas fa-user-circle me-1 text-muted" style="font-size: 0.7rem;"></i>

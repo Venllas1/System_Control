@@ -57,4 +57,9 @@ def create_app(config_class=Config):
             except Exception as e:
                 app.logger.error(f"AUTO-INIT ERROR: {str(e)}")
 
+    @app.errorhandler(500)
+    def internal_error(error):
+        from flask import render_template
+        return render_template('500.html'), 500
+
     return app

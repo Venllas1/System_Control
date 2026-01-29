@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Optimizando Sistema{% endblock %}
+
+{% block content %}
+<div class="container d-flex flex-column align-items-center justify-content-center" style="min-height: 80vh;">
+    <div class="text-center">
+        <div class="mb-4">
+            <i class="fas fa-server fa-4x text-info fa-pulse"></i>
+        </div>
+        <h1 class="display-4 fw-bold text-light mb-3">Optimizando Recursos</h1>
+        <p class="lead text-secondary mb-4">
+            Estamos realizando una breve resincronización de procesos internos para mejorar el rendimiento.
+            <br>
+            Esto es un procedimiento automático de mantenimiento.
+        </p>
+        <div class="progress bg-dark border border-secondary mb-3 mx-auto" style="width: 300px; height: 5px;">
+            <div class="progress-bar bg-info progress-bar-striped progress-bar-animated" role="progressbar"
+                style="width: 100%"></div>
+        </div>
+        <p class="text-muted small">
+            <i class="fas fa-sync-alt fa-spin me-2"></i>El sistema se reconectará automáticamente en unos segundos...
+        </p>
+    </div>
+</div>
+
+<script>
+    setTimeout(function () {
+        window.location.reload();
+    }, 5000);
+</script>
+{% endblock %}
