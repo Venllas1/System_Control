@@ -119,7 +119,7 @@ def search():
 @login_required
 def export_data(formato):
     import pandas as pd
-    import os
+    import io
     from flask import send_file
     
     try:
@@ -129,20 +129,35 @@ def export_data(formato):
             query = query.filter(Equipment.estado == estado)
         
         items = query.all()
-        df = pd.DataFrame([i.to_dict() for i in items])
+        # Convert list of dicts to DataFrame
+        data = [i.to_dict() for i in items]
+        df = pd.DataFrame(data)
         
         from app.services.equipment_service import get_local_now
         timestamp = get_local_now().strftime('%Y%m%d_%H%M%S')
-        os.makedirs('exports', exist_ok=True)
         filename = f'export_{estado}_{timestamp}.{formato}'
-        filepath = os.path.join('exports', filename)
+        
+        # Use an in-memory buffer to avoid "Read-only file system" errors on Vercel
+        buffer = io.BytesIO()
         
         if formato == 'csv':
-            df.to_csv(filepath, index=False, encoding='utf-8-sig')
+            # Specify the encoding for special characters
+            df.to_csv(buffer, index=False, encoding='utf-8-sig')
+            mimetype = 'text/csv'
         else:
-            df.to_excel(filepath, index=False)
+            # Use openpyxl as engine for Excel
+            with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+                df.to_excel(writer, index=False)
+            mimetype = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             
-        return send_file(filepath, as_attachment=True)
+        buffer.seek(0)
+        
+        return send_file(
+            buffer,
+            as_attachment=True,
+            download_name=filename,
+            mimetype=mimetype
+        )
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
