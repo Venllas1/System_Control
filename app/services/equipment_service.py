@@ -79,7 +79,7 @@ class EquipmentService:
 
     @staticmethod
     def get_admin_stats():
-        now = datetime.now()
+        now = get_local_now()
         fecha_limite = now - timedelta(days=5)
         fecha_30_dias = now - timedelta(days=30)
         
@@ -164,7 +164,7 @@ class EquipmentService:
                 cliente=normalize_string(data.get('cliente')),
                 serie=normalize_string(data.get('serie')),
                 accesorios=normalize_string(data.get('accesorios')),
-                fecha_ingreso=parse_iso_datetime(data.get('fecha_ingreso')) or datetime.now(),
+                fecha_ingreso=parse_iso_datetime(data.get('fecha_ingreso')) or get_local_now(),
                 estado=data.get('estado') or Equipment.Status.ESPERA_DIAGNOSTICO
             )
             db.session.add(new_eq)
@@ -289,7 +289,7 @@ class EquipmentService:
             
         for field, value in auto_fill.items():
             if value == 'now':
-                additional_data[field] = datetime.now().strftime('%Y-%m-%d %H:%M')
+                additional_data[field] = get_local_now().strftime('%Y-%m-%d %H:%M')
         
         # Perform the state change
         success, message = EquipmentService._update_status_internal(

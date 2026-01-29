@@ -27,8 +27,9 @@ def create_app(config_class=Config):
 
     @app.context_processor
     def inject_now():
+        from app.services.equipment_service import get_local_now
         from datetime import datetime
-        return {'now': datetime.now, 'datetime': datetime}
+        return {'now': get_local_now, 'datetime': datetime}
 
     @app.before_request
     def ensure_db():

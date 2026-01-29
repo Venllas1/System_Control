@@ -131,7 +131,8 @@ def export_data(formato):
         items = query.all()
         df = pd.DataFrame([i.to_dict() for i in items])
         
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        from app.services.equipment_service import get_local_now
+        timestamp = get_local_now().strftime('%Y%m%d_%H%M%S')
         os.makedirs('exports', exist_ok=True)
         filename = f'export_{estado}_{timestamp}.{formato}'
         filepath = os.path.join('exports', filename)
