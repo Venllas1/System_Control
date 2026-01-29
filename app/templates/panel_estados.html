@@ -871,32 +871,32 @@
             // Unified Days Badge (style like Admin) - HIDE IF ENTREGADO
             const daysBadge = isEntregado ? '-' : `<span class="badge ${diffDays > 5 ? 'bg-danger' : 'bg-success'} badge-pill">${diffDays} días</span>`;
 
-            // Row Content Structure (Centered)
+            // Compact Row Design - More horizontal, less vertical space
             return `
-            <tr class="text-center">
-                <td class="ps-4 text-start fw-bold text-info">${frDisplay}</td>
-                <td>
-                    <div class="d-flex flex-column align-items-center">
-                        <span class="text-white fw-bold">${item.marca || 'N/A'}</span>
-                        <small class="text-secondary opacity-75">${item.modelo || 'N/A'}</small>
-                        <small class="text-info text-xs mt-1">S/N: ${item.serie || '-'}</small>
+            <tr class="text-center compact-row">
+                <td class="ps-3 text-start fw-bold text-info small">${frDisplay}</td>
+                <td class="text-start">
+                    <div class="d-flex align-items-center gap-2">
+                        <div>
+                            <span class="text-white fw-bold d-block" style="font-size: 0.875rem; line-height: 1.2;">${item.marca || 'N/A'}</span>
+                            <small class="text-secondary" style="font-size: 0.75rem;">${item.modelo || 'N/A'}</small>
+                        </div>
+                        ${item.serie ? `<span class="badge bg-dark border border-info text-info" style="font-size: 0.65rem;">S/N: ${item.serie}</span>` : ''}
                     </div>
                 </td>
                 <td>
-                    <div class="d-flex flex-column align-items-center">
+                    <div class="d-flex flex-column align-items-center gap-1">
                         ${getStatusBadge(item.estado)}
-                        <small class="text-muted mt-1 text-uppercase" style="font-size: 0.65rem;">${item.cliente || 'Sin cliente'}</small>
+                        <small class="text-muted text-uppercase" style="font-size: 0.65rem; line-height: 1;">${item.cliente || 'Sin cliente'}</small>
                     </div>
                 </td>
-                <td class="text-light">
-                    <div class="d-flex align-items-center justify-content-center">
-                        <i class="fas fa-user-circle me-1 text-muted"></i>
-                        <span>${tech}</span>
-                    </div>
+                <td class="text-light small">
+                    <i class="fas fa-user-circle me-1 text-muted" style="font-size: 0.7rem;"></i>
+                    <span style="font-size: 0.8rem;">${tech}</span>
                 </td>
-                <td class="text-muted small">${dateToDisplay || 'N/A'}</td>
+                <td class="text-muted" style="font-size: 0.8rem;">${dateToDisplay || 'N/A'}</td>
                 <td>${daysBadge}</td>
-                <td class="text-end pe-4">${actionsHtml}</td>
+                <td class="text-end pe-3">${actionsHtml}</td>
             </tr>
             `;
         }
@@ -1214,8 +1214,11 @@
 
             // Hide/Show maintenance fields based on status
             const isDiagnostico = normalize(item.estado).includes('diagnostico');
+            const isPendiente = normalize(item.estado).includes('pendiente') && normalize(item.estado).includes('aprobacion');
+            const shouldHideMaintenance = isDiagnostico || isPendiente;
+
             document.querySelectorAll('.maint-field').forEach(el => {
-                el.style.display = isDiagnostico ? 'none' : 'block';
+                el.style.display = shouldHideMaintenance ? 'none' : 'block';
             });
 
             const myModal = new bootstrap.Modal(document.getElementById('detailedInfoModal'));
@@ -1247,6 +1250,32 @@
     .badge {
         padding: 0.25rem 0.5rem !important;
         line-height: 1.2;
+    }
+
+    /* Compact row styling for better vertical space usage */
+    .compact-row td {
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+        vertical-align: middle !important;
+    }
+
+    /* Optimize table spacing */
+    .table thead th {
+        padding: 0.75rem 0.5rem !important;
+        font-size: 0.75rem !important;
+        font-weight: 600 !important;
+    }
+
+    /* Improve button group spacing */
+    .btn-group .btn-sm {
+        padding: 0.25rem 0.5rem !important;
+        font-size: 0.75rem !important;
+    }
+
+    /* Status badge optimization */
+    .badge.badge-pill {
+        padding: 0.35rem 0.6rem !important;
+        font-size: 0.75rem !important;
     }
 </style>
 
