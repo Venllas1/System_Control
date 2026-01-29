@@ -59,6 +59,14 @@ def panel_general():
 def panel_excel():
     return render_template('gestion_excel.html')
 
+@dashboard_bp.route('/auditoria')
+@login_required
+def auditoria():
+    # Pass all equipments for audit analysis
+    equipments = Equipment.query.all()
+    equipments_json = json.dumps([eq.to_dict() for eq in equipments])
+    return render_template('auditoria.html', equipments_json=equipments_json)
+
 @dashboard_bp.route('/admin/db/backup')
 @login_required
 def backup_db():

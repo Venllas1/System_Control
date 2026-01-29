@@ -1,0 +1,658 @@
+{% extends "base.html" %}
+
+{% block title %}Auditoría de Equipos - CABELAB{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.05);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --accent-color: #8b5cf6;
+        --success-color: #10b981;
+        --info-color: #3b82f6;
+    }
+
+    .audit-card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--glass-border);
+        border-radius: 1.25rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .audit-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    .kpi-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        letter-spacing: -1px;
+    }
+
+    .kpi-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #94a3b8;
+    }
+
+    .nav-pills .nav-link {
+        border-radius: 0.75rem;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        color: #94a3b8;
+        transition: all 0.3s ease;
+    }
+
+    .nav-pills .nav-link.active {
+        background-color: var(--accent-color);
+        color: white;
+        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+    }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+    }
+
+    .custom-select {
+        background-color: #1e293b;
+        border: 1px solid #334155;
+        color: #f1f5f9;
+        border-radius: 0.75rem;
+        padding: 0.8rem 1rem;
+    }
+
+    .custom-select:focus {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+        outline: none;
+    }
+
+    .table-audit {
+        background: transparent;
+        color: #e2e8f0;
+    }
+
+    .table-audit thead th {
+        border-bottom: 2px solid #334155;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        letter-spacing: 0.5px;
+        color: #94a3b8;
+    }
+
+    .table-audit td {
+        border-bottom: 1px solid #1e293b;
+        padding: 1rem 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .badge-time {
+        background: rgba(139, 92, 246, 0.1);
+        color: var(--accent-color);
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.5rem;
+        font-weight: 700;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 px-lg-5">
+    <!-- Header -->
+    <div class="row mb-5 align-items-center">
+        <div class="col-md-6">
+            <h1 class="text-white fw-bold mb-1">AUDITORÍA DE EQUIPOS</h1>
+            <p class="text-secondary">Análisis técnico de rendimiento y tiempos de servicio</p>
+        </div>
+        <div class="col-md-6 d-flex justify-content-md-end">
+            <ul class="nav nav-pills" id="auditTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="equipment-tab" data-bs-toggle="pill"
+                        data-bs-target="#equipment-pane" type="button" role="tab">
+                        <i class="fas fa-tools me-2"></i>Por Equipo
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="model-tab" data-bs-toggle="pill" data-bs-target="#model-pane"
+                        type="button" role="tab">
+                        <i class="fas fa-microchip me-2"></i>Por Modelo
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="client-tab" data-bs-toggle="pill" data-bs-target="#client-pane"
+                        type="button" role="tab">
+                        <i class="fas fa-user-tie me-2"></i>Por Cliente
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="tab-content" id="auditTabsContent">
+        <!-- PESTAÑA 1: AUDITORÍA POR EQUIPO -->
+        <div class="tab-pane fade show active" id="equipment-pane" role="tabpanel">
+            <div class="row mb-4">
+                <div class="col-md-6 mx-auto text-center">
+                    <label class="text-secondary small text-uppercase mb-2 d-block">Seleccionar Equipo (FR / Serie /
+                        Modelo)</label>
+                    <select id="selectEquipment" class="form-select custom-select w-100">
+                        <option value="">Buscar equipo...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="equipmentResults" style="display: none;">
+                <div class="row g-4">
+                    <!-- KPIs -->
+                    <div class="col-md-4">
+                        <div class="audit-card p-4 h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <span class="kpi-label">Horas Diagnóstico</span>
+                                <div class="kpi-value text-info" id="eqHoursDiag">0.0</div>
+                            </div>
+                            <div class="mt-3">
+                                <small class="text-secondary">Desde inicio hasta aprobación</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="audit-card p-4 h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <span class="kpi-label">Horas Mantenimiento</span>
+                                <div class="kpi-value text-success" id="eqHoursMant">0.0</div>
+                            </div>
+                            <div class="mt-3">
+                                <small class="text-secondary">Desde inicio mant. hasta entrega</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="audit-card p-4 h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <span class="kpi-label">Tiempo Total Servicio</span>
+                                <div class="kpi-value text-white" id="eqHoursTotal">0.0</div>
+                            </div>
+                            <div class="mt-3">
+                                <small class="text-secondary">Tiempo total transcurrido</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Area -->
+                    <div class="col-md-8">
+                        <div class="audit-card p-4">
+                            <h5 class="text-white mb-4">Distribución de Tiempos</h5>
+                            <div class="chart-container">
+                                <canvas id="chartEqFlow"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="audit-card p-4">
+                            <h5 class="text-white mb-4">Eficiencia vs Promedio</h5>
+                            <div class="chart-container">
+                                <canvas id="chartEqComparison"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="equipmentEmpty" class="text-center py-5">
+                <i class="fas fa-search fa-4x text-secondary opacity-25 mb-3"></i>
+                <h4 class="text-secondary">Selecciona un equipo para ver su auditoría</h4>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 2: AUDITORÍA POR MODELO -->
+        <div class="tab-pane fade" id="model-pane" role="tabpanel">
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <label class="text-secondary small text-uppercase mb-2 d-block">Seleccionar Modelo</label>
+                    <select id="selectModel" class="form-select custom-select">
+                        <option value="">Seleccionar modelo...</option>
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <div class="audit-card px-4 py-2 w-100">
+                        <small class="text-secondary text-uppercase d-block" style="font-size: 0.6rem;">Equipos
+                            Analizados</small>
+                        <span class="text-white fw-bold fs-5" id="modelCount">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="modelResults" style="display: none;">
+                <div class="row g-4">
+                    <div class="col-md-3">
+                        <div class="audit-card p-4 h-100">
+                            <span class="kpi-label">Días Promedio Total</span>
+                            <div class="kpi-value text-accent" id="modelAvgTotal">0.0</div>
+                            <hr class="border-secondary">
+                            <div class="mb-3">
+                                <small class="text-secondary d-block">Avg. Diagnóstico</small>
+                                <span class="text-info fw-bold" id="modelAvgDiag">0.0 h</span>
+                            </div>
+                            <div>
+                                <small class="text-secondary d-block">Avg. Mantenimiento</small>
+                                <span class="text-success fw-bold" id="modelAvgMant">0.0 h</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="audit-card p-4 h-100">
+                            <h5 class="text-white mb-4">Comparativa de Fases (Horas Promedio)</h5>
+                            <div class="chart-container">
+                                <canvas id="chartModelBars"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="audit-card p-4 h-100">
+                            <h5 class="text-white mb-4">Distribución Promedio</h5>
+                            <div class="chart-container">
+                                <canvas id="chartModelPie"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="modelEmpty" class="text-center py-5">
+                <i class="fas fa-layer-group fa-4x text-secondary opacity-25 mb-3"></i>
+                <h4 class="text-secondary">Selecciona un modelo para analizar su rendimiento</h4>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 3: AUDITORÍA POR CLIENTE -->
+        <div class="tab-pane fade" id="client-pane" role="tabpanel">
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <label class="text-secondary small text-uppercase mb-2 d-block">Seleccionar Cliente</label>
+                    <select id="selectClient" class="form-select custom-select">
+                        <option value="">Seleccionar cliente...</option>
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <div class="audit-card px-4 py-2 w-100">
+                        <small class="text-secondary text-uppercase d-block" style="font-size: 0.6rem;">Total Equipos
+                            Ingresados</small>
+                        <span class="text-white fw-bold fs-5" id="clientCount">0</span>
+                    </div>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <div class="audit-card px-4 py-2 w-100">
+                        <small class="text-secondary text-uppercase d-block" style="font-size: 0.6rem;">Atención
+                            Promedio</small>
+                        <span class="text-info fw-bold fs-5" id="clientAvg">0.0 días</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="clientResults" style="display: none;">
+                <div class="row g-4">
+                    <div class="col-md-12">
+                        <div class="audit-card p-4">
+                            <h5 class="text-white mb-4">Tiempo Total de Servicio por Equipo</h5>
+                            <div class="chart-container" style="height: 250px;">
+                                <canvas id="chartClientBars"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="audit-card p-4">
+                            <h5 class="text-white mb-3">Detalle de Equipos del Cliente</h5>
+                            <div class="table-responsive">
+                                <table class="table table-audit align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>FR</th>
+                                            <th>Equipo</th>
+                                            <th>Serie</th>
+                                            <th>Ingreso</th>
+                                            <th>Fase Diagnóstico</th>
+                                            <th>Fase Mantenimiento</th>
+                                            <th class="text-end">Total Servicio</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="clientTableBody">
+                                        <!-- JS Rendered -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="clientEmpty" class="text-center py-5">
+                <i class="fas fa-users-cog fa-4x text-secondary opacity-25 mb-3"></i>
+                <h4 class="text-secondary">Selecciona un cliente para evaluar el nivel de servicio</h4>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const allEquipments = {{ equipments_json | safe }};
+
+    // Configuración Global de Chart.js para modo oscuro
+    Chart.defaults.color = '#94a3b8';
+    Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+    Chart.defaults.font.family = "'Inter', sans-serif";
+
+    // --- HELPERS ---
+    function parseDate(dateStr) {
+        if (!dateStr || dateStr === 'N/A' || dateStr === '-') return null;
+        // Format incoming: "DD/MM/YYYY II:MM AM/PM"
+        const parts = dateStr.split(' ');
+        const dateParts = parts[0].split('/');
+        let hh = parseInt(parts[1].split(':')[0]);
+        const mm = parseInt(parts[1].split(':')[1]);
+        const ampm = parts[2] ? parts[2].toUpperCase() : '';
+
+        if (ampm === 'PM' && hh < 12) hh += 12;
+        if (ampm === 'AM' && hh === 12) hh = 0;
+
+        return new Date(dateParts[2], dateParts[1] - 1, dateParts[0], hh, mm);
+    }
+
+    function diffHours(start, end) {
+        if (!start || !end) return 0;
+        const diff = end - start;
+        return Math.max(0, (diff / (1000 * 60 * 60)).toFixed(1));
+    }
+
+    // --- INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', () => {
+        populateSelectors();
+        initListeners();
+    });
+
+    const selectors = {
+        equipment: document.getElementById('selectEquipment'),
+        model: document.getElementById('selectModel'),
+        client: document.getElementById('selectClient')
+    };
+
+    function populateSelectors() {
+        // Equipment
+        allEquipments.forEach(eq => {
+            const opt = document.createElement('option');
+            opt.value = eq.id;
+            opt.textContent = `${eq.fr} - ${eq.serie} (${eq.marca} ${eq.modelo})`;
+            selectors.equipment.appendChild(opt);
+        });
+
+        // Models (Unique)
+        const models = [...new Set(allEquipments.map(eq => `${eq.marca} ${eq.modelo}`))].sort();
+        models.forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m;
+            opt.textContent = m;
+            selectors.model.appendChild(opt);
+        });
+
+        // Clients (Unique)
+        const clients = [...new Set(allEquipments.map(eq => eq.cliente).filter(c => c))].sort();
+        clients.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c;
+            opt.textContent = c;
+            selectors.client.appendChild(opt);
+        });
+    }
+
+    // Chart instances to destroy before update
+    let charts = {
+        eqFlow: null,
+        eqComp: null,
+        modelBars: null,
+        modelPie: null,
+        clientBars: null
+    };
+
+    function initListeners() {
+        // Tab 1: Equipment
+        selectors.equipment.addEventListener('change', (e) => {
+            const id = e.target.value;
+            if (id) {
+                const eq = allEquipments.find(item => item.id == id);
+                renderEquipmentAudit(eq);
+                document.getElementById('equipmentResults').style.display = 'block';
+                document.getElementById('equipmentEmpty').style.display = 'none';
+            } else {
+                document.getElementById('equipmentResults').style.display = 'none';
+                document.getElementById('equipmentEmpty').style.display = 'block';
+            }
+        });
+
+        // Tab 2: Model
+        selectors.model.addEventListener('change', (e) => {
+            const model = e.target.value;
+            if (model) {
+                const filtered = allEquipments.filter(eq => `${eq.marca} ${eq.modelo}` === model);
+                renderModelAudit(model, filtered);
+                document.getElementById('modelResults').style.display = 'block';
+                document.getElementById('modelEmpty').style.display = 'none';
+            } else {
+                document.getElementById('modelResults').style.display = 'none';
+                document.getElementById('modelEmpty').style.display = 'block';
+            }
+        });
+
+        // Tab 3: Client
+        selectors.client.addEventListener('change', (e) => {
+            const client = e.target.value;
+            if (client) {
+                const filtered = allEquipments.filter(eq => eq.cliente === client);
+                renderClientAudit(client, filtered);
+                document.getElementById('clientResults').style.display = 'block';
+                document.getElementById('clientEmpty').style.display = 'none';
+            } else {
+                document.getElementById('clientResults').style.display = 'none';
+                document.getElementById('clientEmpty').style.display = 'block';
+            }
+        });
+    }
+
+    // --- RENDER FUNCTIONS ---
+
+    function renderEquipmentAudit(eq) {
+        const dIngreso = parseDate(eq.fecha_ingreso);
+        const dDiagStart = parseDate(eq.hora_inicio_diagnostico);
+        const dAprob = parseDate(eq.hora_aprobacion);
+        const dMantStart = parseDate(eq.hora_inicio_mantenimiento);
+        // If delivered, we use the last history date or now if active
+        // For this audit, we use dAprob for diag phase and now/final for mant
+        const now = new Date();
+
+        const hDiag = diffHours(dDiagStart, dAprob);
+        const hMant = diffHours(dMantStart, (eq.estado.toLowerCase().includes('entregado') ? dAprob : now)); // Simple logic
+        const hTotal = diffHours(dIngreso, now);
+
+        document.getElementById('eqHoursDiag').innerText = hDiag;
+        document.getElementById('eqHoursMant').innerText = hMant;
+        document.getElementById('eqHoursTotal').innerText = hTotal;
+
+        // Chart: Flow
+        if (charts.eqFlow) charts.eqFlow.destroy();
+        charts.eqFlow = new Chart(document.getElementById('chartEqFlow'), {
+            type: 'line',
+            data: {
+                labels: ['Ingreso', 'Inic. Diag', 'Aprobación', 'Inic. Mant', 'Estado Actual'],
+                datasets: [{
+                    label: 'Ciclo de Vida (Horas Acumuladas)',
+                    data: [
+                        0,
+                        diffHours(dIngreso, dDiagStart),
+                        diffHours(dIngreso, dAprob),
+                        diffHours(dIngreso, dMantStart),
+                        hTotal
+                    ],
+                    borderColor: '#8b5cf6',
+                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // Chart: Efficiency (Donut)
+        if (charts.eqComp) charts.eqComp.destroy();
+        charts.eqComp = new Chart(document.getElementById('chartEqComparison'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Diagnóstico', 'Mantenimiento', 'Esperas/Otros'],
+                datasets: [{
+                    data: [hDiag, hMant, Math.max(0, hTotal - hDiag - hMant)],
+                    backgroundColor: ['#3b82f6', '#10b981', 'rgba(255,255,255,0.05)'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    }
+
+    function renderModelAudit(model, items) {
+        document.getElementById('modelCount').innerText = items.length;
+
+        let totalDiag = 0, totalMant = 0, countDiag = 0, countMant = 0;
+
+        items.forEach(eq => {
+            const hDiag = diffHours(parseDate(eq.hora_inicio_diagnostico), parseDate(eq.hora_aprobacion));
+            const hMant = diffHours(parseDate(eq.hora_inicio_mantenimiento), parseDate(eq.estado.includes('Entregado') ? eq.hora_aprobacion : null)); // Logic placeholder
+
+            if (hDiag > 0) { totalDiag += parseFloat(hDiag); countDiag++; }
+            if (hMant > 0) { totalMant += parseFloat(hMant); countMant++; }
+        });
+
+        const avgDiag = countDiag ? (totalDiag / countDiag).toFixed(1) : 0;
+        const avgMant = countMant ? (totalMant / countMant).toFixed(1) : 0;
+        const avgTotal = (parseFloat(avgDiag) + parseFloat(avgMant)).toFixed(1);
+
+        document.getElementById('modelAvgTotal').innerText = (avgTotal / 24).toFixed(1); // Conver to days for main KPI
+        document.getElementById('modelAvgDiag').innerText = avgDiag + ' h';
+        document.getElementById('modelAvgMant').innerText = avgMant + ' h';
+
+        // Chart Bars
+        if (charts.modelBars) charts.modelBars.destroy();
+        charts.modelBars = new Chart(document.getElementById('chartModelBars'), {
+            type: 'bar',
+            data: {
+                labels: ['Promedio Diagnóstico', 'Promedio Mantenimiento'],
+                datasets: [{
+                    data: [avgDiag, avgMant],
+                    backgroundColor: ['#3b82f6', '#10b981'],
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, title: { display: true, text: 'Horas' } } }
+            }
+        });
+
+        // Chart Pie
+        if (charts.modelPie) charts.modelPie.destroy();
+        charts.modelPie = new Chart(document.getElementById('chartModelPie'), {
+            type: 'pie',
+            data: {
+                labels: ['Diag', 'Mant'],
+                datasets: [{
+                    data: [avgDiag, avgMant],
+                    backgroundColor: ['#3b82f6', '#10b981'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    }
+
+    function renderClientAudit(client, items) {
+        document.getElementById('clientCount').innerText = items.length;
+
+        const now = new Date();
+        let totalTime = 0;
+        const labels = [];
+        const dataTotal = [];
+
+        const tableBody = document.getElementById('clientTableBody');
+        tableBody.innerHTML = '';
+
+        items.forEach(eq => {
+            const hDiag = diffHours(parseDate(eq.hora_inicio_diagnostico), parseDate(eq.hora_aprobacion));
+            const hMant = diffHours(parseDate(eq.hora_inicio_mantenimiento), parseDate(eq.estado.includes('Entregado') ? eq.hora_aprobacion : null));
+            const hTotal = diffHours(parseDate(eq.fecha_ingreso), now);
+            totalTime += parseFloat(hTotal);
+
+            labels.push(eq.fr);
+            dataTotal.push(hTotal);
+
+            const row = `
+                <tr>
+                    <td class="text-info fw-bold">${eq.fr}</td>
+                    <td>
+                        <div class="fw-bold">${eq.marca}</div>
+                        <small class="text-secondary">${eq.modelo}</small>
+                    </td>
+                    <td class="font-monospace">${eq.serie || '-'}</td>
+                    <td class="small">${eq.fecha_ingreso}</td>
+                    <td><span class="badge-time">${hDiag}h</span></td>
+                    <td><span class="badge-time" style="color:#10b981; background:rgba(16,185,129,0.1)">${hMant}h</span></td>
+                    <td class="text-end fw-bold">${hTotal}h</td>
+                </tr>
+            `;
+            tableBody.innerHTML += row;
+        });
+
+        const avgDays = ((totalTime / items.length) / 24).toFixed(1);
+        document.getElementById('clientAvg').innerText = avgDays + ' días';
+
+        // Chart Client Bars
+        if (charts.clientBars) charts.clientBars.destroy();
+        charts.clientBars = new Chart(document.getElementById('chartClientBars'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Horas totales servicio',
+                    data: dataTotal,
+                    backgroundColor: '#8b5cf6',
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { title: { display: true, text: 'Horas' } } }
+            }
+        });
+    }
+</script>
+{% endblock %}
