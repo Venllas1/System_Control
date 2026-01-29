@@ -11,36 +11,44 @@ registrados", now_func=none) %}
         <div class="table-responsive">
             <table class="table table-dark table-hover mb-0 align-middle">
                 <thead>
-                    <tr>
-                        <th>FR</th>
+                    <tr class="text-secondary text-uppercase text-center" style="font-size: 0.8rem;">
+                        <th class="ps-4 text-start">FR</th>
                         <th>Cliente</th>
                         <th>Equipo</th>
+                        <th>Serie</th>
                         <th>Estado</th>
                         {% if 'encargado_diagnostico' in actions_config.columns %}<th>Encargado</th>{% endif %}
                         <th>Fecha</th>
-                        <th>Días</th>
-                        <th class="text-end">Acción</th>
+                        {% if title != 'Historial de Entregados' %}<th>Días</th>{% endif %}
+                        <th class="text-end pe-4">Acción</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for eq in equipments %}
-                    <tr>
-                        <td>
+                    <tr class="text-center">
+                        <td class="ps-4 text-start">
                             <span
                                 class="badge {% if color_class == 'text-info' %}bg-info{% elif color_class == 'text-warning' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
                                 {{ eq.fr or 'N/A' }}
                             </span>
                         </td>
                         <td>{{ eq.cliente or 'N/A' }}</td>
+                        <td class="text-start">
+                            <div class="d-flex flex-column">
+                                <span class="fw-bold">{{ eq.marca }}</span>
+                                <small class="text-muted">{{ eq.modelo }}</small>
+                            </div>
+                        </td>
                         <td>
-                            <span class="fw-bold">{{ eq.marca }}</span>
-                            <small class="d-block text-muted">{{ eq.modelo }}</small>
+                            <span class="badge bg-dark border border-info text-info">{{ eq.serie or '-' }}</span>
                         </td>
                         <td><span class="badge bg-secondary">{{ eq.estado }}</span></td>
                         {% if 'encargado_diagnostico' in actions_config.columns %}<td>{{ eq.encargado_diagnostico or
                             'N/A' }}</td>{% endif %}
                         {% set base_date = eq.hora_aprobacion if eq.hora_aprobacion else eq.fecha_ingreso %}
                         <td>{{ base_date.strftime('%d/%m/%Y %I:%M %p') if base_date else 'N/A' }}</td>
+
+                        {% if title != 'Historial de Entregados' %}
                         <td>
                             {% if base_date %}
                             {% set dias = ((now_func or now)() - base_date).days %}
@@ -52,7 +60,9 @@ registrados", now_func=none) %}
                             -
                             {% endif %}
                         </td>
-                        <td class="text-end">
+                        {% endif %}
+
+                        <td class="text-end pe-4">
                             <div class="btn-group btn-group-sm">
                                 <button class="btn btn-outline-info" onclick="showInfo(this)" data-id="{{ eq.id }}"
                                     data-fr="{{ eq.fr }}" data-marca="{{ eq.marca }} {{ eq.modelo }}"
@@ -81,7 +91,7 @@ registrados", now_func=none) %}
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="8" class="text-center text-muted py-4">{{ empty_msg }}</td>
+                        <td colspan="9" class="text-center text-muted py-4">{{ empty_msg }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

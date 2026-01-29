@@ -21,6 +21,22 @@ def get_local_now():
     from datetime import timezone
     return datetime.now(timezone(timedelta(hours=-5))).replace(tzinfo=None)
 
+def normalize_string(value, default=None):
+    """Normalize and uppercase a string value, return default if empty."""
+    if not value:
+        return default
+    val = str(value).strip().upper()
+    return val if val else default
+
+def safe_commit(success_msg="Operación exitosa"):
+    """Safely commit database changes with error handling."""
+    try:
+        db.session.commit()
+        return True, success_msg
+    except Exception as e:
+        db.session.rollback()
+        return False, str(e)
+
 class EquipmentService:
     @staticmethod
     def get_dashboard_config(user):
@@ -66,18 +82,21 @@ class EquipmentService:
         now = datetime.now()
         fecha_limite = now - timedelta(days=5)
         fecha_30_dias = now - timedelta(days=30)
+        
+        # Filtro común para equipos activos (no entregados)
+        active_filter = ~Equipment.estado.ilike('%entregado%')
 
         stats = {
             'total': Equipment.query.count(),
-            'activos': Equipment.query.filter(~Equipment.estado.ilike('%entregado%')).count(),
+            'activos': Equipment.query.filter(active_filter).count(),
             'atrasados': Equipment.query.filter(
-                ~Equipment.estado.ilike('%entregado%'),
+                active_filter,
                 Equipment.fecha_ingreso < fecha_limite
             ).count(),
             'ultima_actualizacion': now.strftime('%d/%m/%Y %H:%M:%S')
         }
 
-        # Tiempo promedio (30 days)
+        # Tiempo promedio (últimos 30 días)
         recientes = Equipment.query.filter(
             Equipment.estado.ilike('%entregado%'),
             Equipment.fecha_ingreso >= fecha_30_dias
@@ -136,22 +155,15 @@ class EquipmentService:
     @staticmethod
     def create_equipment(data):
         try:
-            # Helper to handle empty/trimmed strings
-            def get_val(key, default=None):
-                val = data.get(key)
-                if val is None: return default
-                val = val.strip()
-                return val if val != "" else default
-
             new_eq = Equipment(
-                fr=get_val('fr', '').upper() or None,
-                marca=get_val('marca', '').upper() or None,
-                modelo=get_val('modelo', '').upper() or None,
-                reporte_cliente=get_val('reporte_cliente', '').upper() or None,
-                observaciones=get_val('observaciones', '').upper() or None,
-                cliente=get_val('cliente', '').upper() or None,
-                serie=get_val('serie', '').upper() or None,
-                accesorios=get_val('accesorios', '').upper() or None,
+                fr=normalize_string(data.get('fr')),
+                marca=normalize_string(data.get('marca')),
+                modelo=normalize_string(data.get('modelo')),
+                reporte_cliente=normalize_string(data.get('reporte_cliente')),
+                observaciones=normalize_string(data.get('observaciones')),
+                cliente=normalize_string(data.get('cliente')),
+                serie=normalize_string(data.get('serie')),
+                accesorios=normalize_string(data.get('accesorios')),
                 fecha_ingreso=parse_iso_datetime(data.get('fecha_ingreso')) or datetime.now(),
                 estado=data.get('estado') or Equipment.Status.ESPERA_DIAGNOSTICO
             )
