@@ -10,19 +10,20 @@
             <h2 class="text-white mb-0"><i class="fas fa-table me-2"></i> Panel General de Gestión</h2>
             <p class="text-white mb-0">Vista administrativa completa de todos los equipos</p>
         </div>
-        <div class="d-flex gap-2">
-            <div class="input-group">
+        <div class="d-flex gap-3 flex-grow-1 justify-content-end">
+            <div class="input-group" style="max-width: 500px; flex-grow: 1;">
                 <span class="input-group-text bg-dark border-secondary text-secondary">
                     <i class="fas fa-search"></i>
                 </span>
                 <input type="text" id="generalSearch" class="form-control bg-dark text-light border-secondary"
-                    placeholder="Buscar en todo...">
+                    placeholder="Buscar por FR, Serie, Cliente, Modelo o Encargado...">
             </div>
-            <a href="{{ url_for('api.export_data', formato='xlsx') }}?estado=all" class="btn btn-success">
+            <a href="{{ url_for('api.export_data', formato='xlsx') }}?estado=all"
+                class="btn btn-success px-4 text-nowrap d-flex align-items-center">
                 <i class="fas fa-file-excel me-2"></i> Exportar a Excel
             </a>
-            <button class="btn btn-outline-info" onclick="location.reload()">
-                <i class="fas fa-sync-alt"></i>
+            <button class="btn btn-outline-info px-4 text-nowrap d-flex align-items-center" onclick="location.reload()">
+                <i class="fas fa-sync-alt me-2"></i> Actualizar Vista
             </button>
         </div>
     </div>
@@ -167,29 +168,16 @@
     document.addEventListener('DOMContentLoaded', async function () {
         await loadAllEquipment();
 
-        // Search Filter (Global)
-        document.getElementById('generalSearch').addEventListener('keyup', function (e) {
-            const term = e.target.value.toLowerCase();
-            // We filter the data object directly and re-render OR filter DOM.
-            // Filtering DOM is faster for small datasets (<2000 items).
-            const tables = document.querySelectorAll('table');
-            tables.forEach(table => {
-                const rows = table.querySelectorAll('tbody tr');
-                let hasVisible = false;
-                rows.forEach(row => {
-                    const text = row.innerText.toLowerCase();
-                    const match = text.includes(term);
-                    row.style.display = match ? '' : 'none';
-                    if (match) hasVisible = true;
-                });
-                // Hide empty tables/cards if needed, or just leave them
-                table.closest('.card').style.display = hasVisible ? '' : 'none';
-            });
+        // Search Filter (Global - filters data before rendering)
+        document.getElementById('generalSearch').addEventListener('input', function (e) {
+            const term = e.target.value.toLowerCase().trim();
+            renderGroupedTables(term);
         });
     });
 
-    let allData = [];
-    let groupPages = {}; // Store current page for each group
+    let allOriginalData = []; // Store the full dataset
+    let currentFilter = "";
+    let groupPages = {};
     const ITEMS_PER_PAGE = 10;
 
     async function loadAllEquipment() {
@@ -198,7 +186,7 @@
             const result = await response.json();
 
             if (result.success) {
-                allData = result.data;
+                allOriginalData = result.data;
                 renderGroupedTables();
             } else {
                 console.error('Error loading data');
@@ -208,10 +196,16 @@
         }
     }
 
-    function renderGroupedTables() {
+    function renderGroupedTables(filter = "") {
         const container = document.getElementById('tablesContainer');
         const count = document.getElementById('recordCount');
         container.innerHTML = '';
+
+        // Filter Data if term present
+        const filteredData = filter ? allOriginalData.filter(item => {
+            const searchStr = `${item.fr} ${item.marca} ${item.modelo} ${item.serie} ${item.cliente} ${item.estado} ${item.encargado_diagnostico} ${item.encargado_mantenimiento}`.toLowerCase();
+            return searchStr.includes(filter);
+        }) : allOriginalData;
 
         // NEW ORDER & GROUPING (Synchronized with panel_estados)
         const groupsConfig = [
@@ -252,7 +246,7 @@
         });
 
         // Distribute Data
-        allData.forEach(item => {
+        filteredData.forEach(item => {
             let placed = false;
             const itemState = (item.estado || '').toLowerCase().trim();
 
@@ -341,7 +335,8 @@
 
     window.changePage = function (groupName, delta) {
         groupPages[groupName] += delta;
-        renderGroupedTables();
+        const currentFilter = document.getElementById('generalSearch').value.toLowerCase().trim();
+        renderGroupedTables(currentFilter);
     }
 
     function createRowHTML(item) {

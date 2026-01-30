@@ -137,12 +137,21 @@
         <!-- PESTAÑA 1: AUDITORÍA POR EQUIPO -->
         <div class="tab-pane fade show active" id="equipment-pane" role="tabpanel">
             <div class="row mb-4">
-                <div class="col-md-6 mx-auto text-center">
-                    <label class="text-secondary small text-uppercase mb-2 d-block">Seleccionar Equipo (FR / Serie /
-                        Modelo)</label>
-                    <select id="selectEquipment" class="form-select custom-select w-100">
-                        <option value="">Buscar equipo...</option>
-                    </select>
+                <div class="col-md-8 mx-auto">
+                    <label class="text-secondary small text-uppercase mb-2 d-block text-center">Buscador de Equipos
+                        (Filtrado Exclusivo)</label>
+                    <div class="input-group">
+                        <select id="searchType" class="form-select custom-select" style="max-width: 180px;">
+                            <option value="fr">FR</option>
+                            <option value="modelo">Modelo</option>
+                            <option value="serie">Número de Serie</option>
+                        </select>
+                        <input type="text" id="searchValue" class="form-control custom-select"
+                            placeholder="Ingresar valor a buscar...">
+                        <button class="btn btn-primary px-4" id="btnSearchAudit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -378,20 +387,14 @@
     });
 
     const selectors = {
-        equipment: document.getElementById('selectEquipment'),
+        searchType: document.getElementById('searchType'),
+        searchValue: document.getElementById('searchValue'),
+        btnSearch: document.getElementById('btnSearchAudit'),
         model: document.getElementById('selectModel'),
         client: document.getElementById('selectClient')
     };
 
     function populateSelectors() {
-        // Equipment
-        allEquipments.forEach(eq => {
-            const opt = document.createElement('option');
-            opt.value = eq.id;
-            opt.textContent = `${eq.fr} - ${eq.serie} (${eq.marca} ${eq.modelo})`;
-            selectors.equipment.appendChild(opt);
-        });
-
         // Models (Unique)
         const models = [...new Set(allEquipments.map(eq => `${eq.marca} ${eq.modelo}`))].sort();
         models.forEach(m => {
@@ -421,18 +424,44 @@
     };
 
     function initListeners() {
-        // Tab 1: Equipment
-        selectors.equipment.addEventListener('change', (e) => {
-            const id = e.target.value;
-            if (id) {
-                const eq = allEquipments.find(item => item.id == id);
+        // Tab 1: Equipment dual search
+        const performAuditSearch = () => {
+            const type = selectors.searchType.value;
+            const val = selectors.searchValue.value.toLowerCase().trim();
+
+            if (!val) {
+                document.getElementById('equipmentResults').style.display = 'none';
+                document.getElementById('equipmentEmpty').style.display = 'block';
+                return;
+            }
+
+            // Find match based EXCLUSIVELY on type
+            const eq = allEquipments.find(item => {
+                if (type === 'fr') return (item.fr || '').toLowerCase() === val;
+                if (type === 'modelo') return (item.modelo || '').toLowerCase().includes(val) || (item.marca || '').toLowerCase().includes(val);
+                if (type === 'serie') return (item.serie || '').toLowerCase() === val;
+                return false;
+            });
+
+            if (eq) {
                 renderEquipmentAudit(eq);
                 document.getElementById('equipmentResults').style.display = 'block';
                 document.getElementById('equipmentEmpty').style.display = 'none';
             } else {
                 document.getElementById('equipmentResults').style.display = 'none';
+                document.getElementById('equipmentEmpty').innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-exclamation-circle fa-4x text-warning opacity-25 mb-3"></i>
+                        <h4 class="text-secondary">No se encontró equipo con ${type.toUpperCase()}: "${val}"</h4>
+                    </div>
+                `;
                 document.getElementById('equipmentEmpty').style.display = 'block';
             }
+        };
+
+        selectors.btnSearch.addEventListener('click', performAuditSearch);
+        selectors.searchValue.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') performAuditSearch();
         });
 
         // Tab 2: Model
