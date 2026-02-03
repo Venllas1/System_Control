@@ -268,6 +268,17 @@
             }
         });
 
+        // Sort each bucket by FR Descending (Highest to Lowest)
+        Object.keys(buckets).forEach(key => {
+            buckets[key].sort((a, b) => {
+                const frA = (a.fr || '').toUpperCase();
+                const frB = (b.fr || '').toUpperCase();
+                if (frA < frB) return 1;
+                if (frA > frB) return -1;
+                return 0;
+            });
+        });
+
         // Render Groups
         let totalCount = 0;
         groupsConfig.forEach(group => {

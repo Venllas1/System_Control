@@ -1035,11 +1035,11 @@
                             'revision': 4
                         };
                         filtered.sort((a, b) => {
-                            // Primary: FR
+                            // Primary: FR (Highest to Lowest)
                             const frA = (a.fr || '').toUpperCase();
                             const frB = (b.fr || '').toUpperCase();
-                            if (frA < frB) return -1;
-                            if (frA > frB) return 1;
+                            if (frA < frB) return 1;
+                            if (frA > frB) return -1;
 
                             // Secondary: State Priority
                             const priA = statePriority[normalize(a.estado)] || 99;
@@ -1122,8 +1122,8 @@
                         filtered.sort((a, b) => {
                             const frA = (a.fr || '').toUpperCase();
                             const frB = (b.fr || '').toUpperCase();
-                            if (frA < frB) return -1;
-                            if (frA > frB) return 1;
+                            if (frA < frB) return 1;
+                            if (frA > frB) return -1;
 
                             const priA = statePriority[normalize(a.estado)] || 99;
                             const priB = statePriority[normalize(b.estado)] || 99;
