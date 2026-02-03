@@ -24,6 +24,7 @@ class Equipment(db.Model):
     observaciones_diagnostico = db.Column(db.Text)
     hora_inicio_mantenimiento = db.Column(db.DateTime)
     hora_aprobacion = db.Column(db.DateTime)
+    hora_entregado = db.Column(db.DateTime)
     observaciones_mantenimiento = db.Column(db.Text)
 
     class Status:
@@ -70,6 +71,7 @@ class Equipment(db.Model):
             'observaciones_diagnostico': self.observaciones_diagnostico,
             'hora_inicio_mantenimiento': parse_date(self.hora_inicio_mantenimiento),
             'hora_aprobacion': parse_date(self.hora_aprobacion),
+            'hora_entregado': parse_date(self.hora_entregado),
             'observaciones_mantenimiento': self.observaciones_mantenimiento
         }
 

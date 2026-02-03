@@ -65,12 +65,14 @@ class WorkflowEngine:
         'Entregado': {
             'next': None,  # Terminal state
             'allowed_roles': [],
-            'requires_decision': False
+            'requires_decision': False,
+            'auto_fill': {'hora_entregado': 'now'}
         },
         'Entregado - Devolucion': {
             'next': None,  # Terminal state
             'allowed_roles': [],
-            'requires_decision': False
+            'requires_decision': False,
+            'auto_fill': {'hora_entregado': 'now'}
         }
     }
     

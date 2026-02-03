@@ -803,7 +803,10 @@
             let icon = 'fa-circle';
             let s = status.toLowerCase();
 
-            if (s.includes('diagnostico') || s.includes('revision') || s.includes('standby')) { badgeClass = 'bg-info text-dark'; icon = 'fa-stethoscope'; }
+            // prioritized specific match for colors
+            if (s === 'espera de diagnostico') { badgeClass = 'bg-warning text-dark'; icon = 'fa-clock'; }
+            else if (s === 'en diagnostico') { badgeClass = 'bg-info text-dark'; icon = 'fa-stethoscope'; }
+            else if (s.includes('diagnostico') || s.includes('revision') || s.includes('standby')) { badgeClass = 'bg-info text-dark'; icon = 'fa-stethoscope'; }
             else if (s.includes('aprobado')) { badgeClass = 'bg-success'; icon = 'fa-check-circle'; }
             else if (s.includes('espera') || s.includes('pendiente')) { badgeClass = 'bg-warning text-dark'; icon = 'fa-clock'; }
             else if (s.includes('servicio') || s.includes('reparacion')) { badgeClass = 'bg-primary'; icon = 'fa-tools'; }
@@ -1023,6 +1026,28 @@
                         normalize(item.modelo).includes(currentTerm)
                     );
 
+                    // --- CUSTOM SORTING FOR DIAGNOSTICO ---
+                    if (tableId.includes('Diagnostico')) {
+                        const statePriority = {
+                            'espera de diagnostico': 1,
+                            'en diagnostico': 2,
+                            'espera de repuesto o consumible': 3,
+                            'revision': 4
+                        };
+                        filtered.sort((a, b) => {
+                            // Primary: FR
+                            const frA = (a.fr || '').toUpperCase();
+                            const frB = (b.fr || '').toUpperCase();
+                            if (frA < frB) return -1;
+                            if (frA > frB) return 1;
+
+                            // Secondary: State Priority
+                            const priA = statePriority[normalize(a.estado)] || 99;
+                            const priB = statePriority[normalize(b.estado)] || 99;
+                            return priA - priB;
+                        });
+                    }
+
                     if (paginationIds) {
                         const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
                         if (pageState.page > totalPages) pageState.page = 1;
@@ -1085,6 +1110,26 @@
                         normalize(item.marca).includes(currentTerm) ||
                         normalize(item.modelo).includes(currentTerm)
                     );
+
+                    // --- CUSTOM SORTING FOR DIAGNOSTICO OP ---
+                    if (tableId.includes('Diagnostico')) {
+                        const statePriority = {
+                            'espera de diagnostico': 1,
+                            'en diagnostico': 2,
+                            'espera de repuesto o consumible': 3,
+                            'revision': 4
+                        };
+                        filtered.sort((a, b) => {
+                            const frA = (a.fr || '').toUpperCase();
+                            const frB = (b.fr || '').toUpperCase();
+                            if (frA < frB) return -1;
+                            if (frA > frB) return 1;
+
+                            const priA = statePriority[normalize(a.estado)] || 99;
+                            const priB = statePriority[normalize(b.estado)] || 99;
+                            return priA - priB;
+                        });
+                    }
 
                     if (paginationIds) {
                         const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
@@ -1177,8 +1222,15 @@
         };
 
         window.updateStatus = async function (id, newStatus, targetState = null, additionalData = {}) {
+            // Idempotency: Disable group pointer events during processing
+            const btns = event ? event.target.closest('.btn-group') || event.target : null;
+            if (btns) btns.style.pointerEvents = 'none';
+
             let msg = `¿Cambiar estado a: ${newStatus}?`;
-            if (!confirm(msg)) return;
+            if (!confirm(msg)) {
+                if (btns) btns.style.pointerEvents = 'auto';
+                return;
+            }
 
             const payload = {
                 next_state: newStatus,
@@ -1186,6 +1238,11 @@
             };
 
             try {
+                if (btns && btns.tagName === 'BUTTON') {
+                    btns.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    btns.disabled = true;
+                }
+
                 const response = await fetch(`/api/equipment/${id}/update_status`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1193,11 +1250,22 @@
                 });
                 const data = await response.json();
 
-                if (data.success) location.reload();
-                else alert('Error: ' + data.error);
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                    if (btns) {
+                        btns.style.pointerEvents = 'auto';
+                        if (btns.tagName === 'BUTTON') btns.disabled = false;
+                    }
+                }
             } catch (err) {
                 console.error('Error updating status:', err);
                 alert('Error de red: ' + err);
+                if (btns) {
+                    btns.style.pointerEvents = 'auto';
+                    if (btns.tagName === 'BUTTON') btns.disabled = false;
+                }
             }
         };
 

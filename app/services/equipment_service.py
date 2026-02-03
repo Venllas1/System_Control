@@ -136,6 +136,8 @@ class EquipmentService:
                 equipment.hora_inicio_diagnostico = parse_iso_datetime(additional_data['hora_inicio_diagnostico'])
             if 'hora_aprobacion' in additional_data:
                 equipment.hora_aprobacion = parse_iso_datetime(additional_data['hora_aprobacion'])
+            if 'hora_entregado' in additional_data:
+                equipment.hora_entregado = parse_iso_datetime(additional_data['hora_entregado'])
             if 'observaciones_diagnostico' in additional_data:
                 equipment.observaciones_diagnostico = additional_data['observaciones_diagnostico']
             if 'observaciones_mantenimiento' in additional_data:

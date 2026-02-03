@@ -62,8 +62,9 @@ def panel_excel():
 @dashboard_bp.route('/auditoria')
 @login_required
 def auditoria():
-    # Pass all equipments for audit analysis
-    equipments = Equipment.query.all()
+    # Pass all equipments for audit analysis, filtering from Feb 1st 2026
+    start_date = datetime(2026, 2, 1)
+    equipments = Equipment.query.filter(Equipment.fecha_ingreso >= start_date).all()
     equipments_json = json.dumps([eq.to_dict() for eq in equipments])
     return render_template('auditoria.html', equipments_json=equipments_json)
 

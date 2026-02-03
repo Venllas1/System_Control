@@ -332,6 +332,13 @@ function showDecisionModal(equipmentId, currentState, nextStates) {
  * Advance equipment to next state
  */
 async function advanceEquipment(equipmentId, nextState = null, additionalData = {}) {
+    // Idempotency: Block interaction during fetch
+    const submitBtn = document.querySelector('#promptForm button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Procesando...';
+    }
+
     try {
         const payload = { next_state: nextState, ...additionalData };
         const response = await fetch(`/api/equipment/${equipmentId}/update_status`, {
@@ -349,10 +356,18 @@ async function advanceEquipment(equipmentId, nextState = null, additionalData = 
             setTimeout(() => location.reload(), 1000);
         } else {
             showError(result.error || 'Error al avanzar equipo');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Continuar y Avanzar';
+            }
         }
     } catch (error) {
         console.error('Error advancing equipment:', error);
         showError('Error al procesar la solicitud');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Continuar y Avanzar';
+        }
     }
 }
 
@@ -399,7 +414,10 @@ function getStatusBadge(status) {
     let icon = 'fa-circle';
     let s = status.toLowerCase();
 
-    if (s.includes('diagnostico') || s.includes('revision') || s.includes('standby')) {
+    // prioritized specific match for colors
+    if (s === 'espera de diagnostico') { badgeClass = 'bg-warning text-dark'; icon = 'fa-clock'; }
+    else if (s === 'en diagnostico') { badgeClass = 'bg-info text-dark'; icon = 'fa-stethoscope'; }
+    else if (s.includes('diagnostico') || s.includes('revision') || s.includes('standby')) {
         badgeClass = 'bg-info text-dark';
         icon = 'fa-stethoscope';
     } else if (s.includes('aprobado')) {
